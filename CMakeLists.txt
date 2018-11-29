@@ -11,6 +11,8 @@ set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
+set(CMAKE_CXX_STANDARD 11)
+
 option(DEMO_MODE "Demo mode: simulate hardware" OFF)
 
 if (NOT DEMO_MODE)
@@ -23,5 +25,9 @@ find_package(NI-DAQmx REQUIRED NOT DEMO_MODE)
 find_package(DCAM-API REQUIRED NOT DEMO_MODE)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qwt REQUIRED)
+
+if (UNIX)
+    add_definitions(-DLINUX)  # needed for DCAM-API
+endif ()
 
 add_subdirectory(src)

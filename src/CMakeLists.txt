@@ -10,6 +10,7 @@ set(SPIMlab_SRCS
     cameratrigger.cpp
     galvoramp.cpp
     logmanager.cpp
+    orcaflash.cpp
 )
 
 set(OTHER_FILES
