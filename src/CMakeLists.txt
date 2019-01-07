@@ -16,7 +16,7 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qwt REQUIRED)
 find_package(NIDAQmx REQUIRED NOT DEMO_MODE)
 find_package(DCAMAPI REQUIRED NOT DEMO_MODE)
-find_package(Boost REQUIRED thread system)
+find_package(Boost REQUIRED system)
 
 
 include_directories(
@@ -30,6 +30,7 @@ if (UNIX)
 endif ()
 
 set(SPIMlab_SRCS
+    ../resources.qrc
     main.cpp
     mainwindow.cpp
     version.cpp
@@ -37,11 +38,14 @@ set(SPIMlab_SRCS
     logger.cpp
     nidevice.cpp
     centralwidget.cpp
+    cameraplot.cpp
     cameradisplay.cpp
     cameratrigger.cpp
     galvoramp.cpp
     logmanager.cpp
     orcaflash.cpp
+    spimhub.cpp
+    savestackworker.cpp
 )
 
 set(OTHER_FILES
@@ -60,7 +64,6 @@ add_executable(SPIMlab ${SPIMlab_SRCS} ${OTHER_FILES})
 target_link_libraries(SPIMlab
     Qt5::Widgets
     ${Qwt_LIBRARY}
-    ${Boost_THREAD_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
 )
 
