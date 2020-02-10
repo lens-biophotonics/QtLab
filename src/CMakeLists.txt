@@ -1,5 +1,4 @@
 set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -13,4 +12,3 @@ else ()
 endif ()
 
 add_subdirectory(core)
-add_subdirectory(gui)

@@ -17,8 +17,6 @@ set(SRC
     # National Instruments
     natinst.cpp
     niabstracttask.cpp
-    cameratrigger.cpp
-    galvoramp.cpp
 
     # Hamamatsu
     dcamutils.cpp
