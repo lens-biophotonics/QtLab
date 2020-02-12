@@ -1,5 +1,5 @@
-#include "logger.h"
-#include "natinst.h"
+#include <libqtlab/hw/ni/natinst.h>
+#include <libqtlab/core/logger.h>
 
 using namespace NI;
 

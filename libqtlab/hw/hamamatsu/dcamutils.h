@@ -8,10 +8,8 @@
 #endif
 
 namespace DCAM {
-#ifdef DCAMAPI_HEADERS
 #include <dcamapi.h>
 #include <dcamprop.h>
-#endif
 
 struct ModelInfo {
     QString vendor;

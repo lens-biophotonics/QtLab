@@ -1,7 +1,5 @@
-set(LIBNAME_STR "Hamamatsu DCAM-API")
+set(DCAMAPI_LIBNAME_STR "Hamamatsu DCAM-API")
 set(DCAMAPI_LIBRARY_NAMES dcamapi)
-
-get_property(INCLUDE_DIRECTORIES DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 
 find_library(DCAMAPI_LIBRARY
     NAMES ${DCAMAPI_LIBRARY_NAMES}
@@ -13,7 +11,7 @@ find_library(DCAMAPI_LIBRARY
 )
 
 find_path(DCAMAPI_INCLUDE_DIR NAMES dcamapi.h PATHS
-    "${INCLUDE_DIRECTORIES}"
+    "${INCLUDE_DIRS}"
     /usr/include
     /usr/local/include
     /usr/local/hamamatsu_dcam/sdk/include/
@@ -22,20 +20,14 @@ find_path(DCAMAPI_INCLUDE_DIR NAMES dcamapi.h PATHS
 )
 
 if (DCAMAPI_INCLUDE_DIR)
-    add_definitions(-DDCAMAPI_HEADERS)
+    message(STATUS "Found ${DCAMAPI_LIBNAME_STR} headers in: ${DCAMAPI_INCLUDE_DIR}")
 endif ()
 
 if (DCAMAPI_INCLUDE_DIR AND DCAMAPI_LIBRARY)
     set(DCAMAPI_FOUND TRUE)
+    message(STATUS "Found ${DCAMAPI_LIBNAME_STR}: ${DCAMAPI_LIBRARY}")
 endif ()
 
-if (DCAMAPI_INCLUDE_DIR AND DEMO_MODE)
-    set(DCAMAPI_FOUND TRUE)
-    message(STATUS "Found ${LIBNAME_STR} headers in: ${DCAMAPI_INCLUDE_DIR}")
-elseif (DCAMAPI_FOUND)
-    message(STATUS "Found ${LIBNAME_STR}: ${DCAMAPI_LIBRARY}")
-else (DCAMAPI_FOUND)
-    if (DCAMAPI_FIND_REQUIRED)
-        message(FATAL_ERROR "Could not find ${LIBNAME_STR}")
-    endif (DCAMAPI_FIND_REQUIRED)
-endif (DCAMAPI_INCLUDE_DIR AND DEMO_MODE)
+if (NOT DCAMAPI_FOUND AND DCAMAPI_FIND_REQUIRED)
+    message(FATAL_ERROR "Could not find ${DCAMAPI_LIBNAME_STR}")
+endif ()

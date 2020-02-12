@@ -1,5 +1,5 @@
-#include "niabstracttask.h"
-#include "logger.h"
+#include <libqtlab/hw/ni/niabstracttask.h>
+#include <libqtlab/core/logger.h>
 
 using namespace NI;
 

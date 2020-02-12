@@ -1,6 +1,6 @@
 #include <memory>
 
-#include "logmanager.h"
+#include <libqtlab/core/logmanager.h>
 
 LogManager* LogManager::inst = nullptr;
 

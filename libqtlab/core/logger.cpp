@@ -1,5 +1,5 @@
-#include "logger.h"
-#include "logmanager.h"
+#include <libqtlab/core/logger.h>
+#include <libqtlab/core/logmanager.h>
 
 
 Logger::Logger(QString name) : QObject(nullptr), name(name)

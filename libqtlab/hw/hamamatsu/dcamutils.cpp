@@ -1,5 +1,6 @@
-#include "dcamutils.h"
-#include "logger.h"
+#include <libqtlab/hw/hamamatsu/dcamutils.h>
+#include <libqtlab/core/logger.h>
+
 #include <QMap>
 
 using namespace DCAM;
@@ -10,7 +11,7 @@ static QMap<QString, int> mapByIDStr;
 
 
 namespace DCAM {
-QString getModelInfo(const int index, const int32 dwStringID)
+QString getModelInfo(const int index, const int32_t dwStringID)
 {
     char buf[128];
 #ifdef WITH_HARDWARE

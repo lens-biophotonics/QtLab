@@ -35,7 +35,7 @@
 
 #include <QObject>
 
-#include "natinst.h"
+#include <libqtlab/hw/ni/natinst.h>
 
 /**
  * @brief The NIAbstractTask class is an abstract wrapper for a DAQmx Task.

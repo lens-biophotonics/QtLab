@@ -5,7 +5,7 @@
 #include <QMutex>
 #include <QState>
 
-#include "dcamutils.h"
+#include <libqtlab/hw/hamamatsu/dcamutils.h>
 
 #define CLASSNAME(x) # x
 
@@ -171,9 +171,7 @@ signals:
 public slots:
 
 private:
-#ifdef DCAMAPI_HEADERS
     DCAM::HDCAM h;
-#endif
     int cameraIndex;
     double exposureTime;
 
