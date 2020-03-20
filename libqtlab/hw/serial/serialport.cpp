@@ -6,10 +6,10 @@
 
 #include <libqtlab/hw/serial/serialport.h>
 
-#define RUNTIME_ERROR(what) { \
-        logger->error(what); \
-        throw std::runtime_error(what); \
-} \
+#define RUNTIME_ERROR(what) {                                               \
+        logger->error(what);                                                \
+        throw std::runtime_error(what);                                     \
+}                                                                           \
 
 static Logger *logger = getLogger("SerialPort");
 

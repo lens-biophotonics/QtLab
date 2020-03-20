@@ -14,10 +14,12 @@ static Logger *logger = getLogger("PIDevice");
 
 #define FUNCNAME(x) # x
 #ifdef WITH_HARDWARE
-#define CALL_THROW(functionCall) \
-    QMutexLocker ml(&mutex); \
-    if (!functionCall) { \
-        throw std::runtime_error(std::string(FUNCNAME(functionCall)) + ": " + getErrorString().toStdString()); \
+#define CALL_THROW(functionCall)                                            \
+    QMutexLocker ml(&mutex);                                                \
+    if (!functionCall) {                                                    \
+        throw std::runtime_error(                                           \
+            std::string(FUNCNAME(functionCall)) + ": "                      \
+                        + getErrorString().toStdString());                  \
     }
 #else
 #define CALL_THROW(func)

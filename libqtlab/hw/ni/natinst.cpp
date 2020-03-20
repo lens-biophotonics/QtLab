@@ -44,14 +44,14 @@ static QStringList getList(daqmx_f_ptr myfp)
 #endif
 
 #ifdef WITH_HARDWARE
-#define DEF_NI_GET_FUNCTION(funcName, DAQmxFuncName) \
-    QStringList NI::funcName() { \
-        return getList(&DAQmxFuncName); \
+#define DEF_NI_GET_FUNCTION(funcName, DAQmxFuncName)                        \
+    QStringList NI::funcName() {                                            \
+        return getList(&DAQmxFuncName);                                     \
     }
 #else
-#define DEF_NI_GET_FUNCTION(funcName, DAQmxFuncNAme) \
-    QStringList NI::funcName() { \
-        return QStringList(); \
+#define DEF_NI_GET_FUNCTION(funcName, DAQmxFuncNAme)                        \
+    QStringList NI::funcName() {                                            \
+        return QStringList();                                               \
     }
 #endif
 

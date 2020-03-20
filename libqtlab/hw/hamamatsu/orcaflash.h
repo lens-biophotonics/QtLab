@@ -9,10 +9,10 @@
 
 #define CLASSNAME(x) # x
 
-#define EXCEPTION_CLASS(name) \
-    class name : public std::runtime_error { \
-public: \
-        name(); \
+#define EXCEPTION_CLASS(name)                                               \
+    class name : public std::runtime_error {                                \
+public:                                                                     \
+        name();                                                             \
     };
 
 class OrcaFlash : public QObject

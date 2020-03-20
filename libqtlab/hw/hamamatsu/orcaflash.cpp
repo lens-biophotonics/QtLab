@@ -10,22 +10,23 @@
 
 #define FUNCNAME(x) # x
 #ifdef WITH_HARDWARE
-#define CALL_THROW(functionCall) \
-    { \
-        QMutexLocker ml(&mutex); \
-        if (!functionCall) { \
-            throw std::runtime_error( \
-                      logLastError(FUNCNAME(functionCall)).toStdString()); \
-        } \
+#define CALL_THROW(functionCall)                                             \
+    {                                                                        \
+        QMutexLocker ml(&mutex);                                             \
+        if (!functionCall) {                                                 \
+            throw std::runtime_error(                                        \
+                        logLastError(FUNCNAME(functionCall)).toStdString()); \
+        }                                                                    \
     }
-#define CALL_THROW_400(functionCall) \
-    { \
-        DCAM::DCAMERR err; \
-        { \
-            QMutexLocker ml(&mutex); \
-            err = functionCall; \
-        } \
-        throw400(err); \
+
+#define CALL_THROW_400(functionCall)                                        \
+    {                                                                       \
+        DCAM::DCAMERR err;                                                  \
+        {                                                                   \
+            QMutexLocker ml(&mutex);                                        \
+            err = functionCall;                                             \
+        }                                                                   \
+        throw400(err);                                                      \
     }
 #else
 #define CALL_THROW(func)
@@ -36,7 +37,7 @@ static Logger *logger = getLogger("OrcaFlash");
 
 using namespace DCAM;
 
-#define EXCEPTION_CONSTRUCTOR(name) \
+#define EXCEPTION_CONSTRUCTOR(name)                                         \
     OrcaFlash::name::name() : std::runtime_error(FUNCNAME(name)) {}
 
 EXCEPTION_CONSTRUCTOR(OrcaBusyException)
