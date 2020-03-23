@@ -4,9 +4,9 @@
 #include <QStringList>
 
 namespace NI {
-#ifdef NIDAQMX_HEADERS
+
 #include <NIDAQmx.h>
-#endif
+
 QStringList getDevicesInSystem();
 QStringList getDOLines();
 QStringList getAOPhysicalChans();

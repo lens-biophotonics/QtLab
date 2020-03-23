@@ -13,24 +13,33 @@ set(SOURCEFILES
     niabstracttask.cpp
 )
 
+set(HEADERS
+    natinst.h
+    niabstracttask.h
+)
+
 add_library(${TARGETNAME} SHARED ${SOURCEFILES})
-target_link_libraries(${TARGETNAME}
+target_link_libraries(${TARGETNAME} PRIVATE
     qtlab-core
 )
-target_include_directories(${TARGETNAME} PRIVATE
-    ${NIDAQMX_INCLUDE_DIR}
-    ${LIBQTLAB_INCLUDE_DIR}
+target_include_directories(${TARGETNAME}
+    PUBLIC
+        ${NIDAQMX_INCLUDE_DIR}
+    PRIVATE
+        ${LIBQTLAB_INCLUDE_DIR}
 )
-target_compile_definitions(${TARGETNAME} PRIVATE NIDAQMX_HEADERS)
 
 if(UNIX)
     target_compile_definitions(${TARGETNAME} PRIVATE LINUX)
 endif()
 
 if(NIDAQMX_FOUND)
-    target_link_libraries(${TARGETNAME} ${NIDAQMX_LIBRARY})
+    target_link_libraries(${TARGETNAME} PRIVATE ${NIDAQMX_LIBRARY})
     target_compile_definitions(${TARGETNAME} PRIVATE WITH_HARDWARE)
 else()
     message("Could not find ${NIDAQMX_LIBNAME_STR}. "
             "Library ${TARGETNAME} will be built in demo mode.")
 endif()
+
+set(EXPORT_NAME NI)
+include(install_targets)

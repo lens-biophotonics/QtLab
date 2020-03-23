@@ -84,12 +84,12 @@ void NIAbstractTask::onError() const
     throw std::runtime_error(errBuff);
 }
 
-NI::int32 NIAbstractTask::getTriggerEdge() const
+int32 NIAbstractTask::getTriggerEdge() const
 {
     return triggerEdge;
 }
 
-void NIAbstractTask::setTriggerEdge(const NI::int32 &value)
+void NIAbstractTask::setTriggerEdge(const int32 &value)
 {
     triggerEdge = value;
 }
@@ -136,12 +136,12 @@ void NIAbstractTask::configureTriggering()
         );
 }
 
-NI::uInt64 NIAbstractTask::getNSamples() const
+uInt64 NIAbstractTask::getNSamples() const
 {
     return nSamples;
 }
 
-void NIAbstractTask::setNSamples(const NI::uInt64 &value)
+void NIAbstractTask::setNSamples(const uInt64 &value)
 {
     nSamples = value;
 }
@@ -173,8 +173,8 @@ void NIAbstractTask::appendToTaskName(const QString &suffix)
 
 void NIAbstractTask::configureSampleClockTiming(
     const QString &source,
-    NI::int32 activeEdge,
-    NI::int32 sampleMode
+    int32 activeEdge,
+    int32 sampleMode
     )
 {
 #ifndef WITH_HARDWARE

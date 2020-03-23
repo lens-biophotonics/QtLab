@@ -13,8 +13,13 @@ set(SOURCEFILES
     orcaflash.cpp
 )
 
+set(HEADERS
+    dcamutils.h
+    orcaflash.h
+)
+
 add_library(${TARGETNAME} SHARED ${SOURCEFILES})
-target_link_libraries(${TARGETNAME}
+target_link_libraries(${TARGETNAME} PRIVATE
     qtlab-core
 )
 target_include_directories(${TARGETNAME} PRIVATE
@@ -28,9 +33,12 @@ if(UNIX)
 endif()
 
 if(DCAMAPI_FOUND)
-    target_link_libraries(${TARGETNAME} ${DCAMAPI_LIBRARY})
+    target_link_libraries(${TARGETNAME} PRIVATE ${DCAMAPI_LIBRARY})
     target_compile_definitions(${TARGETNAME} PRIVATE WITH_HARDWARE)
 else()
     message("Could not find ${DCAMAPI_LIBNAME_STR}. "
             "Library ${TARGETNAME} will be built in demo mode.")
 endif()
+
+set(EXPORT_NAME Hamamatsu)
+include(install_targets)

@@ -14,9 +14,20 @@ target_sources(${TARGETNAME}
         filterwheel.cpp
 )
 
-target_link_libraries(${TARGETNAME}
+set(HEADERS
+    serialport.h
+
+    cobolt.h
+
+    filterwheel.h
+)
+
+target_link_libraries(${TARGETNAME} PRIVATE
     Qt5::SerialPort
     qtlab-core
 )
 
 target_include_directories(${TARGETNAME} PRIVATE ${LIBQTLAB_INCLUDE_DIR})
+
+set(EXPORT_NAME Serial)
+include(install_targets)

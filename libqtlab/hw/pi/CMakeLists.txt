@@ -14,8 +14,13 @@ set(SOURCEFILES
     pidevice.cpp
 )
 
+set(HEADERS
+    pidaisychain.h
+    pidevice.h
+)
+
 add_library(${TARGETNAME} SHARED ${SOURCEFILES})
-target_link_libraries(${TARGETNAME}
+target_link_libraries(${TARGETNAME} PRIVATE
     Qt5::SerialPort
     qtlab-core
 )
@@ -30,9 +35,12 @@ if(UNIX)
 endif()
 
 if(PIGCS_FOUND)
-    target_link_libraries(${TARGETNAME} ${PIGCS_LIBRARY})
+    target_link_libraries(${TARGETNAME} PRIVATE ${PIGCS_LIBRARY})
     target_compile_definitions(${TARGETNAME} PRIVATE WITH_HARDWARE)
 else()
     message("Could not find ${PIGCS_LIBNAME_STR}. "
             "Library ${TARGETNAME} will be built in demo mode.")
 endif()
+
+set(EXPORT_NAME PI)
+include(install_targets)

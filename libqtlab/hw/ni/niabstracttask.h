@@ -38,6 +38,8 @@
 
 #include <libqtlab/hw/ni/natinst.h>
 
+using namespace NI;
+
 /**
  * @brief The NIAbstractTask class is an abstract wrapper for a DAQmx Task.
  *
@@ -59,14 +61,14 @@ public:
 
     void appendToTaskName(const QString &suffix);
     void configureSampleClockTiming(const QString &source,
-                                    NI::int32 activeEdge,
-                                    NI::int32 sampleMode);
+                                    int32 activeEdge,
+                                    int32 sampleMode);
 
     double getSampleRate() const;
     void setSampleRate(double value);
 
-    NI::uInt64 getNSamples() const;
-    void setNSamples(const NI::uInt64 &value);
+    uInt64 getNSamples() const;
+    void setNSamples(const uInt64 &value);
 
     QStringList getPhysicalChannels() const;
     QString getPhysicalChannel(const int number) const;
@@ -77,11 +79,11 @@ public:
 
     virtual void configureTriggering();
 
-    NI::int32 getTriggerEdge() const;
-    void setTriggerEdge(const NI::int32 &value);
+    int32 getTriggerEdge() const;
+    void setTriggerEdge(const int32 &value);
 
-    void exportSignal(const NI::int32 signalID, const QString &terminals);
-    void exportSignal(const NI::int32 signalID, const QStringList &terminals);
+    void exportSignal(const int32 signalID, const QString &terminals);
+    void exportSignal(const int32 signalID, const QStringList &terminals);
 
 signals:
     void error();
@@ -98,13 +100,11 @@ protected:
     [[ noreturn ]] void onError() const;
     virtual void setPhysicalChannels_impl() {}
 
-#ifdef NIDAQMX_HEADERS
-    NI::TaskHandle task = nullptr;
-#endif
-    NI::uInt64 nSamples;
+    TaskHandle task = nullptr;
+    uInt64 nSamples;
     QStringList physicalChannels;
     QString triggerTerm;
-    NI::int32 triggerEdge = DAQmx_Val_Rising;
+    int32 triggerEdge = DAQmx_Val_Rising;
 
 private:
     virtual void initializeTask_impl() = 0;

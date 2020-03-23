@@ -7,10 +7,15 @@ target_sources(${TARGETNAME}
         logmanager.cpp
 )
 
-target_link_libraries(${TARGETNAME}
-    Qt5::Core
-)
-target_include_directories(${TARGETNAME} PRIVATE
-    ${LIBQTLAB_INCLUDE_DIR}
+set(HEADERS
+    logger.h
+    logmanager.h
 )
 
+target_link_libraries(${TARGETNAME} PUBLIC
+    Qt5::Core
+)
+target_include_directories(${TARGETNAME} PRIVATE ${LIBQTLAB_INCLUDE_DIR})
+
+set(EXPORT_NAME Core)
+include(install_targets)
