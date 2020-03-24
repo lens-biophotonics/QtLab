@@ -5,7 +5,7 @@
 
 #include <PI/PI_GCS2_DLL.h>
 
-#include <libqtlab/hw/pi/pidaisychain.h>
+#include <qtlab/hw/pi/pidaisychain.h>
 
 
 static QMap<QString, PIDaisyChain *> dcMap;

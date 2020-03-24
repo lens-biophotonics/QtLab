@@ -2,9 +2,9 @@
 #include <QTimer>
 #include <QStateMachine>
 
-#include <libqtlab/core/logger.h>
+#include <qtlab/core/logger.h>
 
-#include <libqtlab/hw/serial/serialport.h>
+#include <qtlab/hw/serial/serialport.h>
 
 #define RUNTIME_ERROR(what) {                                               \
         logger->error(what);                                                \

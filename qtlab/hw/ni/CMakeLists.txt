@@ -1,4 +1,5 @@
 find_package(NIDAQmx)
+set(EXPORT_NAME NI)
 
 set(TARGETNAME qtlab-hw-ni)
 
@@ -19,6 +20,8 @@ set(HEADERS
 )
 
 add_library(${TARGETNAME} SHARED ${SOURCEFILES})
+set_target_properties(${TARGETNAME} PROPERTIES EXPORT_NAME ${EXPORT_NAME})
+
 target_link_libraries(${TARGETNAME} PRIVATE
     qtlab-core
 )
@@ -26,7 +29,7 @@ target_include_directories(${TARGETNAME}
     PUBLIC
         ${NIDAQMX_INCLUDE_DIR}
     PRIVATE
-        ${LIBQTLAB_INCLUDE_DIR}
+        ${QTLAB_INCLUDE_DIR}
 )
 
 if(UNIX)
@@ -41,5 +44,4 @@ else()
             "Library ${TARGETNAME} will be built in demo mode.")
 endif()
 
-set(EXPORT_NAME NI)
 include(install_targets)

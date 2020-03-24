@@ -36,7 +36,7 @@
 
 #include <QObject>
 
-#include <libqtlab/hw/ni/natinst.h>
+#include <qtlab/hw/ni/natinst.h>
 
 using namespace NI;
 

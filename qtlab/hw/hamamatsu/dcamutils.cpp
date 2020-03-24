@@ -1,5 +1,5 @@
-#include <libqtlab/hw/hamamatsu/dcamutils.h>
-#include <libqtlab/core/logger.h>
+#include <qtlab/hw/hamamatsu/dcamutils.h>
+#include <qtlab/core/logger.h>
 
 #include <QMap>
 

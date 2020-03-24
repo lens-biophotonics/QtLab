@@ -4,7 +4,7 @@
 #include <QMap>
 #include <QObject>
 
-#include <libqtlab/core/logger.h>
+#include <qtlab/core/logger.h>
 
 /**
  * @brief The LogManager class is a singleton factory for Loggers.

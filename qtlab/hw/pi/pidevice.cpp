@@ -6,9 +6,9 @@
 #include <QSerialPortInfo>
 #include <QMutexLocker>
 
-#include <libqtlab/core/logger.h>
-#include <libqtlab/hw/pi/pidevice.h>
-#include <libqtlab/hw/pi/pidaisychain.h>
+#include <qtlab/core/logger.h>
+#include <qtlab/hw/pi/pidevice.h>
+#include <qtlab/hw/pi/pidaisychain.h>
 
 static Logger *logger = getLogger("PIDevice");
 

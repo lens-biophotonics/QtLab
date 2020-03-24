@@ -5,8 +5,8 @@
 #include <stdio.h>
 #endif
 
-#include <libqtlab/hw/hamamatsu/orcaflash.h>
-#include <libqtlab/core/logger.h>
+#include <qtlab/hw/hamamatsu/orcaflash.h>
+#include <qtlab/core/logger.h>
 
 #define FUNCNAME(x) # x
 #ifdef WITH_HARDWARE

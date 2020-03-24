@@ -3,7 +3,10 @@ find_package(Qt5 COMPONENTS SerialPort REQUIRED)
 set(CMAKE_AUTOMOC ON)
 
 set(TARGETNAME qtlab-hw-serial)
+set(EXPORT_NAME Serial)
+
 add_library(${TARGETNAME} SHARED)
+set_target_properties(${TARGETNAME} PROPERTIES EXPORT_NAME ${EXPORT_NAME})
 
 target_sources(${TARGETNAME}
     PRIVATE
@@ -27,7 +30,6 @@ target_link_libraries(${TARGETNAME} PRIVATE
     qtlab-core
 )
 
-target_include_directories(${TARGETNAME} PRIVATE ${LIBQTLAB_INCLUDE_DIR})
+target_include_directories(${TARGETNAME} PRIVATE ${QTLAB_INCLUDE_DIR})
 
-set(EXPORT_NAME Serial)
 include(install_targets)

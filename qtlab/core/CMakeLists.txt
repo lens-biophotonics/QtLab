@@ -1,5 +1,8 @@
 set(TARGETNAME qtlab-core)
+set(EXPORT_NAME Core)
+
 add_library(${TARGETNAME} SHARED)
+set_target_properties(${TARGETNAME} PROPERTIES EXPORT_NAME ${EXPORT_NAME})
 
 target_sources(${TARGETNAME}
     PRIVATE
@@ -15,7 +18,6 @@ set(HEADERS
 target_link_libraries(${TARGETNAME} PUBLIC
     Qt5::Core
 )
-target_include_directories(${TARGETNAME} PRIVATE ${LIBQTLAB_INCLUDE_DIR})
+target_include_directories(${TARGETNAME} PRIVATE ${QTLAB_INCLUDE_DIR})
 
-set(EXPORT_NAME Core)
 include(install_targets)

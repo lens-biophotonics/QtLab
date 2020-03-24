@@ -1,7 +1,7 @@
 #include <QRegularExpression>
 
-#include <libqtlab/hw/serial/cobolt.h>
-#include <libqtlab/hw/serial/serialport.h>
+#include <qtlab/hw/serial/cobolt.h>
+#include <qtlab/hw/serial/serialport.h>
 
 
 Cobolt::Cobolt(QObject *parent) : QObject(parent)

@@ -5,7 +5,7 @@
 #include <QMutex>
 #include <QState>
 
-#include <libqtlab/hw/hamamatsu/dcamutils.h>
+#include <qtlab/hw/hamamatsu/dcamutils.h>
 
 #define CLASSNAME(x) # x
 

@@ -2,8 +2,8 @@
 #include <QStringList>
 #include <QtDebug>
 
-#include <libqtlab/hw/serial/filterwheel.h>
-#include <libqtlab/hw/serial/serialport.h>
+#include <qtlab/hw/serial/filterwheel.h>
+#include <qtlab/hw/serial/serialport.h>
 
 
 FilterWheel::FilterWheel(QObject *parent) : QObject(parent)
