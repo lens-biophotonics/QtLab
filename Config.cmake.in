@@ -17,6 +17,12 @@ foreach(_comp ${QtLab_FIND_COMPONENTS})
   endif()
   include("${CMAKE_CURRENT_LIST_DIR}/${_comp}Targets.cmake"
           RESULT_VARIABLE QtLab_${_comp}_FOUND)
+  get_target_property(TEMP_LIB QtLab::${_comp} IMPORTED_LOCATION_NOCONFIG)
+  message(STATUS "Found QtLab::${_comp}:\t${TEMP_LIB}")
 endforeach()
 
 check_required_components(QtLab)
+
+if(NOT ${QtLab_FOUND})
+   message(STATUS "Could not locate QtLab")
+endif()
