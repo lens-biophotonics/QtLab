@@ -22,3 +22,7 @@ install(FILES ${HEADERS}
         COMPONENT
             devel
 )
+
+target_include_directories(${TARGETNAME}
+    PUBLIC
+        "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>")
