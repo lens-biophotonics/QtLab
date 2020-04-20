@@ -19,6 +19,11 @@ class Logger : public QObject
 {
     Q_OBJECT
 public:
+    struct Message {
+        MsgType type;
+        QString msg;
+    };
+
     Logger(QString name = "");
 
 public slots:

@@ -6,6 +6,7 @@ LogManager* LogManager::inst = nullptr;
 
 LogManager::LogManager()
 {
+    signalEmitted = false;
     qRegisterMetaType<MsgType>("MsgType");
 }
 
@@ -26,6 +27,22 @@ Logger *LogManager::getLogger(QString name)
         logger = it.value();
     }
     return logger;
+}
+
+QList<Logger::Message> LogManager::getMessages()
+{
+    QList<Logger::Message> list = QList<Logger::Message>(messageList);
+    messageList.clear();
+    signalEmitted = false;
+    return list;
+}
+
+void LogManager::appendMessage(Logger::Message msg) {
+    messageList.append(msg);
+    if(signalEmitted)
+        return;
+    signalEmitted = true;
+    emit newLogMessages();
 }
 
 LogManager &logManager()

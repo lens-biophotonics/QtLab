@@ -11,6 +11,7 @@ set(SOURCE_FILES
     aspectratiowidget.cpp
     colormaps.cpp
     customspinbox.cpp
+    logwidget.cpp
 )
 
 add_library(${TARGETNAME} SHARED ${SOURCE_FILES})
@@ -36,6 +37,8 @@ set(HEADERS
 
     colormaps.h
     customspinbox.h
+
+    logwidget.h
 )
 
 target_link_libraries(${TARGETNAME}

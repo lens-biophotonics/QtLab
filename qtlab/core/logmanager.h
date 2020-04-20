@@ -14,17 +14,24 @@ class LogManager : public QObject
 {
     Q_OBJECT
 public:
+    friend class Logger;
+
     LogManager();
     ~LogManager();
 
     Logger *getLogger(QString name);
+    QList<Logger::Message> getMessages();
 
 signals:
-    void newLogMessage(QString msg, MsgType type);
+    void newLogMessages();
 
 private:
     static LogManager* inst;
     QMap<QString, Logger *> logMap;
+    QList<Logger::Message> messageList;
+    bool signalEmitted;
+
+    void appendMessage(Logger::Message msg);
 };
 
 LogManager& logManager();

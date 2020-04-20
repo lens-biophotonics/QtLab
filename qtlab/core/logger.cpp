@@ -9,7 +9,11 @@ Logger::Logger(QString name) : QObject(nullptr), name(name)
 void Logger::_msg(QString str, MsgType type) const
 {
     str.prepend(QString("[%1] ").arg(name));
-    emit logManager().newLogMessage(str, type);
+    struct Message m = {
+        .type = type,
+        .msg = str,
+    };
+    logManager().appendMessage(m);
 }
 
 void Logger::info(QString msg) const
