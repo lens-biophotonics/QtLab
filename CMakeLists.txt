@@ -22,11 +22,17 @@ set(CMAKE_AUTOMOC ON)
 
 include(GNUInstallDirs)
 
+
 add_subdirectory(qtlab/core)
 add_subdirectory(qtlab/hw/hamamatsu)
 add_subdirectory(qtlab/hw/ni)
 add_subdirectory(qtlab/hw/pi)
 add_subdirectory(qtlab/hw/serial)
+
+option(BUILD_WIDGETS "Build widgets" ON)
+if(BUILD_WIDGETS)
+    add_subdirectory(qtlab/widgets)
+endif()
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
