@@ -30,5 +30,5 @@ if (NIDAQMX_INCLUDE_DIR AND NIDAQMX_LIBRARY)
 endif ()
 
 if (NOT NIDAQMX_FOUND AND NIDAQMX_FIND_REQUIRED)
-    message(FATAL_ERROR "Could not find ${DCAMAPI_LIBNAME_STR}")
+    message(FATAL_ERROR "Could not find ${NIDAQMX_LIBNAME_STR}")
 endif ()
