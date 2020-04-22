@@ -17,4 +17,23 @@ a different version, please regenerate wrappers before compiling:
 make NIDAQmx_wrappers
 ```
 
+## Aravis
+
+[Aravis][aravis] is a vision library for genicam based cameras. How to install:
+
+```bash
+sudo apt install meson libglib2.0-dev libxml2-dev libusb-1.0-0-dev
+
+git clone https://github.com/AravisProject/aravis
+cd aravis
+
+sudo cp src/aravis.rules /etc/udev/rules.d
+
+meson build --prefix=/path/to/install/prefix -Dviewer=disabled -Dgst-plugin=disabled -Ddocumentation=disabled -Dintrospection=disabled
+cd build
+ninja
+ninja install
+```
+
 [ni-linux]: https://www.ni.com/en-us/support/downloads/drivers/download.ni-linux-device-drivers.html
+[aravis]: https://github.com/AravisProject/aravis

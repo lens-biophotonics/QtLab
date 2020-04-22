@@ -28,6 +28,7 @@ include(GNUInstallDirs)
 
 
 add_subdirectory(qtlab/core)
+add_subdirectory(qtlab/hw/aravis)
 add_subdirectory(qtlab/hw/hamamatsu)
 add_subdirectory(qtlab/hw/ni)
 add_subdirectory(qtlab/hw/pi)
