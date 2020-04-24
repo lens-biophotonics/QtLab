@@ -22,14 +22,12 @@ set(HEADERS
 add_library(${TARGETNAME} SHARED ${SOURCEFILES})
 set_target_properties(${TARGETNAME} PROPERTIES EXPORT_NAME ${EXPORT_NAME})
 
-target_link_libraries(${TARGETNAME} PRIVATE
+target_link_libraries(${TARGETNAME} PUBLIC
     qtlab-core
 )
 target_include_directories(${TARGETNAME}
     PUBLIC
         ${NIDAQMX_INCLUDE_DIR}
-    PRIVATE
-        ${QTLAB_INCLUDE_DIR}
 )
 
 if(UNIX)

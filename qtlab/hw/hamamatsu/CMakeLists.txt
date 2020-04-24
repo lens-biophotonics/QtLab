@@ -22,12 +22,12 @@ set(HEADERS
 add_library(${TARGETNAME} SHARED ${SOURCEFILES})
 set_target_properties(${TARGETNAME} PROPERTIES EXPORT_NAME ${EXPORT_NAME})
 
-target_link_libraries(${TARGETNAME} PRIVATE
+target_link_libraries(${TARGETNAME} PUBLIC
     qtlab-core
 )
-target_include_directories(${TARGETNAME} PRIVATE
-    ${DCAMAPI_INCLUDE_DIR}
-    ${QTLAB_INCLUDE_DIR}
+target_include_directories(${TARGETNAME}
+    PUBLIC
+        ${DCAMAPI_INCLUDE_DIR}
 )
 target_compile_definitions(${TARGETNAME} PRIVATE DCAMAPI_HEADERS)
 
@@ -36,7 +36,7 @@ if(UNIX)
 endif()
 
 if(DCAMAPI_FOUND)
-    target_link_libraries(${TARGETNAME} PRIVATE ${DCAMAPI_LIBRARY})
+    target_link_libraries(${TARGETNAME} PUBLIC ${DCAMAPI_LIBRARY})
     target_compile_definitions(${TARGETNAME} PRIVATE WITH_HARDWARE)
 else()
     message("Could not find ${DCAMAPI_LIBNAME_STR}. "
