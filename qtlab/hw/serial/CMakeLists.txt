@@ -5,16 +5,13 @@ set(CMAKE_AUTOMOC ON)
 set(TARGETNAME qtlab-hw-serial)
 set(EXPORT_NAME Serial)
 
-add_library(${TARGETNAME} SHARED)
-set_target_properties(${TARGETNAME} PROPERTIES EXPORT_NAME ${EXPORT_NAME})
 
-target_sources(${TARGETNAME}
-    PRIVATE
-        serialport.cpp
+set(SOURCE_FILES
+    serialport.cpp
 
-        cobolt.cpp
+    cobolt.cpp
 
-        filterwheel.cpp
+    filterwheel.cpp
 )
 
 set(HEADERS
@@ -24,6 +21,9 @@ set(HEADERS
 
     filterwheel.h
 )
+
+add_library(${TARGETNAME} SHARED ${SOURCE_FILES})
+set_target_properties(${TARGETNAME} PROPERTIES EXPORT_NAME ${EXPORT_NAME})
 
 target_link_libraries(${TARGETNAME} PRIVATE
     Qt5::SerialPort

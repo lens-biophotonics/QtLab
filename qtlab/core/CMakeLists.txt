@@ -1,19 +1,18 @@
 set(TARGETNAME qtlab-core)
 set(EXPORT_NAME Core)
 
-add_library(${TARGETNAME} SHARED)
-set_target_properties(${TARGETNAME} PROPERTIES EXPORT_NAME ${EXPORT_NAME})
-
-target_sources(${TARGETNAME}
-    PRIVATE
-        logger.cpp
-        logmanager.cpp
+set(SOURCE_FILES
+    logger.cpp
+    logmanager.cpp
 )
 
 set(HEADERS
     logger.h
     logmanager.h
 )
+
+add_library(${TARGETNAME} SHARED ${SOURCE_FILES})
+set_target_properties(${TARGETNAME} PROPERTIES EXPORT_NAME ${EXPORT_NAME})
 
 target_link_libraries(${TARGETNAME} PUBLIC
     Qt5::Core
