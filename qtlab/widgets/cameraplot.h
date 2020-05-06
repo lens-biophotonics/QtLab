@@ -10,14 +10,19 @@
 class CameraPlot : public QwtPlot
 {
 public:
-    CameraPlot(uint nRows, uint nCols, QWidget *parent = nullptr);
+    CameraPlot(uint nCols, uint nRows, QWidget *parent = nullptr);
 
-    void setData(const QVector<double> &vec);
     void setInterval(const Qt::Axis axis, const double min, const double max);
 
     void setZAutoscaleEnabled(bool enable);
 
     void setColorMap(QwtLinearColorMap *value);
+
+    double *getBuffer();
+    void replot() override;
+
+public slots:
+    void setData(const QVector<double> &vec);
 
 private:
     QwtMatrixRasterData *data;
@@ -26,8 +31,9 @@ private:
     bool autoscaleZ = true;
     double min;
     double max;
-    uint nRows, nCols;
+    uint nCols, nRows;
     QwtInterval ZInterval;
+    QVector<double> vec;
 };
 
 #endif // CAMERPLOT_H

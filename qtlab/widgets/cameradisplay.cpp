@@ -22,8 +22,6 @@ CameraDisplay::CameraDisplay(QWidget *parent) :
     QWidget(parent)
 {
     setupUi();
-
-    vec.resize(2048 * 2048);
 }
 
 CameraDisplay::~CameraDisplay()
@@ -36,19 +34,14 @@ void CameraDisplay::setLUTPath(QString value)
     setupLUTmenu();
 }
 
-/**
- * @brief CameraDisplay::getBuffer
- * @return A pointer to the internal buffer for data to be plotted
- */
-
 double *CameraDisplay::getBuffer()
 {
-    return vec.data();
+    return plot->getBuffer();
 }
 
 void CameraDisplay::replot()
 {
-    plot->setData(vec);
+    plot->replot();
 }
 
 void CameraDisplay::contextMenuEvent(QContextMenuEvent *event)

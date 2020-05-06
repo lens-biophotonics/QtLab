@@ -30,7 +30,6 @@ protected:
 
 private:
     CameraPlot *plot;
-    QVector<double> vec;
     QMenu *menu;
     QMenu *LUTMenu;
 
