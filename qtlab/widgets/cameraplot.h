@@ -10,7 +10,7 @@
 class CameraPlot : public QwtPlot
 {
 public:
-    CameraPlot(QWidget *parent = nullptr);
+    CameraPlot(uint nRows, uint nCols, QWidget *parent = nullptr);
 
     void setData(const QVector<double> &vec);
     void setInterval(const Qt::Axis axis, const double min, const double max);
@@ -26,6 +26,7 @@ private:
     bool autoscaleZ = true;
     double min;
     double max;
+    uint nRows, nCols;
     QwtInterval ZInterval;
 };
 

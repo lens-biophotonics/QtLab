@@ -74,7 +74,7 @@ void CameraDisplay::setupUi()
     menu = new QMenu();
     setContextMenuPolicy(Qt::DefaultContextMenu);
 
-    plot = new CameraPlot();
+    plot = new CameraPlot(2048, 2048);
     QwtPlotZoomer *zoomer = new QwtPlotZoomer(plot->canvas());
     zoomer->setRubberBandPen(QColor(Qt::green));
     zoomer->setTrackerPen(QColor(Qt::green));

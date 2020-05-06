@@ -5,11 +5,9 @@
 
 #include "colormaps.h"
 
-#define NROWS 2048
-#define NCOLS 2048
 
-
-CameraPlot::CameraPlot(QWidget *parent) : QwtPlot(parent)
+CameraPlot::CameraPlot(uint nRows, uint nCols, QWidget *parent) :
+    QwtPlot(parent), nRows(nRows), nCols(nCols)
 {
     axisScaleEngine(xBottom)->setAttribute(QwtScaleEngine::Floating, true);
     axisScaleEngine(yLeft)->setAttribute(QwtScaleEngine::Floating, true);
@@ -18,10 +16,10 @@ CameraPlot::CameraPlot(QWidget *parent) : QwtPlot(parent)
     spectrogramPlot->attach(this);
 
     data = new QwtMatrixRasterData();
-    data->setInterval(Qt::XAxis, QwtInterval(0, NCOLS));
-    data->setInterval(Qt::YAxis, QwtInterval(0, NROWS));
+    data->setInterval(Qt::XAxis, QwtInterval(0, nCols));
+    data->setInterval(Qt::YAxis, QwtInterval(0, nRows));
 
-    QVector<double> vec = QVector<double>(NROWS * NCOLS, 0.);
+    QVector<double> vec = QVector<double>(nCols * nRows, 0.);
     for (int i = 0; i < vec.size(); ++i) {
         vec[i] = i / 64;
     }
@@ -41,7 +39,7 @@ void CameraPlot::setData(const QVector<double> &vec)
 {
     min = std::numeric_limits<double>::infinity();
     max = -min;
-    data->setValueMatrix(vec, NCOLS);
+    data->setValueMatrix(vec, nCols);
     for (const double val : vec) {
         if (val > max) {
             max = val;
