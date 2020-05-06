@@ -11,10 +11,12 @@ endif()
 
 set(SOURCE_FILES
     aravis.cpp
+    camera.cpp
 )
 
 set(HEADERS
     aravis.h
+    camera.h
 )
 
 add_library(${TARGETNAME} SHARED ${SOURCE_FILES})
