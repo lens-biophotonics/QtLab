@@ -9,6 +9,7 @@ set(EXPORT_NAME Widgets)
 
 set(SOURCE_FILES
     aspectratiowidget.cpp
+    pixmapwidget.cpp
     colormaps.cpp
     customspinbox.cpp
     logwidget.cpp
@@ -32,6 +33,7 @@ target_sources(${TARGETNAME} PRIVATE ${SOURCE_FILES})
 
 set(HEADERS
     aspectratiowidget.h
+    pixmapwidget.h
     cameradisplay.h
     cameraplot.h
 
