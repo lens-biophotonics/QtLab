@@ -216,7 +216,7 @@ void CameraDisplay::setupUi()
 
     menu->addMenu(LUTMenu);
 
-    QWidget *aspectRatioWidget = new AspectRatioWidget(plot, 1.1, 1., -80, -50);
+    QWidget *aspectRatioWidget = new AspectRatioWidget(plot, 1.1, -80, -50);
 
     QBoxLayout *layout = new QHBoxLayout();
     layout->addWidget(aspectRatioWidget, 1);

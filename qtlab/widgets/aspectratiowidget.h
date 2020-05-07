@@ -11,16 +11,24 @@ class AspectRatioWidget : public QWidget
 {
     Q_OBJECT
 public:
-    AspectRatioWidget(QWidget *widget, double width, double height,
+    AspectRatioWidget(QWidget *widget, double ratio,
                       int paddingW = 0, int paddingH = 0,
                       QWidget *parent = nullptr);
-    void resizeEvent(QResizeEvent *event);
+
+public slots:
+    void setAspectRatio(double ratio);
+    void invertRatio();
+
+    void readjust();
+
+protected:
+    virtual void resizeEvent(QResizeEvent *event);
 
 private:
     QWidget *wdg;
     QBoxLayout *layout;
-    double arWidth; // aspect ratio width
-    double arHeight; // aspect ratio height
+    double ratio;
+    bool _invertRatio = false;
     int paddingW;
     int paddingH;
 };
