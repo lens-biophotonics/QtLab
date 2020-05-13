@@ -11,12 +11,13 @@ endif()
 
 set(SOURCEFILES
     natinst.cpp
-    niabstracttask.cpp
+    nitask.cpp
 )
 
 set(HEADERS
     natinst.h
-    niabstracttask.h
+    nitask.h
+    NIDAQmx_wrapper_methods.h
 )
 
 add_library(${TARGETNAME} SHARED ${SOURCEFILES})
@@ -41,5 +42,12 @@ else()
     message("Could not find ${NIDAQMX_LIBNAME_STR}. "
             "Library ${TARGETNAME} will be built in demo mode.")
 endif()
+
+add_custom_target(NIDAQmx_wrappers
+    COMMAND ./generate_wrappers.sh ${NIDAQMX_INCLUDE_DIR}/NIDAQmx.h
+    BYPRODUCTS
+        NIDAQmx_dummy.cpp NIDAQmx_wrapper_methods.cpp NIDAQmx_wrapper_methods.h
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
 
 include(install_targets)

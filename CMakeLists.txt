@@ -17,7 +17,10 @@ set(OTHER_FILES
     .gitignore
     uncrustify.cfg
     LICENSE.txt
+    README.md
 )
+
+add_custom_target(project-related-files SOURCES ${OTHER_FILES})
 
 set(CMAKE_AUTOMOC ON)
 
