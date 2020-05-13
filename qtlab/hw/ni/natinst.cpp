@@ -53,6 +53,11 @@ static QStringList getList(daqmx_f_ptr myfp)
     QStringList NI::funcName() {                                            \
         return QStringList();                                               \
     }
+extern "C" {
+int32 __CFUNC     DAQmxLoadTask (const char taskName[], TaskHandle *taskHandle) {return 0;};
+int32 __CFUNC     DAQmxCreateTask (const char taskName[], TaskHandle *taskHandle) {return 0;};
+#include "NIDAQmx_dummy.cpp"
+}
 #endif
 
 DEF_NI_GET_FUNCTION(getDOLines, DAQmxGetDevDOLines)
