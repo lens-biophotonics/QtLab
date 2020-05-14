@@ -13,6 +13,7 @@ set(SOURCE_FILES
     colormaps.cpp
     customspinbox.cpp
     logwidget.cpp
+    timeplot.cpp
 )
 
 add_library(${TARGETNAME} SHARED ${SOURCE_FILES})
@@ -36,6 +37,7 @@ set(HEADERS
     pixmapwidget.h
     cameradisplay.h
     cameraplot.h
+    timeplot.h
 
     colormaps.h
     customspinbox.h
