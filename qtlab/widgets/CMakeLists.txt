@@ -24,7 +24,11 @@ target_include_directories(${TARGETNAME}
 
 
 if (Qwt_FOUND)
-    set(SOURCE_FILES ${SOURCE_FILES} cameradisplay.cpp cameraplot.cpp)
+    set(SOURCE_FILES ${SOURCE_FILES} cameradisplay.cpp cameraplot.cpp timeplot.cpp)
+    target_link_libraries(${TARGETNAME}
+        PUBLIC
+            ${Qwt_LIBRARY}
+    )
 else()
     message("Could not find Qwt. Camera widgets will not be built")
 endif()
@@ -36,6 +40,7 @@ set(HEADERS
     pixmapwidget.h
     cameradisplay.h
     cameraplot.h
+    timeplot.h
 
     colormaps.h
     customspinbox.h
@@ -46,7 +51,6 @@ set(HEADERS
 target_link_libraries(${TARGETNAME}
     PUBLIC
         Qt5::Widgets
-        ${Qwt_LIBRARY}
         qtlab-core
 )
 
