@@ -9,8 +9,10 @@ set(QTLAB_INCLUDE_DIR @CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_INCLUDEDIR@)
 set(_supported_components Core Hamamatsu NI PI Serial Widgets)
 
 foreach(_comp ${_supported_components})
-  include("${CMAKE_CURRENT_LIST_DIR}/${_comp}Targets.cmake"
-          RESULT_VARIABLE QtLab_${_comp}_FOUND)
+  if (";${QtLab_FIND_COMPONENTS};" MATCHES ${_comp})
+    include("${CMAKE_CURRENT_LIST_DIR}/${_comp}Targets.cmake"
+            RESULT_VARIABLE QtLab_${_comp}_FOUND)
+  endif()
 endforeach()
 
 set(QtLab_FOUND True)
