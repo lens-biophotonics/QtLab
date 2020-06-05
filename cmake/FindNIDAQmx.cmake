@@ -1,6 +1,8 @@
 set(NIDAQMX_LIBNAME_STR "NI-DAQmx")
 set(NIDAQMX_LIBRARY_NAMES nidaqmx)
 
+set(WIN_NIDAQMX_DIR "$ENV{ProgramFiles\(x86\)}/National Instruments/Shared/ExternalCompilerSupport/C")
+
 find_library(NIDAQMX_LIBRARY
     NAMES ${NIDAQMX_LIBRARY_NAMES}
     PATHS
@@ -9,6 +11,7 @@ find_library(NIDAQMX_LIBRARY
     /usr/local/lib
     "$ENV{LIB_DIR}/lib"
     "$ENV{LIB}"
+    "${WIN_NIDAQMX_DIR}/lib64/msvc"
 )
 
 find_path(NIDAQMX_INCLUDE_DIR NAMES NIDAQmx.h PATHS
@@ -18,6 +21,7 @@ find_path(NIDAQMX_INCLUDE_DIR NAMES NIDAQmx.h PATHS
     /usr/local/hamamatsu_dcam/sdk/include/
     "$ENV{LIB_DIR}/include"
     "$ENV{INCLUDE}"
+    "${WIN_NIDAQMX_DIR}/include"
 )
 
 if (NIDAQMX_INCLUDE_DIR)
