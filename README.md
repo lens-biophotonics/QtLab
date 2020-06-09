@@ -18,3 +18,15 @@ make NIDAQmx_wrappers
 ```
 
 [ni-linux]: https://www.ni.com/en-us/support/downloads/drivers/download.ni-linux-device-drivers.html
+
+## How to configure Qt Creator to use MSVC
+
+In the corresponding kit, CMake generator configuration should be:
+* Generator: Visual Studio 16 2019
+* Extra generator: <none>
+* Platform: empty
+* Toolset: empty
+
+CMake configuration: `CMAKE_PREFIX_PATH:STRING=%{Qt:QT_INSTALL_PREFIX}`
+
+In Projects > Build Steps, select `ALL_BUILD` instead of `all`.
