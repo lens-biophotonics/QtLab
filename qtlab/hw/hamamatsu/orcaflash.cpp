@@ -10,14 +10,6 @@
 
 #define FUNCNAME(x) # x
 #ifdef WITH_HARDWARE
-#define CALL_THROW(functionCall)                                             \
-    {                                                                        \
-        QMutexLocker ml(&mutex);                                             \
-        if (!functionCall) {                                                 \
-            throw std::runtime_error(                                        \
-                        logLastError(FUNCNAME(functionCall)).toStdString()); \
-        }                                                                    \
-    }
 
 #define CALL_THROW_400(functionCall)                                        \
     {                                                                       \
@@ -29,7 +21,6 @@
         throw400(err);                                                      \
     }
 #else
-#define CALL_THROW(func)
 #define CALL_THROW_400(func)
 #endif
 
@@ -98,7 +89,7 @@ void OrcaFlash::throw400(const DCAMERR err)
     case DCAMERR_NOTBUSY:
         throw OrcaNotBusyException();
     default:
-        throw std::runtime_error(getLastError().toStdString());
+        throw std::runtime_error(QString("Error %1").arg(err).toStdString());
     }
 }
 
@@ -127,7 +118,7 @@ void OrcaFlash::open(const int index)
     if (_isOpen) {
         return;
     }
-#if DCAM_VERSION == 400
+
     DCAMDEV_OPEN param;
     memset (&param, 0, sizeof(param));
 
@@ -135,9 +126,7 @@ void OrcaFlash::open(const int index)
     param.size = sizeof(param);
     CALL_THROW_400(dcamdev_open(&param));
     h = param.hdcam;
-#else
-    CALL_THROW(dcam_open(&h, index))
-#endif
+
     logger->info(QString("Camera %1 opened").arg(index));
     _isOpen = true;
     cameraIndex = index;
@@ -159,7 +148,7 @@ void OrcaFlash::close()
     if (!_isOpen) {
         return;
     }
-    CALL_THROW(dcam_close(h))
+    CALL_THROW_400(dcamdev_close(h))
     _isOpen = false;
     emit closed();
 }
@@ -179,34 +168,13 @@ int32_t OrcaFlash::nFramesInBuffer() const
     return _nFramesInBuffer;
 }
 
-QString OrcaFlash::getLastError()
-{
-#ifdef WITH_HARDWARE
-    char buf[2048];
-    if (!_isOpen) {
-        return QString("OrcaFlash: cannot get last error, camera not open.");
-    }
-    if (!dcam_getlasterror(h, buf, 2048)) {
-        return QString("OrcaFlash: cannot get last error");
-    }
-    return QString(buf);
-#else
-    return QString("Cannot get last error. Compiled in DEMO mode.");
-#endif
-}
-
-double OrcaFlash::setGet(const _DCAMIDPROP property, const double value)
+double OrcaFlash::setGetPropertyValue(const _DCAMIDPROP property, const double value)
 {
 #ifndef WITH_HARDWARE
     Q_UNUSED(property)
 #endif
     double temp = value;
-#if DCAM_VERSION == 400
     CALL_THROW_400(dcamprop_setgetvalue(h, static_cast<int32>(property), &temp));
-#else
-    CALL_THROW(dcam_setgetpropertyvalue(
-                   h, static_cast<int32>(property), &temp))
-#endif
     return temp;
 }
 
@@ -216,21 +184,13 @@ double OrcaFlash::getPropertyValue(const _DCAMIDPROP property)
     Q_UNUSED(property)
 #endif
     double ret = 0;
-#if DCAM_VERSION == 400
     CALL_THROW_400(dcamprop_getvalue(h, static_cast<int32>(property), &ret));
-#else
-    CALL_THROW(dcam_getpropertyvalue(h, static_cast<int32>(property), &ret))
-#endif
     return ret;
 }
 
 void OrcaFlash::setPropertyValue(const _DCAMIDPROP property, const double value)
 {
-#if DCAM_VERSION == 400
     CALL_THROW_400(dcamprop_setvalue(h, static_cast<int32>(property), value));
-#else
-    CALL_THROW(dcam_setpropertyvalue(h, static_cast<int32>(property), value))
-#endif
 #ifndef WITH_HARDWARE
     Q_UNUSED(property)
     Q_UNUSED(value)
@@ -269,49 +229,19 @@ int OrcaFlash::nOfLines() const
 
 int32_t OrcaFlash::getImageWidth()
 {
-#if DCAM_VERSION == 400
-    double dValue = getPropertyValue(DCAM_IDPROP_IMAGE_WIDTH);
-    return static_cast<int32_t>(dValue);
-#else
-    DCAM_SIZE sz;
-    CALL_THROW(dcam_getdatasizeex(h, &sz))
-
-    return sz.cx;
-#endif
+    return static_cast<int32_t>(getPropertyValue(DCAM_IDPROP_IMAGE_WIDTH));
 }
 
 int32_t OrcaFlash::getImageHeight()
 {
-#if DCAM_VERSION == 400
-    double dValue = getPropertyValue(DCAM_IDPROP_IMAGE_HEIGHT);
-    return static_cast<int32_t>(dValue);
-#else
-    DCAM_SIZE sz;
-    CALL_THROW(dcam_getdatasizeex(h, &sz))
-
-    return sz.cy;
-#endif
-}
-
-QString OrcaFlash::logLastError(const QString label)
-{
-    QString errMsg = getLastError().prepend(label + " ");
-    logger->error(errMsg);
-    return errMsg;
+    return static_cast<int32_t>(getPropertyValue(DCAM_IDPROP_IMAGE_HEIGHT));
 }
 
 void OrcaFlash::startCapture()
 {
-#if DCAM_VERSION == 400
     buf_release();
     buf_alloc(_nFramesInBuffer);
     cap_start();
-#else
-    CALL_THROW(dcam_freeframe(h))
-    CALL_THROW(dcam_precapture(h, DCAM_CAPTUREMODE_SEQUENCE))
-    CALL_THROW(dcam_allocframe(h, _nFramesInBuffer))
-    CALL_THROW(dcam_capture(h))
-#endif
     emit captureStarted();
 }
 
@@ -320,12 +250,7 @@ void OrcaFlash::stop()
     if (!_isOpen) {
         return;
     }
-#if DCAM_VERSION == 400
     cap_stop();
-#else
-    CALL_THROW(dcam_idle(h))
-    emit stopped();
-#endif
 }
 
 void OrcaFlash::copyFrame(void * const buf, const size_t n,
@@ -339,8 +264,6 @@ void OrcaFlash::copyFrame(void * const buf, const size_t n,
     fclose(f);
     return;
 #else
-
-#if DCAM_VERSION == 400
     DCAMBUF_FRAME dcamframe;
 
     memset(&dcamframe, 0, sizeof(dcamframe));
@@ -364,22 +287,12 @@ void OrcaFlash::copyFrame(void * const buf, const size_t n,
     if (timestamp != nullptr) {
         *timestamp = dcamframe.timestamp;
     }
-#else
-    void *top;
-    int32 rowbytes;
-
-    wait();
-    lockData(&top, &rowbytes, frame);
-    memcpy(buf, top, n);
-    unlockData();
-#endif
 #endif
 }
 
 void OrcaFlash::lockFrame(const int32_t frame, void **buf, int32_t *frameStamp,
                           DCAM_TIMESTAMP *timestamp)
 {
-#if DCAM_VERSION == 400
     DCAMBUF_FRAME dcamframe;
 
     memset(&dcamframe, 0, sizeof(dcamframe));
@@ -406,7 +319,6 @@ void OrcaFlash::lockFrame(const int32_t frame, void **buf, int32_t *frameStamp,
     if (timestamp != nullptr) {
         *timestamp = dcamframe.timestamp;
     }
-#endif
 }
 
 void OrcaFlash::lockFrame(DCAMBUF_FRAME *dcambufFrame)
@@ -420,17 +332,6 @@ void OrcaFlash::lockFrame(DCAMBUF_FRAME *dcambufFrame)
 void OrcaFlash::copyLastFrame(void * const buf, const size_t n)
 {
     copyFrame(buf, n, -1, nullptr, nullptr);
-}
-
-void OrcaFlash::wait(const _DWORD timeout, const DCAMWAIT_EVENT event)
-{
-    _DWORD dwEvent = event;
-    CALL_THROW(dcam_wait(h, &dwEvent, timeout, nullptr))
-#ifndef WITH_HARDWARE
-    Q_UNUSED(dwEvent)
-    Q_UNUSED(timeout)
-    Q_UNUSED(event)
-#endif
 }
 
 int32 OrcaFlash::wait(const int32 timeout_ms, const int32 eventMask)
@@ -451,21 +352,6 @@ int32 OrcaFlash::wait(const int32 timeout_ms, const int32 eventMask)
     CALL_THROW_400(dcamwait_close(dwOpen.hwait));
 
     return dwStart.eventhappened;
-}
-
-void OrcaFlash::lockData(void **pTop, int32_t *pRowbytes, const int32_t frame)
-{
-    CALL_THROW(dcam_lockdata(h, pTop, pRowbytes, frame))
-#ifndef WITH_HARDWARE
-    Q_UNUSED(pTop)
-    Q_UNUSED(pRowbytes)
-    Q_UNUSED(frame)
-#endif
-}
-
-void OrcaFlash::unlockData()
-{
-    CALL_THROW(dcam_unlockdata(h))
 }
 
 void OrcaFlash::buf_release()
@@ -493,38 +379,32 @@ void OrcaFlash::cap_stop()
 
 double OrcaFlash::getExposureTime()
 {
-    double sec = 0.0;
-    CALL_THROW(dcam_getexposuretime(h, &sec));
 #ifndef WITH_HARDWARE
-    sec = 0.1;
+    exposureTime = 0.1;
 #endif
-    exposureTime = sec;
+    exposureTime = getPropertyValue(DCAM_IDPROP_EXPOSURETIME);
     return exposureTime;
 }
 
 double OrcaFlash::setGetExposureTime(const double sec)
 {
-#ifndef WITH_HARDWARE
-    Q_UNUSED(sec)
-#endif
-    CALL_THROW(dcam_setexposuretime(h, sec))
-    getExposureTime();
-    return exposureTime;
+    return setGetPropertyValue(DCAM_IDPROP_EXPOSURETIME, sec);
+}
+
+void OrcaFlash::setExposureTime(const double sec)
+{
+    setPropertyValue(DCAM_IDPROP_EXPOSURETIME, sec);
 }
 
 OrcaFlash::ORCA_TRIGGER_MODE OrcaFlash::getTriggerMode()
 {
-    int32 mode = 0;
-    CALL_THROW(dcam_gettriggermode(h, &mode))
-    return static_cast<ORCA_TRIGGER_MODE>(mode);
+    return static_cast<ORCA_TRIGGER_MODE>(
+        getPropertyValue(DCAM_IDPROP_TRIGGER_MODE));
 }
 
 void OrcaFlash::setTriggerMode(const ORCA_TRIGGER_MODE mode)
 {
-    CALL_THROW(dcam_settriggermode(h, mode))
-#ifndef WITH_HARDWARE
-    Q_UNUSED(mode)
-#endif
+    setPropertyValue(DCAM_IDPROP_TRIGGER_MODE, mode);
 }
 
 void OrcaFlash::setTriggerSource(const OrcaFlash::ORCA_TRIGGERSOURCE source)
@@ -534,29 +414,21 @@ void OrcaFlash::setTriggerSource(const OrcaFlash::ORCA_TRIGGERSOURCE source)
 
 OrcaFlash::ORCA_TRIGGER_POLARITY OrcaFlash::getTriggerPolarity()
 {
-    int32 polarity = 0;
-    CALL_THROW(dcam_gettriggerpolarity(h, &polarity))
-    return static_cast<ORCA_TRIGGER_POLARITY>(polarity);
+    return static_cast<ORCA_TRIGGER_POLARITY>(
+        getPropertyValue(DCAM_IDPROP_TRIGGERPOLARITY));
 }
 
 void OrcaFlash::setTriggerPolarity(
     const OrcaFlash::ORCA_TRIGGER_POLARITY polarity)
 {
-#if DCAM_VERSION == 400
     setPropertyValue(DCAM_IDPROP_TRIGGERPOLARITY, polarity);
-#else
-    CALL_THROW(dcam_settriggerpolarity(h, polarity))
-#endif
-#ifndef WITH_HARDWARE
-    Q_UNUSED(polarity)
-#endif
 }
 
-OrcaFlash::ORCA_STATUS OrcaFlash::getStatus()
+OrcaFlash::ORCA_CAPSTATUS OrcaFlash::getStatus()
 {
-    _DWORD status = 0;
-    CALL_THROW(dcam_getstatus(h, &status))
-    return static_cast<ORCA_STATUS>(status);
+    int32 status = 0;
+    CALL_THROW_400(dcamcap_status(h, &status))
+    return static_cast<ORCA_CAPSTATUS>(status);
 }
 
 QString OrcaFlash::getStatusString()
@@ -564,20 +436,21 @@ QString OrcaFlash::getStatusString()
     return statusString(getStatus());
 }
 
-QString OrcaFlash::statusString(const OrcaFlash::ORCA_STATUS status)
+QString OrcaFlash::statusString(const OrcaFlash::ORCA_CAPSTATUS status)
 {
     switch (status) {
-    case OrcaFlash::STATUS_BUSY:
+    case OrcaFlash::CAPSTATUS_BUSY:
         return "busy";
-    case OrcaFlash::STATUS_ERROR:
+    case OrcaFlash::CAPSTATUS_ERROR:
         return "error";
-    case OrcaFlash::STATUS_READY:
+    case OrcaFlash::CAPSTATUS_READY:
         return "ready";
-    case OrcaFlash::STATUS_STABLE:
+    case OrcaFlash::CAPSTATUS_STABLE:
         return "stable";
-    case OrcaFlash::STATUS_UNSTABLE:
+    case OrcaFlash::CAPSTATUS_UNSTABLE:
         return "unstable";
     }
+    throw std::runtime_error("Invalid CAPSTATUS");
 }
 
 void OrcaFlash::logStatusString()

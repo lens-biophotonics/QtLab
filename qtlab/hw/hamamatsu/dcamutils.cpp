@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include <qtlab/hw/hamamatsu/dcamutils.h>
 #include <qtlab/core/logger.h>
 
@@ -6,16 +8,22 @@
 using namespace DCAM;
 
 static Logger *logger = getLogger("DCAM");
-static QMap<int, ModelInfo *> map;
-static QMap<QString, int> mapByIDStr;
+static QMap<size_t, ModelInfo *> map;
+static QMap<QString, size_t> mapByIDStr;
 
 
 namespace DCAM {
-QString getModelInfo(const int index, const int32_t dwStringID)
+QString getModelInfo(const size_t index, const int32_t iString)
 {
     char buf[128];
 #ifdef WITH_HARDWARE
-    dcam_getmodelinfo(index, dwStringID, buf, 128);
+    DCAMDEV_STRING devString;
+    devString.size = sizeof(DCAMDEV_STRING);
+    devString.iString = iString;
+    devString.text = buf;
+    devString.textbytes = 128;
+    // can be called without handle from dcamdev_open, using device index instead
+    dcamdev_getstring((HDCAM)index, &devString);
 #else
     Q_UNUSED(index)
     Q_UNUSED(dwStringID)
@@ -23,7 +31,7 @@ QString getModelInfo(const int index, const int32_t dwStringID)
     return QString(buf);
 }
 
-ModelInfo *getModelInfo(const int index)
+ModelInfo *getModelInfo(const size_t index)
 {
     if (!map.contains(index)) {
         return nullptr;
@@ -31,7 +39,7 @@ ModelInfo *getModelInfo(const int index)
     return map[index];
 }
 
-int getCameraIndex(const QString idStr)
+size_t getCameraIndex(const QString idStr)
 {
     if (!mapByIDStr.contains(idStr)) {
         return -1;
@@ -44,17 +52,14 @@ int init_dcam()
     int nCamera;
 #ifdef WITH_HARDWARE
     bool ok = false;
-#if DCAM_VERSION == 400
     DCAMAPI_INIT param;
     memset (&param, 0, sizeof(param));
 
     param.size = sizeof(param);
-    int32 ret = dcamapi_init (&param);
+    int32 ret = dcamapi_init(&param);
     ok = ret == DCAMERR_SUCCESS;
     nCamera = param.iDeviceCount;
-#else
-    ok = dcam_init(nullptr, &nCamera);
-#endif
+
     if (!ok) {
         QString errMsg = "Cannot initialize dcam";
         logger->critical(errMsg);
@@ -92,11 +97,7 @@ int init_dcam()
 void uninit_dcam()
 {
 #ifdef WITH_HARDWARE
-#if DCAM_VERSION == 400
     if (dcamapi_uninit() != DCAMERR_SUCCESS)
-#else
-    if (!dcam_uninit())
-#endif
     {
         QString errMsg = "Cannot uninitialize dcam";
         logger->critical(errMsg);

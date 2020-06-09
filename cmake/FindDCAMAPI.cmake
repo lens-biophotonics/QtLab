@@ -10,7 +10,7 @@ find_library(DCAMAPI_LIBRARY
     "$ENV{LIB}"
 )
 
-find_path(DCAMAPI_INCLUDE_DIR NAMES dcamapi.h PATHS
+find_path(DCAMAPI_INCLUDE_DIR NAMES dcamapi4.h PATHS
     "${INCLUDE_DIRS}"
     /usr/include
     /usr/local/include

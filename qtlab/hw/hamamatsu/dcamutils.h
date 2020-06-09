@@ -8,7 +8,7 @@
 #endif
 
 namespace DCAM {
-#include <dcamapi.h>
+#include <dcamapi4.h>
 #include <dcamprop.h>
 
 struct ModelInfo {
@@ -23,8 +23,8 @@ struct ModelInfo {
 int init_dcam();
 void uninit_dcam();
 
-ModelInfo *getModelInfo(const int index);
-int getCameraIndex(const QString idStr);
+ModelInfo *getModelInfo(const size_t index);
+size_t getCameraIndex(const QString idStr);
 }
 
 #endif // DCAMUTILS_H

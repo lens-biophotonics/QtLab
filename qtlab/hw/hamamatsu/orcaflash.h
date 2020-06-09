@@ -1,6 +1,8 @@
 #ifndef ORCAFLASH_H
 #define ORCAFLASH_H
 
+#include <stdexcept>
+
 #include <QObject>
 #include <QMutex>
 #include <QState>
@@ -27,14 +29,11 @@ public:
     EXCEPTION_CLASS(OrcaNotBusyException)
 
     enum ORCA_TRIGGER_MODE {
-        TRIGMODE_INTERNAL = DCAM::DCAM_TRIGMODE_INTERNAL,
-        TRIGMODE_EDGE = DCAM::DCAM_TRIGMODE_EDGE,
-        TRIGMODE_LEVEL = DCAM::DCAM_TRIGMODE_LEVEL,
-        TRIGMODE_SOFTWARE = DCAM::DCAM_TRIGMODE_SOFTWARE,
-        TRIGMODE_TDI = DCAM::DCAM_TRIGMODE_TDI,
-        TRIGMODE_TDIINTERNAL = DCAM::DCAM_TRIGMODE_TDIINTERNAL,
-        TRIGMODE_START = DCAM::DCAM_TRIGMODE_START,
-        TRIGMODE_SYNCREADOUT = DCAM::DCAM_TRIGMODE_SYNCREADOUT,
+        TRIGMODE_PIV = DCAM::DCAMPROP_TRIGGER_MODE__PIV,
+        TRIGMODE_START = DCAM::DCAMPROP_TRIGGER_MODE__START,
+        TRIGMODE_NORMAL = DCAM::DCAMPROP_TRIGGER_MODE__NORMAL,
+        TRIGMODE_MULTIGATE = DCAM::DCAMPROP_TRIGGER_MODE__MULTIGATE,
+        TRIGMODE_MULTIFRAME = DCAM::DCAMPROP_TRIGGER_MODE__MULTIFRAME,
     };
 
     enum ORCA_TRIGGERSOURCE {
@@ -70,12 +69,12 @@ public:
 #endif
     };
 
-    enum ORCA_STATUS {
-        STATUS_BUSY = DCAM::DCAM_STATUS_BUSY,
-        STATUS_ERROR = DCAM::DCAM_STATUS_ERROR,
-        STATUS_READY = DCAM::DCAM_STATUS_READY,
-        STATUS_STABLE = DCAM::DCAM_STATUS_STABLE,
-        STATUS_UNSTABLE = DCAM::DCAM_STATUS_UNSTABLE,
+    enum ORCA_CAPSTATUS {
+        CAPSTATUS_ERROR = DCAM::DCAMCAP_STATUS_ERROR,
+        CAPSTATUS_BUSY = DCAM::DCAMCAP_STATUS_BUSY,
+        CAPSTATUS_READY = DCAM::DCAMCAP_STATUS_READY,
+        CAPSTATUS_STABLE = DCAM::DCAMCAP_STATUS_STABLE,
+        CAPSTATUS_UNSTABLE = DCAM::DCAMCAP_STATUS_UNSTABLE,
     };
 
     enum ORCA_SENSOR_MODE {
@@ -115,11 +114,7 @@ public:
                    DCAM::DCAM_TIMESTAMP *timestamp = nullptr);
     void lockFrame(DCAM::DCAMBUF_FRAME *dcambufFrame);
     void copyLastFrame(void * const buf, const size_t n);
-    void wait(const DCAM::_DWORD timeout = 1000,
-              const DCAM::DCAMWAIT_EVENT event = DCAM::DCAMCAP_EVENT_FRAMEREADY);
     DCAM::int32 wait(const DCAM::int32 timeout_ms, const DCAM::int32 eventMask);
-    void lockData(void **pTop, int32_t *pRowbytes, const int32_t frame);
-    void unlockData();
 
     void buf_release();
     void buf_alloc(const int32_t nFrames);
@@ -128,6 +123,7 @@ public:
 
     double getExposureTime();
     double setGetExposureTime(const double sec);
+    void setExposureTime(const double sec);
 
     ORCA_TRIGGER_MODE getTriggerMode();
     void setTriggerMode(const ORCA_TRIGGER_MODE mode);
@@ -136,14 +132,12 @@ public:
     ORCA_TRIGGER_POLARITY getTriggerPolarity();
     void setTriggerPolarity(const ORCA_TRIGGER_POLARITY polarity);
 
-    ORCA_STATUS getStatus();
+    ORCA_CAPSTATUS getStatus();
     QString getStatusString();
-    static QString statusString(const ORCA_STATUS status);
+    static QString statusString(const ORCA_CAPSTATUS status);
     void logStatusString();
 
-    QString getLastError();
-
-    double setGet(DCAM::_DCAMIDPROP property, const double value);
+    double setGetPropertyValue(DCAM::_DCAMIDPROP property, const double value);
     double getPropertyValue(DCAM::_DCAMIDPROP property);
     void setPropertyValue(DCAM::_DCAMIDPROP property, const double value);
     double getLineInterval();
@@ -183,7 +177,6 @@ private:
     QState *closedState;
     QState *capturingState;
 
-    QString logLastError(const QString label = "");
     void setupStateMachine();
 
     void throw400(const DCAM::DCAMERR err);
