@@ -47,6 +47,17 @@ size_t getCameraIndex(const QString idStr)
     return mapByIDStr[idStr];
 }
 
+/**
+ * @brief Return the error code as a hex formatted string
+ * @param err
+ * @return
+ */
+
+QString errString(uint err)
+{
+    return QString("Error 0x%1").arg((uint)err, 0, 16);
+}
+
 int init_dcam()
 {
     int nCamera;
@@ -61,8 +72,8 @@ int init_dcam()
     nCamera = param.iDeviceCount;
 
     if (!ok) {
-        QString errMsg = "Cannot initialize dcam";
-        logger->critical(errMsg);
+        QString errMsg("Cannot initialize dcam. ");
+        logger->critical(errMsg + errString(ret));
         throw std::runtime_error(errMsg.toStdString());
     }
 

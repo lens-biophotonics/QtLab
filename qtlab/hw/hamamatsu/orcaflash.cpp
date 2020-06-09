@@ -89,7 +89,7 @@ void OrcaFlash::throw400(const DCAMERR err)
     case DCAMERR_NOTBUSY:
         throw OrcaNotBusyException();
     default:
-        throw std::runtime_error(QString("Error %1").arg(err).toStdString());
+        throw std::runtime_error(errString(err).toStdString());
     }
 }
 

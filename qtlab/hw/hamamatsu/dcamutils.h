@@ -23,6 +23,8 @@ struct ModelInfo {
 int init_dcam();
 void uninit_dcam();
 
+QString errString(uint err);
+
 ModelInfo *getModelInfo(const size_t index);
 size_t getCameraIndex(const QString idStr);
 }
