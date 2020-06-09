@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include <QSerialPortInfo>
 #include <QTimer>
 #include <QStateMachine>

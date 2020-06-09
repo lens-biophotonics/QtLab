@@ -5,12 +5,17 @@
 #include <QObject>
 
 #include <qtlab/core/logger.h>
+#ifdef WIN32
+#include "qtlab-core_export.h"
+#else
+#define QTLAB_CORE_EXPORT
+#endif
 
 /**
  * @brief The LogManager class is a singleton factory for Loggers.
  */
 
-class LogManager : public QObject
+class QTLAB_CORE_EXPORT LogManager : public QObject
 {
     Q_OBJECT
 public:

@@ -32,8 +32,15 @@
 # Qwt_INCLUDE_DIR = where to find headers
 #
 
-
-set(Qwt_LIBRARY_NAMES qwt-qt5 qwt6-qt5 qwt qwt6)
+if(WIN32)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(Qwt_LIBRARY_NAMES qwtd)
+    else()
+        set(Qwt_LIBRARY_NAMES qwt)
+    endif()
+else()
+    set(Qwt_LIBRARY_NAMES qwt-qt5 qwt6-qt5 qwt6)
+endif()
 
 find_library(Qwt_LIBRARY
   NAMES ${Qwt_LIBRARY_NAMES}
@@ -43,6 +50,7 @@ find_library(Qwt_LIBRARY
     /usr/local/lib/qt5
     "$ENV{LIB_DIR}/lib"
     "$ENV{LIB}"
+    C:/Qwt-6.1.5/lib
 )
 
 set(_qwt_fw)
@@ -60,6 +68,7 @@ FIND_PATH(Qwt_INCLUDE_DIR NAMES qwt.h PATHS
   /usr/local/include/qt5
   "$ENV{LIB_DIR}/include"
   "$ENV{INCLUDE}"
+  C:/Qwt-6.1.5/include
   PATH_SUFFIXES qwt-qt5 qwt qwt6
 )
 

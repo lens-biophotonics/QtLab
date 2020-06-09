@@ -9,6 +9,8 @@
 #ifndef NITASK_H
 #define NITASK_H
 
+#include <stdexcept>
+
 /**
  * \brief Wraps the call to the given function around some logic for error
  * checking

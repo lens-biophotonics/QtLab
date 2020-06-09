@@ -22,6 +22,9 @@ target_include_directories(${TARGETNAME}
         ${Qwt_INCLUDE_DIR}
 )
 
+if(WIN32)
+    target_compile_definitions(${TARGETNAME} PRIVATE QWT_DLL)
+endif()
 
 if (Qwt_FOUND)
     set(SOURCE_FILES ${SOURCE_FILES} cameradisplay.cpp cameraplot.cpp timeplot.cpp)

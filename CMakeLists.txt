@@ -8,7 +8,15 @@ find_package(Qt5 5.8 REQUIRED COMPONENTS
 
 message(STATUS "Custom include directories: ${INCLUDE_DIRS}")
 
-set(CMAKE_CXX_STANDARD 14)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_compile_options("/std:c++latest")
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+else()
+    set(CMAKE_CXX_STANDARD 14)
+endif()
+
+set(CMAKE_AUTOMOC ON)
+
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 set(QTLAB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
@@ -21,8 +29,6 @@ set(OTHER_FILES
 )
 
 add_custom_target(project-related-files SOURCES ${OTHER_FILES})
-
-set(CMAKE_AUTOMOC ON)
 
 include(GNUInstallDirs)
 

@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include <QRegularExpression>
 #include <QStringList>
 #include <QtDebug>

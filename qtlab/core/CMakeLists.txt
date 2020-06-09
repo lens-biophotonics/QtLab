@@ -19,3 +19,18 @@ target_link_libraries(${TARGETNAME} PUBLIC
 )
 
 include(install_targets)
+
+if(WIN32)
+    include(GenerateExportHeader)
+    generate_export_header(${TARGETNAME})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${TARGETNAME}_export.h
+            DESTINATION
+                ${CMAKE_INSTALL_INCLUDEDIR}/${HEADER_PREFIX}
+            COMPONENT
+                devel
+    )
+    target_include_directories(${TARGETNAME}
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    )
+endif()
