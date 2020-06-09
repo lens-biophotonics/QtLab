@@ -2,8 +2,6 @@
 
 #include <qtlab/core/logmanager.h>
 
-LogManager* LogManager::inst = nullptr;
-
 LogManager::LogManager()
 {
     signalEmitted = false;

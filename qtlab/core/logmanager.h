@@ -26,7 +26,6 @@ signals:
     void newLogMessages();
 
 private:
-    static LogManager* inst;
     QMap<QString, Logger *> logMap;
     QList<Logger::Message> messageList;
     bool signalEmitted;
