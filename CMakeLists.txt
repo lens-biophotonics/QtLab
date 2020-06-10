@@ -44,6 +44,8 @@ if(BUILD_WIDGETS)
     add_subdirectory(qtlab/widgets)
 endif()
 
+add_subdirectory(docker)
+
 include(CMakePackageConfigHelpers)
 configure_package_config_file(
   "Config.cmake.in"

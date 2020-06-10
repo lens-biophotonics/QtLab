@@ -156,7 +156,7 @@ public:
     uInt64 getSampsPerChan() const;
     void setSampsPerChan(const uInt64 &value);
 
-#include <qtlab/hw/ni/NIDAQmx_wrapper_methods.h>
+#include "NIDAQmx_wrapper_methods.h"
 
 public slots:
     void initializeTask();

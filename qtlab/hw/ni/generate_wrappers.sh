@@ -2,13 +2,16 @@
 
 echo "Generating wrappers for NIDAQmx, please wait. This may take some time."
 
-OUTFILE_CPP=NIDAQmx_wrapper_methods.cpp
-OUTFILE_H=NIDAQmx_wrapper_methods.h
+NIDAQmx_file=$1
+OUTPUT_DIR=$2
 
-grep 'int32 __CFUNC.*(TaskHandle taskHandle.*);' $1 | perl -pe 's/;.*$/ {return 0;}/' > NIDAQmx_dummy.cpp
-grep 'int32 __CFUNC .*(TaskHandle taskHandle.*);' $1 > NIDAQmx_wrapper_methods.h
+OUTFILE_CPP=${OUTPUT_DIR}/NIDAQmx_wrapper_methods.cpp
+OUTFILE_H=${OUTPUT_DIR}/NIDAQmx_wrapper_methods.h
+
+grep 'int32 __CFUNC.*(TaskHandle taskHandle.*);' ${NIDAQmx_file} | perl -pe 's/;.*$/ {return 0;}/' > ${OUTPUT_DIR}/NIDAQmx_dummy.cpp
+grep 'int32 __CFUNC .*(TaskHandle taskHandle.*);' ${NIDAQmx_file} > ${OUTFILE_H}
 perl -pe 's/;.*$/ {}/' $OUTFILE_H > $OUTFILE_CPP
-spatch --in-place wrapper.cocci "$OUTFILE_CPP"
+spatch --in-place wrapper.cocci "$OUTFILE_CPP" &> /dev/null || exit 1
 
 # for s in channel channelName channelNames physicalChannel deviceNames nameToAssignToChannel customScaleName nameToAssignToLines lines saveAs author outputTerminal triggerSource triggerPattern counter cjcChannel sourceTerminal source sampleClkOutpTerm sampleClkSrc risingEdgeChan fallingEdgeChan filePath groupName
 # do
