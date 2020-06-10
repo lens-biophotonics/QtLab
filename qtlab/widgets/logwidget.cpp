@@ -19,7 +19,7 @@ LogWidget::LogWidget(QWidget *parent) : QWidget(parent)
 
 void LogWidget::logMessages()
 {
-    foreach (Logger::Message message, logManager().getMessages()) {
+    for (Logger::Message message : logManager().getMessages()) {
         QString msg = message.msg;
         if (msg.isEmpty())
             return;
