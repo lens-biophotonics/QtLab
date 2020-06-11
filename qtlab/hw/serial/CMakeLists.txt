@@ -1,3 +1,8 @@
+option(BUILD_SERIAL "Build serial" ON)
+if(NOT BUILD_SERIAL)
+    return()
+endif()
+
 find_package(Qt5 COMPONENTS SerialPort REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
