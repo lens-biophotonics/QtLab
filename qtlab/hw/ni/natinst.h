@@ -8,9 +8,14 @@ namespace NI {
 #include <NIDAQmx.h>
 
 QStringList getDevicesInSystem();
-QStringList getDOLines();
 QStringList getAOPhysicalChans();
+QStringList getAIPhysicalChans();
 QStringList getCOPhysicalChans();
+QStringList getCIPhysicalChans();
+QStringList getDILines();
+QStringList getDIPorts();
+QStringList getDOLines();
+QStringList getDOPorts();
 QStringList getTerminals();
 }
 

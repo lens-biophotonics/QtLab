@@ -60,7 +60,12 @@ int32 __CFUNC     DAQmxCreateTask (const char taskName[], TaskHandle *taskHandle
 }
 #endif
 
-DEF_NI_GET_FUNCTION(getDOLines, DAQmxGetDevDOLines)
 DEF_NI_GET_FUNCTION(getAOPhysicalChans, DAQmxGetDevAOPhysicalChans)
+DEF_NI_GET_FUNCTION(getAIPhysicalChans, DAQmxGetDevAIPhysicalChans)
 DEF_NI_GET_FUNCTION(getCOPhysicalChans, DAQmxGetDevCOPhysicalChans)
+DEF_NI_GET_FUNCTION(getCIPhysicalChans, DAQmxGetDevCIPhysicalChans)
+DEF_NI_GET_FUNCTION(getDILines, DAQmxGetDevDILines)
+DEF_NI_GET_FUNCTION(getDIPorts, DAQmxGetDevDIPorts)
+DEF_NI_GET_FUNCTION(getDOLines, DAQmxGetDevDOLines)
+DEF_NI_GET_FUNCTION(getDOPorts, DAQmxGetDevDOPorts)
 DEF_NI_GET_FUNCTION(getTerminals, DAQmxGetDevTerminals)
