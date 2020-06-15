@@ -29,15 +29,20 @@ Logger *LogManager::getLogger(QString name)
 
 QList<Logger::Message> LogManager::getMessages()
 {
+    mutex.lock();
     QList<Logger::Message> list = QList<Logger::Message>(messageList);
     messageList.clear();
+    mutex.unlock();
     signalEmitted = false;
     return list;
 }
 
-void LogManager::appendMessage(Logger::Message msg) {
+void LogManager::appendMessage(Logger::Message msg)
+{
+    mutex.lock();
     messageList.append(msg);
-    if(signalEmitted)
+    mutex.unlock();
+    if (signalEmitted)
         return;
     signalEmitted = true;
     emit newLogMessages();

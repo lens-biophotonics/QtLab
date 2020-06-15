@@ -3,6 +3,7 @@
 
 #include <QMap>
 #include <QObject>
+#include <QMutex>
 
 #include <qtlab/core/logger.h>
 #ifdef WIN32
@@ -34,6 +35,7 @@ private:
     QMap<QString, Logger *> logMap;
     QList<Logger::Message> messageList;
     bool signalEmitted;
+    QMutex mutex;
 
     void appendMessage(Logger::Message msg);
 };
