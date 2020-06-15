@@ -15,7 +15,8 @@ NITask::NITask(QString taskName, QObject *parent) : QObject(parent),
 
 NITask::~NITask()
 {
-    clearTask();
+    if(isInitialized())
+        clearTask();
     delete[] errBuff;
 }
 
