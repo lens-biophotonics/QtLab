@@ -44,6 +44,7 @@ TimePlot::TimePlot(QWidget *parent) :
 {
     setupUi();
     setSamplingRate(1);
+    setBufSize(10.0);
     clear();
 }
 
@@ -184,9 +185,15 @@ void TimePlot::setupUi()
     swipeXAction->trigger();
 }
 
-void TimePlot::appendPoint(ulong y)
+void TimePlot::updateCountsLabel(double value)
 {
-    if ((size_t)yData->size() >= nResSamples) {
+    countsLabelText->setText(QString("%1").arg(value, 4, 'g', 4));
+    countsLabel->setText(*countsLabelText);
+}
+
+void TimePlot::appendPoint(double y)
+{
+    if ((size_t)yData->size() + 1 > nResSamples) {
         xData->remove(0);
         yData->remove(0);
         xData->append(sampCounter);
@@ -195,34 +202,36 @@ void TimePlot::appendPoint(ulong y)
     sampCounter++;
     yData->append(y);
 
-    if (swipeXAction->isChecked()) {
-        // when swiping, make sure that the last major tick is not drawn
-        // to have smooth scrolling (because its label would occupy too much
-        // space)
-        const QList<double> &majTicks
-            = axisScaleDiv(xBottom).ticks(QwtScaleDiv::MajorTick);
-        if (majTicks.size() > 2) {
-            double diff = majTicks.at(1) - majTicks.at(0);
-            if (sampCounter == majTicks.last() + diff)
-                static_cast<TimeScaleDraw*>(scaleDraw)->hiddenMajTick
-                    = majTicks.last() + diff;
+    replot();
+    updateCountsLabel(y);
+}
+
+void TimePlot::appendPoints(const QVector<double> &y)
+{
+    if (!y.size())
+        return;
+    double sr = static_cast<TimeScaleDraw*>(scaleDraw)->rate;
+    if ((size_t)yData->size() + y.size() > nResSamples) {
+        size_t _free = nResSamples - yData->size();
+        size_t diff = y.size() - _free;
+        xData->remove(0, diff);
+        yData->remove(0, diff);
+
+        for (int i = 0; i < y.size(); ++i) {
+            xData->append(sampCounter + i);
         }
-        setAxisScale(QwtPlot::xBottom,
-                     xData->first(), xData->first() + nResSamples);
     }
 
-    curve->setRawSamples(xData->data(), yData->data(), yData->size());
+    yData->append(y);
+    sampCounter += y.size();
 
     replot();
-    double countsDouble = y;
-    countsLabelText->setText(QString("%1").arg(countsDouble, 4, 'g', 4));
-    countsLabel->setText(*countsLabelText);
+    updateCountsLabel(y.last());
 }
 
 void TimePlot::clear()
 {
     yData->clear();
-    xData->clear();
     sampCounter = 0;
     setBufSize(nResSamples);
     curve->setRawSamples(xData->data(), yData->data(), yData->size());
@@ -233,20 +242,23 @@ void TimePlot::clear()
 void TimePlot::setSamplingRate(double Hz)
 {
     static_cast<TimeScaleDraw*>(scaleDraw)->rate = Hz;
-
-    // 10s worth of data
-    setBufSize(Hz * 10);
 }
 
 void TimePlot::setBufSize(size_t nSamples)
 {
     this->nResSamples = nSamples;
-    xData->reserve(nSamples);
     yData->reserve(nSamples);
+    xData->reserve(nSamples);
     xData->clear();
     for (size_t i = 0; i < nSamples; ++i) {
         xData->append(i);
     }
+}
+
+void TimePlot::setBufSize(double seconds)
+{
+    size_t bs = (size_t)(static_cast<TimeScaleDraw*>(scaleDraw)->rate * seconds);
+    setBufSize(bs);
 }
 
 void TimePlot::setSwipeXEnabled(bool enable)
@@ -275,6 +287,28 @@ void TimePlot::mouseDoubleClickEvent(QMouseEvent *e)
 
     e->accept();
     dialog->show();
+}
+
+void TimePlot::replot()
+{
+    curve->setRawSamples(xData->data(), yData->data(), yData->size());
+
+    if (swipeXAction->isChecked()) {
+        // when swiping, make sure that the last major tick is not drawn
+        // to have smooth scrolling (because its label would occupy too much
+        // space)
+        const QList<double> &majTicks
+            = axisScaleDiv(xBottom).ticks(QwtScaleDiv::MajorTick);
+        if (majTicks.size() > 2) {
+            double diff = majTicks.at(1) - majTicks.at(0);
+            if (sampCounter >= majTicks.last() + diff)
+                static_cast<TimeScaleDraw*>(scaleDraw)->hiddenMajTick
+                    = majTicks.last() + diff;
+        }
+        setAxisScale(QwtPlot::xBottom, xData->first(), xData->last());
+    }
+
+    QwtPlot::replot();
 }
 
 TimePlot::~TimePlot()

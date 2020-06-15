@@ -24,14 +24,17 @@ public:
 signals:
 
 public slots:
-    void appendPoint(ulong y);
+    void appendPoint(double y);
+    void appendPoints(const QVector<double> &y);
     void clear();
     void setSamplingRate(double Hz);
     void setBufSize(size_t nResSamples);
+    void setBufSize(double seconds);
     void setSwipeXEnabled(bool enable);
 
 protected:
     virtual void mouseDoubleClickEvent(QMouseEvent *e) override;
+    void replot() override;
 
 private:
     size_t sampCounter, nResSamples;
@@ -45,6 +48,7 @@ private:
     QDialog *dialog;
 
     void setupUi();
+    void updateCountsLabel(double value);
 };
 
 #endif // TIMEPLOT_H
