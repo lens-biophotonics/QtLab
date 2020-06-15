@@ -23,13 +23,13 @@
 
 #ifdef WITH_HARDWARE
 #define DAQmxErrChk(functionCall) {                                         \
-        if (!task) {                                                        \
-            throw std::runtime_error("Task not initialized");               \
-        }                                                                   \
         int ret = functionCall;                                             \
         if (DAQmxFailed(ret)) {                                             \
             logger->error(QString("Error %1").arg(ret));                    \
             onError();                                                      \
+        }                                                                   \
+        if (!task) {                                                        \
+            throw std::runtime_error("Task not initialized");               \
         }                                                                   \
 }
 #else
