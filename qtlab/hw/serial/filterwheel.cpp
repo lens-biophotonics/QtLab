@@ -2,7 +2,6 @@
 
 #include <QRegularExpression>
 #include <QStringList>
-#include <QtDebug>
 
 #include <qtlab/hw/serial/filterwheel.h>
 #include <qtlab/hw/serial/serialport.h>
