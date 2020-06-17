@@ -289,6 +289,9 @@ QString PIDevice::getAxisIdentifiers()
     std::unique_ptr<char[]> buf(new char[32]);
     CALL_THROW(PI_qSAI(id, buf.get(), 32));
     axisIdentifiers = QString(buf.get()).replace("\n", "");
+#ifndef WITH_HARDWARE
+    axisIdentifiers = "123456789";
+#endif
     return axisIdentifiers;
 }
 
@@ -443,6 +446,9 @@ bool PIDevice::isOnTarget(const QString &axis)
         temp = axis.at(0);
     }
     int ont = 0;
+#ifndef WITH_HARDWARE
+    ont = 1;
+#endif
     CALL_THROW(PI_qONT(id, temp.toLatin1(), &ont));
     if (ont) {
         emit onTarget(axis);
