@@ -6,8 +6,22 @@
 #include "colormaps.h"
 
 
-CameraPlot::CameraPlot(uint nCols, uint nRows, QWidget *parent) :
-    QwtPlot(parent), nCols(nCols), nRows(nRows)
+CameraPlot::CameraPlot(QWidget *parent) : QwtPlot(parent)
+{
+    setup();
+}
+
+CameraPlot::CameraPlot(uint nRows, uint nCols, QWidget *parent) : QwtPlot(parent)
+{
+    setup();
+    setPlotSize(nRows, nCols);
+    for (int i = 0; i < vec.size(); ++i) {
+        vec[i] = i / 64;
+    }
+    replot();
+}
+
+void CameraPlot::setup()
 {
     axisScaleEngine(xBottom)->setAttribute(QwtScaleEngine::Floating, true);
     axisScaleEngine(yLeft)->setAttribute(QwtScaleEngine::Floating, true);
@@ -16,30 +30,47 @@ CameraPlot::CameraPlot(uint nCols, uint nRows, QWidget *parent) :
     spectrogramPlot->attach(this);
 
     data = new QwtMatrixRasterData();
-    data->setInterval(Qt::XAxis, QwtInterval(0, nCols));
-    data->setInterval(Qt::YAxis, QwtInterval(0, nRows));
-
-    vec = QVector<double>(nCols * nRows, 0.);
-    for (int i = 0; i < vec.size(); ++i) {
-        vec[i] = i / 64;
-    }
+    spectrogramPlot->setData(data);
 
     QwtScaleWidget *rightAxis = axisWidget(QwtPlot::yRight);
     rightAxis->setColorBarEnabled(true);
     enableAxis(yRight);
 
-    spectrogramPlot->setData(data);
-
     setColorMap(new GrayScaleColorMap());
     setInterval(Qt::ZAxis, 0, 65535);
 }
 
-void CameraPlot::setData(const QVector<double> &vec)
+void CameraPlot::setPlotSize(uint nRows, uint nCols)
 {
-    data->setValueMatrix(vec, nCols);
+    this->nCols = nCols;
+    this->nRows = nRows;
 
-    min = std::numeric_limits<double>::infinity();
-    max = -min;
+    data->setInterval(Qt::XAxis, QwtInterval(0, nCols));
+    data->setInterval(Qt::YAxis, QwtInterval(0, nRows));
+
+    vec.fill(0, nCols * nRows);
+}
+
+void CameraPlot::setData(const QVector<double> &data)
+{
+    vec = data;
+    replot();
+}
+
+void CameraPlot::setData(const double *data, const size_t n)
+{
+    vec.resize(n);
+    memcpy(vec.data(), data, n * sizeof(double));
+    replot();
+}
+
+void CameraPlot::_autoscale()
+{
+    if (!autoscaleZ || !vec.size())
+        return;
+
+    max = vec.at(0);
+    max = min;
     for (const double val : vec) {
         if (val > max) {
             max = val;
@@ -48,38 +79,36 @@ void CameraPlot::setData(const QVector<double> &vec)
             min = val;
         }
     }
-    if (autoscaleZ) {
-        setInterval(Qt::ZAxis, min, max);
-    }
-    QwtPlot::replot();
+
+    setInterval(Qt::ZAxis, min, max);
 }
 
 void CameraPlot::replot()
 {
-    setData(vec);
+    data->setValueMatrix(vec, nCols);
+
+    _autoscale();
+    QwtPlot::replot();
 }
 
 void CameraPlot::setInterval(const Qt::Axis axis, const double min,
                              const double max)
 {
     ZInterval = QwtInterval(min, max);
-    data->setInterval(axis, ZInterval);
     if (!ZInterval.isValid())
         return;
+    data->setInterval(axis, ZInterval);
     if (axis == Qt::ZAxis) {
         setAxisScale(QwtPlot::yRight, ZInterval.minValue(), ZInterval.maxValue());
         QwtScaleWidget *rightAxis = axisWidget(QwtPlot::yRight);
         rightAxis->setColorMap(ZInterval, copyColorMap(colorMap));
     }
-    spectrogramPlot->plot();
+    QwtPlot::replot();
 }
 
 void CameraPlot::setZAutoscaleEnabled(bool enable)
 {
     autoscaleZ = enable;
-    if (enable) {
-        setInterval(Qt::ZAxis, min, max);
-    }
     replot();
 }
 
@@ -90,15 +119,5 @@ void CameraPlot::setColorMap(QwtLinearColorMap *value)
     spectrogramPlot->setColorMap(colorMap);
     QwtScaleWidget *rightAxis = axisWidget(QwtPlot::yRight);
     rightAxis->setColorMap(ZInterval, copyColorMap(colorMap));
-    replot();
-}
-
-/**
- * @brief CameraPlot::getBuffer
- * @return A pointer to the internal buffer for data to be plotted
- */
-
-double *CameraPlot::getBuffer()
-{
-    return vec.data();
+    QwtPlot::replot();
 }

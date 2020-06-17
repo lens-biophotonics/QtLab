@@ -34,11 +34,6 @@ void CameraDisplay::setLUTPath(QString value)
     setupLUTmenu();
 }
 
-double *CameraDisplay::getBuffer()
-{
-    return plot->getBuffer();
-}
-
 void CameraDisplay::replot()
 {
     plot->replot();
@@ -48,6 +43,11 @@ void CameraDisplay::contextMenuEvent(QContextMenuEvent *event)
 {
     event->accept();
     menu->exec(QCursor::pos());
+}
+
+CameraPlot *CameraDisplay::getPlot() const
+{
+    return plot;
 }
 
 QString CameraDisplay::getTitle() const

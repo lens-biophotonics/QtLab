@@ -15,10 +15,11 @@ public:
     virtual ~CameraDisplay();
 
     void setLUTPath(QString value);
-    double *getBuffer();
 
     QString getTitle() const;
     void setTitle(const QString &value);
+
+    CameraPlot *getPlot() const;
 
 signals:
 
