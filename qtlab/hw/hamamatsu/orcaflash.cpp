@@ -1,10 +1,6 @@
 #include <QStateMachine>
 #include <QMutexLocker>
 
-#ifndef WITH_HARDWARE
-#include <stdio.h>
-#endif
-
 #include <qtlab/hw/hamamatsu/orcaflash.h>
 #include <qtlab/core/logger.h>
 
@@ -245,23 +241,27 @@ void OrcaFlash::startCapture()
     emit captureStarted();
 }
 
-void OrcaFlash::stop()
-{
-    if (!_isOpen) {
-        return;
-    }
-    cap_stop();
-}
-
 void OrcaFlash::copyFrame(void * const buf, const size_t n,
                           const int32_t frame, int32_t *frameStamp,
                           DCAM_TIMESTAMP *timestamp)
 {
 #ifndef WITH_HARDWARE
     Q_UNUSED(frame)
-    FILE * f = fopen("/dev/urandom", "r");
-    fread(buf, 1, n, f);
-    fclose(f);
+    Q_UNUSED(frameStamp)
+    Q_UNUSED(timestamp)
+    int k = n / (sizeof (int) * 64);
+
+    char *p = (char *)buf;
+
+    size_t b = n / k;
+    size_t tot = 0;
+
+    for (int i = 0; i < k; ++i) {
+        memset(p, rand(), b);
+        p += b;
+        tot += b;
+    }
+    memset(p, rand(), n - tot);
     return;
 #else
     DCAMBUF_FRAME dcamframe;

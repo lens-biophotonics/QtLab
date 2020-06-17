@@ -26,7 +26,7 @@ QString getModelInfo(const size_t index, const int32_t iString)
     dcamdev_getstring((HDCAM)index, &devString);
 #else
     Q_UNUSED(index)
-    Q_UNUSED(dwStringID)
+    Q_UNUSED(iString)
 #endif
     return QString(buf);
 }

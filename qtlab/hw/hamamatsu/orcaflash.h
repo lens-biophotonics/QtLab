@@ -104,8 +104,6 @@ public:
     int32_t nFramesInBuffer() const;
 
     void startCapture();
-    void stop();
-
     void copyFrame(void * const buf, const size_t n, const int32_t frame,
                    int32_t *frameStamp = nullptr,
                    DCAM::DCAM_TIMESTAMP *timestamp = nullptr);
