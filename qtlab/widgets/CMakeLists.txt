@@ -23,7 +23,7 @@ target_include_directories(${TARGETNAME}
 )
 
 if(WIN32)
-    target_compile_definitions(${TARGETNAME} PRIVATE QWT_DLL)
+    target_compile_definitions(${TARGETNAME} PUBLIC QWT_DLL)
 endif()
 
 if (Qwt_FOUND)
