@@ -7,6 +7,8 @@
 #include <QMutex>
 #include <QState>
 
+#include "qtlab-hw-hamamatsu_export.h"
+
 #include <qtlab/hw/hamamatsu/dcamutils.h>
 
 #define CLASSNAME(x) # x
@@ -17,7 +19,7 @@ public:                                                                     \
         name();                                                             \
     };
 
-class OrcaFlash : public QObject
+class QTLAB_HW_HAMAMATSU_EXPORT OrcaFlash : public QObject
 {
     Q_OBJECT
 
