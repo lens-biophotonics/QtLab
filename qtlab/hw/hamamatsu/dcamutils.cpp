@@ -13,7 +13,15 @@ static QMap<QString, size_t> mapByIDStr;
 
 
 namespace DCAM {
-QString getModelInfo(const size_t index, const int32_t iString)
+
+/**
+ * @brief Get string or error from device.
+ * @param iString
+ * @param index
+ * @return
+ */
+
+QString getDevString(const HDCAM h, const int32_t iString)
 {
     char buf[128];
 #ifdef WITH_HARDWARE
@@ -23,7 +31,7 @@ QString getModelInfo(const size_t index, const int32_t iString)
     devString.text = buf;
     devString.textbytes = 128;
     // can be called without handle from dcamdev_open, using device index instead
-    dcamdev_getstring((HDCAM)index, &devString);
+    dcamdev_getstring(h, &devString);
 #else
     Q_UNUSED(index)
     Q_UNUSED(iString)
@@ -53,9 +61,14 @@ size_t getCameraIndex(const QString idStr)
  * @return
  */
 
-QString errString(uint err)
+QString errString(DCAMERR err)
 {
+#ifdef WITH_HARDWARE
+    return getDevString(0, err);
+#else
+    Q_UNREACHABLE();
     return QString("Error 0x%1").arg((uint)err, 0, 16);
+#endif
 }
 
 int init_dcam()
@@ -67,9 +80,8 @@ int init_dcam()
     memset (&param, 0, sizeof(param));
 
     param.size = sizeof(param);
-    int32 ret = dcamapi_init(&param);
+    DCAMERR ret = dcamapi_init(&param);
     ok = ret == DCAMERR_SUCCESS;
-    nCamera = param.iDeviceCount;
 
     if (!ok) {
         QString errMsg("Cannot initialize dcam. ");
@@ -77,20 +89,23 @@ int init_dcam()
         throw std::runtime_error(errMsg.toStdString());
     }
 
+    nCamera = param.iDeviceCount;
+
     if (nCamera == 0) {
         QString errMsg = "No cameras found";
         logger->critical(errMsg);
         throw std::runtime_error(errMsg.toStdString());
     }
     logger->info(QString("Found %1 cameras").arg(nCamera));
-    for (int i = 0; i < nCamera; ++i) {
+    for (int32_t i = 0; i < nCamera; ++i) {
         ModelInfo *mi = new ModelInfo();
-        mi->vendor = getModelInfo(i, DCAM_IDSTR_VENDOR);
-        mi->model = getModelInfo(i, DCAM_IDSTR_MODEL);
-        mi->bus = getModelInfo(i, DCAM_IDSTR_BUS);
-        mi->cameraID = getModelInfo(i, DCAM_IDSTR_CAMERAID);
-        mi->cameraVersion = getModelInfo(i, DCAM_IDSTR_CAMERAVERSION);
-        mi->driverVersion = getModelInfo(i, DCAM_IDSTR_DRIVERVERSION);
+        HDCAM h = (HDCAM)i;
+        mi->vendor = getDevString(h, DCAM_IDSTR_VENDOR);
+        mi->model = getDevString(h, DCAM_IDSTR_MODEL);
+        mi->bus = getDevString(h, DCAM_IDSTR_BUS);
+        mi->cameraID = getDevString(h, DCAM_IDSTR_CAMERAID);
+        mi->cameraVersion = getDevString(h, DCAM_IDSTR_CAMERAVERSION);
+        mi->driverVersion = getDevString(h, DCAM_IDSTR_DRIVERVERSION);
         logger->info(QString("Camera #%1 ").arg(i)
                      + mi->vendor + " "
                      + mi->model + " "
