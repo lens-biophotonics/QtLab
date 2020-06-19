@@ -174,7 +174,7 @@ private:
 
     void setupStateMachine();
 
-    void throw400(const DCAM::DCAMERR err);
+    void throwError(const DCAM::DCAMERR err);
 };
 
 #endif // ORCAFLASH_H
