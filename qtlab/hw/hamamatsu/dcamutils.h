@@ -3,10 +3,6 @@
 
 #include <QString>
 
-#ifndef DCAM_VERSION
-#define DCAM_VERSION 400
-#endif
-
 namespace DCAM {
 #include <dcamapi4.h>
 #include <dcamprop.h>
