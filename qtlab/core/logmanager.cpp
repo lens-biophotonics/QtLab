@@ -13,6 +13,18 @@ LogManager::~LogManager()
     qDeleteAll(logMap);
 }
 
+/**
+ * @brief Re-emit newLogMessages() so that the receiving slot can grab messages.
+ *
+ * You need to call this function to grab messages that were logged before the receiving slot was
+ * connected.
+ */
+
+void LogManager::flushMessages()
+{
+    emit newLogMessages();
+}
+
 Logger *LogManager::getLogger(QString name)
 {
     Logger *logger;
@@ -45,7 +57,7 @@ void LogManager::appendMessage(Logger::Message msg)
     if (signalEmitted)
         return;
     signalEmitted = true;
-    emit newLogMessages();
+    flushMessages();
 }
 
 LogManager &logManager()

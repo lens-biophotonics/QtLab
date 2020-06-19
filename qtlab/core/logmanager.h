@@ -23,6 +23,7 @@ public:
 
     Logger *getLogger(QString name);
     QList<Logger::Message> getMessages();
+    void flushMessages();
 
 signals:
     void newLogMessages();
