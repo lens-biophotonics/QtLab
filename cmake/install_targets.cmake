@@ -28,3 +28,18 @@ target_include_directories(${TARGETNAME}
         $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/${CMAKE_INSTALL_INCLUDEDIR}>
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}>
 )
+
+if(${${TARGETNAME}_GEN_EXPORT_HEADER})
+    include(GenerateExportHeader)
+    generate_export_header(${TARGETNAME})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${TARGETNAME}_export.h
+            DESTINATION
+                ${CMAKE_INSTALL_INCLUDEDIR}/${HEADER_PREFIX}
+            COMPONENT
+                devel
+    )
+    target_include_directories(${TARGETNAME}
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    )
+endif()

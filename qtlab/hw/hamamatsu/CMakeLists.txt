@@ -43,4 +43,5 @@ else()
             "Library ${TARGETNAME} will be built in demo mode.")
 endif()
 
+set(${TARGETNAME}_GEN_EXPORT_HEADER TRUE)
 include(install_targets)
