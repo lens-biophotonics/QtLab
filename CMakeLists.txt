@@ -35,6 +35,7 @@ option(BUILD_WIDGETS "Build widgets" ON)
 option(QTLAB_DEMO "Demo mode" OFF)
 
 add_subdirectory(qtlab/core)
+add_subdirectory(qtlab/io)
 add_subdirectory(qtlab/hw/hamamatsu)
 add_subdirectory(qtlab/hw/ni)
 add_subdirectory(qtlab/hw/pi)

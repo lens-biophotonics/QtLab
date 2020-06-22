@@ -6,7 +6,7 @@ find_dependency(Qt5 5.8 REQUIRED COMPONENTS Core)
 
 set(QtLab_INCLUDE_DIR @CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_INCLUDEDIR@)
 
-set(_supported_components Core Hamamatsu NI PI Serial Widgets)
+set(_supported_components Core IO Hamamatsu NI PI Serial Widgets)
 
 foreach(_comp ${_supported_components})
   if (";${QtLab_FIND_COMPONENTS};" MATCHES ${_comp})
