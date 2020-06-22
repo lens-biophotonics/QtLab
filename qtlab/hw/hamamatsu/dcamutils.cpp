@@ -24,17 +24,18 @@ namespace DCAM {
 QString getDevString(const HDCAM h, const int32_t iString)
 {
     char buf[128];
-#ifdef WITH_HARDWARE
     DCAMDEV_STRING devString;
     devString.size = sizeof(DCAMDEV_STRING);
     devString.iString = iString;
     devString.text = buf;
     devString.textbytes = 128;
+
+#ifdef QTLAB_DCAM_DEMO
+    Q_UNUSED(h)
+    Q_UNUSED(iString)
+#else
     // can be called without handle from dcamdev_open, using device index instead
     dcamdev_getstring(h, &devString);
-#else
-    Q_UNUSED(index)
-    Q_UNUSED(iString)
 #endif
     return QString(buf);
 }
@@ -63,18 +64,21 @@ size_t getCameraIndex(const QString idStr)
 
 QString errString(DCAMERR err)
 {
-#ifdef WITH_HARDWARE
-    return getDevString(0, err);
-#else
+#ifdef QTLAB_DCAM_DEMO
     Q_UNREACHABLE();
     return QString("Error 0x%1").arg((uint)err, 0, 16);
+#else
+    return getDevString(0, err);
 #endif
 }
 
 int init_dcam()
 {
+#ifdef QTLAB_DCAM_DEMO
+    return 8;
+#endif
+
     int nCamera;
-#ifdef WITH_HARDWARE
     bool ok = false;
     DCAMAPI_INIT param;
     memset (&param, 0, sizeof(param));
@@ -114,22 +118,21 @@ int init_dcam()
         map.insert(i, mi);
         mapByIDStr.insert(mi->cameraID, i);
     }
-#else
-    nCamera = 8;
-#endif
     return nCamera;
 }
 
 void uninit_dcam()
 {
-#ifdef WITH_HARDWARE
+#ifndef QTLAB_DCAM_DEMO
     if (dcamapi_uninit() != DCAMERR_SUCCESS)
+#else
+    if (false)
+#endif
     {
         QString errMsg = "Cannot uninitialize dcam";
         logger->critical(errMsg);
         throw std::runtime_error(errMsg.toStdString());
     }
-#endif
     qDeleteAll(map);
     map.clear();
     mapByIDStr.clear();

@@ -5,7 +5,7 @@
 #include <qtlab/core/logger.h>
 
 #define FUNCNAME(x) # x
-#ifdef WITH_HARDWARE
+#ifndef QTLAB_DCAM_DEMO
 
 #define CALL_THROW(functionCall)                                            \
     {                                                                       \
@@ -166,7 +166,7 @@ int32_t OrcaFlash::nFramesInBuffer() const
 
 double OrcaFlash::setGetPropertyValue(const _DCAMIDPROP property, const double value)
 {
-#ifndef WITH_HARDWARE
+#ifdef QTLAB_DCAM_DEMO
     Q_UNUSED(property)
 #endif
     double temp = value;
@@ -176,7 +176,7 @@ double OrcaFlash::setGetPropertyValue(const _DCAMIDPROP property, const double v
 
 double OrcaFlash::getPropertyValue(const _DCAMIDPROP property)
 {
-#ifndef WITH_HARDWARE
+#ifdef QTLAB_DCAM_DEMO
     Q_UNUSED(property)
 #endif
     double ret = 0;
@@ -186,19 +186,19 @@ double OrcaFlash::getPropertyValue(const _DCAMIDPROP property)
 
 void OrcaFlash::setPropertyValue(const _DCAMIDPROP property, const double value)
 {
-    CALL_THROW(dcamprop_setvalue(h, static_cast<int32>(property), value));
-#ifndef WITH_HARDWARE
+#ifdef QTLAB_DCAM_DEMO
     Q_UNUSED(property)
     Q_UNUSED(value)
 #endif
+    CALL_THROW(dcamprop_setvalue(h, static_cast<int32>(property), value));
 }
 
 double OrcaFlash::getLineInterval()
 {
-#ifdef WITH_HARDWARE
-    return getPropertyValue(DCAM_IDPROP_INTERNAL_LINEINTERVAL);
-#else
+#ifdef QTLAB_DCAM_DEMO
     return 0.01;
+#else
+    return getPropertyValue(DCAM_IDPROP_INTERNAL_LINEINTERVAL);
 #endif
 }
 
@@ -245,7 +245,7 @@ void OrcaFlash::copyFrame(void * const buf, const size_t n,
                           const int32_t frame, int32_t *frameStamp,
                           DCAM_TIMESTAMP *timestamp)
 {
-#ifndef WITH_HARDWARE
+#ifdef QTLAB_DCAM_DEMO
     Q_UNUSED(frame)
     Q_UNUSED(frameStamp)
     Q_UNUSED(timestamp)
@@ -310,10 +310,10 @@ void OrcaFlash::lockFrame(const int32_t frame, void **buf, int32_t *frameStamp,
 
     *buf = dcamframe.buf;
     if (frameStamp != nullptr) {
-#ifdef WITH_HARDWARE
-        *frameStamp = dcamframe.framestamp;
-#else
+#ifdef QTLAB_DCAM_DEMO
         *frameStamp = frame;
+#else
+        *frameStamp = dcamframe.framestamp;
 #endif
     }
     if (timestamp != nullptr) {
@@ -323,7 +323,7 @@ void OrcaFlash::lockFrame(const int32_t frame, void **buf, int32_t *frameStamp,
 
 void OrcaFlash::lockFrame(DCAMBUF_FRAME *dcambufFrame)
 {
-#ifndef WITH_HARDWARE
+#ifdef QTLAB_DCAM_DEMO
     Q_UNUSED(dcambufFrame)
 #endif
     CALL_THROW(dcambuf_lockframe(h, dcambufFrame));
@@ -379,10 +379,11 @@ void OrcaFlash::cap_stop()
 
 double OrcaFlash::getExposureTime()
 {
-#ifndef WITH_HARDWARE
+#ifdef QTLAB_DCAM_DEMO
     exposureTime = 0.1;
-#endif
+#else
     exposureTime = getPropertyValue(DCAM_IDPROP_EXPOSURETIME);
+#endif
     return exposureTime;
 }
 

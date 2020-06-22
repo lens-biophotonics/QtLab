@@ -1,7 +1,11 @@
+include(CMakeDependentOption)
+
 find_package(DCAMAPI)
 set(EXPORT_NAME Hamamatsu)
 
 set(TARGETNAME qtlab-hw-hamamatsu)
+
+CMAKE_DEPENDENT_OPTION(QTLAB_DCAM_DEMO "DCAM DEMO" ON "QTLAB_DEMO" OFF)
 
 if(NOT DCAMAPI_INCLUDE_DIR)
     message("Could not find ${DCAMAPI_LIBNAME_STR} headers."
@@ -41,6 +45,10 @@ if(DCAMAPI_FOUND)
 else()
     message("Could not find ${DCAMAPI_LIBNAME_STR}. "
             "Library ${TARGETNAME} will be built in demo mode.")
+endif()
+
+if(${QTLAB_DCAM_DEMO} OR NOT ${DCAMAPI_FOUND})
+    target_compile_definitions(${TARGETNAME} PUBLIC QTLAB_DCAM_DEMO)
 endif()
 
 set(${TARGETNAME}_GEN_EXPORT_HEADER TRUE)
