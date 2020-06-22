@@ -97,7 +97,7 @@ int init_dcam()
         throw std::runtime_error(errMsg.toStdString());
     }
     logger->info(QString("Found %1 cameras").arg(nCamera));
-    for (int32_t i = 0; i < nCamera; ++i) {
+    for (int64_t i = 0; i < nCamera; ++i) {
         ModelInfo *mi = new ModelInfo();
         HDCAM h = (HDCAM)i;
         mi->vendor = getDevString(h, DCAM_IDSTR_VENDOR);
