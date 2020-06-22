@@ -16,7 +16,6 @@ set(SOURCE_FILES
 )
 
 add_library(${TARGETNAME} SHARED ${SOURCE_FILES})
-set_target_properties(${TARGETNAME} PROPERTIES EXPORT_NAME ${EXPORT_NAME})
 target_include_directories(${TARGETNAME}
     PUBLIC
         ${Qwt_INCLUDE_DIR}

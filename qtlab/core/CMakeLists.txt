@@ -12,7 +12,6 @@ set(HEADERS
 )
 
 add_library(${TARGETNAME} SHARED ${SOURCE_FILES})
-set_target_properties(${TARGETNAME} PROPERTIES EXPORT_NAME ${EXPORT_NAME})
 
 target_link_libraries(${TARGETNAME} PUBLIC
     Qt5::Core

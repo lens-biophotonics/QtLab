@@ -21,7 +21,6 @@ set(HEADERS
 )
 
 add_library(${TARGETNAME} SHARED ${SOURCEFILES})
-set_target_properties(${TARGETNAME} PROPERTIES EXPORT_NAME ${EXPORT_NAME})
 
 target_link_libraries(${TARGETNAME} PRIVATE
     Qt5::SerialPort

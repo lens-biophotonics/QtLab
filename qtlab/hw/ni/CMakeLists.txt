@@ -21,7 +21,6 @@ set(HEADERS
 )
 
 add_library(${TARGETNAME} SHARED ${SOURCEFILES} ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_wrapper_methods.h)
-set_target_properties(${TARGETNAME} PROPERTIES EXPORT_NAME ${EXPORT_NAME})
 
 target_link_libraries(${TARGETNAME} PUBLIC
     qtlab-core
