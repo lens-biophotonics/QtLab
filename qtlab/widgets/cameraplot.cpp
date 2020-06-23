@@ -1,5 +1,3 @@
-#include <algorithm>
-
 #include <qwt_scale_engine.h>
 #include <qwt_scale_widget.h>
 
@@ -71,11 +69,16 @@ void CameraPlot::_autoscale()
     if (!autoscaleZ || !vec.size())
         return;
 
-    auto result = std::minmax_element(vec.begin(), vec.end());
-
-    min = *(result.first);
-    max = *(result.second);
-
+    max = vec.at(0);
+    max = min;
+    for (const double val : vec) {
+        if (val > max) {
+            max = val;
+        }
+        if (val < min) {
+            min = val;
+        }
+    }
 
     setInterval(Qt::ZAxis, min, max);
 }
