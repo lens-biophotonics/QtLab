@@ -12,7 +12,7 @@ QStringList NI::getDevicesInSystem()
     char buf[2048];
     if (DAQmxFailed(DAQmxGetSysDevNames(buf, 2048))) {
         DAQmxGetExtendedErrorInfo(buf, 2048);
-        logger->error(buf);
+        logger->critical(buf);
         return list;
     }
     list = QString(buf).split(", ");
@@ -33,7 +33,7 @@ static QStringList getList(daqmx_f_ptr myfp)
         QString dev = devIt.next();
         if (DAQmxFailed(myfp(dev.toLatin1(), buf, 2048))) {
             DAQmxGetExtendedErrorInfo(buf, 2048);
-            logger->error(buf);
+            logger->critical(buf);
             return list;
         };
         QStringList cl = QString(buf).split(", ");

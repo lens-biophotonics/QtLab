@@ -2,10 +2,15 @@
 
 #include <qtlab/core/logmanager.h>
 
+/**
+ * @brief The name of the user.
+ * @accessors name(), setName()
+ */
+Q_PROPERTY(bool debugMode READ isDebugModeEnabled WRITE setDebugMode)
+
 LogManager::LogManager()
 {
     signalEmitted = false;
-    qRegisterMetaType<MsgType>("MsgType");
 }
 
 LogManager::~LogManager()
@@ -23,6 +28,16 @@ LogManager::~LogManager()
 void LogManager::flushMessages()
 {
     emit newLogMessages();
+}
+
+bool LogManager::isDebugModeEnabled() const
+{
+    return debugMode;
+}
+
+void LogManager::setDebugModeEnabled(bool enable)
+{
+    debugMode = enable;
 }
 
 Logger *LogManager::getLogger(QString name)
@@ -58,6 +73,28 @@ void LogManager::appendMessage(Logger::Message msg)
         return;
     signalEmitted = true;
     flushMessages();
+
+    if (!debugMode) {
+        return;
+    }
+
+    switch (msg.type) {
+    case QtMsgType::QtDebugMsg:
+        qDebug("%s", msg.msg.toStdString().data());
+        break;
+    case QtMsgType::QtInfoMsg:
+        qInfo("%s", msg.msg.toStdString().data());
+        break;
+    case QtMsgType::QtCriticalMsg:
+        qCritical("%s", msg.msg.toStdString().data());
+        break;
+    case QtMsgType::QtWarningMsg:
+        qWarning("%s", msg.msg.toStdString().data());
+        break;
+    case QtMsgType::QtFatalMsg:
+        qFatal("%s", msg.msg.toStdString().data());
+        break;
+    }
 }
 
 LogManager &logManager()

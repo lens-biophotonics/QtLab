@@ -9,7 +9,7 @@
 #include <qtlab/hw/serial/serialport.h>
 
 #define RUNTIME_ERROR(what) {                                               \
-        logger->error(what);                                                \
+        logger->critical(what);                                                \
         throw std::runtime_error(what);                                     \
 }                                                                           \
 

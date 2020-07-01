@@ -6,7 +6,7 @@ Logger::Logger(QString name) : QObject(nullptr), name(name)
 {
 }
 
-void Logger::_msg(QString str, MsgType type) const
+void Logger::_msg(QString str, QtMsgType type) const
 {
     str.prepend(QString("[%1] ").arg(name));
     struct Message m = {
@@ -16,6 +16,11 @@ void Logger::_msg(QString str, MsgType type) const
     logManager().appendMessage(m);
 }
 
+void Logger::debug(QString msg) const
+{
+    _msg(msg, QtMsgType::QtDebugMsg);
+}
+
 void Logger::info(QString msg) const
 {
     this->_msg(msg);
@@ -23,17 +28,17 @@ void Logger::info(QString msg) const
 
 void Logger::warning(QString msg) const
 {
-    _msg(msg, MSG_WARNING);
-}
-
-void Logger::error(QString errMsg) const
-{
-    _msg(errMsg, MSG_ERROR);
+    _msg(msg, QtMsgType::QtWarningMsg);
 }
 
 void Logger::critical(QString msg) const
 {
-    error(msg);
+    _msg(msg, QtMsgType::QtCriticalMsg);
+}
+
+void Logger::fatal(QString msg) const
+{
+    _msg(msg, QtMsgType::QtFatalMsg);
 }
 
 Logger *getLogger(QString name)

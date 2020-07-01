@@ -42,7 +42,7 @@ void NITask::onError() const
 #ifdef WITH_HARDWARE
     DAQmxGetExtendedErrorInfo(errBuff, ERRBUF_SIZE);
 #endif
-    logger->error(errBuff);
+    logger->critical(errBuff);
     throw std::runtime_error(errBuff);
 }
 

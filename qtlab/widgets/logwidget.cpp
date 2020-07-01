@@ -36,13 +36,26 @@ void LogWidget::logMessages()
             msg.replace(QRegExp("\r"), "");
 
         msg.prepend(timeString);
-        if (message.type == MSG_ERROR) {
-            msg.prepend("<span style='color:red'>");
+        switch (message.type) {
+        case QtMsgType::QtCriticalMsg:
+        case QtMsgType::QtFatalMsg:
+            msg.prepend("<span style='background-color:#ef9a9a'>");
             msg.append("</span>");
-        }
-        else if (message.type == MSG_WARNING) {
-            msg.prepend("<span style='color:orange'>");
+            break;
+
+        case QtMsgType::QtWarningMsg:
+            msg.prepend("<span style='background-color:#ffe082'>");
             msg.append("</span>");
+            break;
+
+        case QtDebugMsg:
+            msg.prepend("<span style='color:blue'>");
+            msg.append("</span>");
+            break;
+
+        case QtInfoMsg:
+        default:
+            break;
         }
 
         msg.append("<br>");

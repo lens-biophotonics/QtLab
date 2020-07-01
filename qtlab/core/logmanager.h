@@ -25,6 +25,9 @@ public:
     QList<Logger::Message> getMessages();
     void flushMessages();
 
+    bool isDebugModeEnabled() const;
+    void setDebugModeEnabled(bool enable);
+
 signals:
     void newLogMessages();
 
@@ -32,6 +35,7 @@ private:
     QMap<QString, Logger *> logMap;
     QList<Logger::Message> messageList;
     bool signalEmitted;
+    bool debugMode = false;
     QMutex mutex;
 
     void appendMessage(Logger::Message msg);

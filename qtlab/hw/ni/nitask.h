@@ -25,7 +25,7 @@
 #define DAQmxErrChk(functionCall) {                                         \
         int ret = functionCall;                                             \
         if (DAQmxFailed(ret)) {                                             \
-            logger->error(QString("Error %1").arg(ret));                    \
+            logger->critical(QString("Error %1").arg(ret));                    \
             onError();                                                      \
         }                                                                   \
         if (!task) {                                                        \
