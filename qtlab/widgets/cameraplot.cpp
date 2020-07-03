@@ -70,12 +70,12 @@ void CameraPlot::_autoscale()
         return;
 
     max = vec.at(0);
-    max = min;
+    min = max;
     for (const double val : vec) {
         if (val > max) {
             max = val;
         }
-        if (val < min) {
+        else if (val < min) {
             min = val;
         }
     }
