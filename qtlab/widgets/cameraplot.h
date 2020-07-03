@@ -21,6 +21,7 @@ public:
     void setData(const QVector<double> &data);
     void setData(const double *data, const size_t size);
     void replot() override;
+    void fillGradient();
 
 public slots:
     void setZAutoscaleEnabled(bool enable);

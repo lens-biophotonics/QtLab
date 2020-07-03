@@ -15,6 +15,10 @@ CameraPlot::CameraPlot(uint nRows, uint nCols, QWidget *parent) : QwtPlot(parent
 {
     setup();
     setPlotSize(nRows, nCols);
+}
+
+void CameraPlot::fillGradient()
+{
     for (int i = 0; i < vec.size(); ++i) {
         vec[i] = i / 64;
     }
@@ -48,7 +52,8 @@ void CameraPlot::setPlotSize(uint nRows, uint nCols)
     data->setInterval(Qt::XAxis, QwtInterval(0, nCols));
     data->setInterval(Qt::YAxis, QwtInterval(0, nRows));
 
-    vec.fill(0, nCols * nRows);
+    vec.resize(nRows * nCols);
+    fillGradient();
 }
 
 void CameraPlot::setData(const QVector<double> &data)
