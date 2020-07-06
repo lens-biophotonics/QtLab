@@ -9,7 +9,6 @@
 
 #include <qwt_slider.h>
 #include <qwt_plot_zoomer.h>
-#include <qwt_plot_marker.h>
 
 #include <qtlab/widgets/aspectratiowidget.h>
 #include <qtlab/widgets/colormaps.h>
@@ -50,6 +49,12 @@ CameraPlot *CameraDisplay::getPlot() const
     return plot;
 }
 
+void CameraDisplay::setPlotSize(QSize size)
+{
+    plot->setPlotSize(size);
+    cursorMarker->setValue(size.width() / 2, size.height() / 2);
+}
+
 QString CameraDisplay::getTitle() const
 {
     return title;
@@ -67,15 +72,15 @@ void CameraDisplay::setupUi()
     menu = new QMenu();
     setContextMenuPolicy(Qt::DefaultContextMenu);
 
-    plot = new CameraPlot(2048, 2048);
+    plot = new CameraPlot(512, 512);
     QwtPlotZoomer *zoomer = new QwtPlotZoomer(plot->canvas());
     zoomer->setRubberBandPen(QColor(Qt::green));
     zoomer->setTrackerPen(QColor(Qt::green));
 
-    QwtPlotMarker *cursorMarker = new QwtPlotMarker();
+    cursorMarker = new QwtPlotMarker();
     cursorMarker->setLineStyle(static_cast<QwtPlotMarker::LineStyle>(QwtPlotMarker::VLine | QwtPlotMarker::HLine));
     cursorMarker->setLinePen(Qt::green);
-    cursorMarker->setValue(1024, 1024);
+    cursorMarker->setValue(256, 256);
     cursorMarker->attach(plot);
     cursorMarker->setVisible(false);
 

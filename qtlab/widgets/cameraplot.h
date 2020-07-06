@@ -17,6 +17,7 @@ public:
 
     void setColorMap(QwtLinearColorMap *value);
     void setPlotSize(uint nRows, uint nCols);
+    void setPlotSize(QSize size);
 
     void setData(const QVector<double> &data);
     void setData(const double *data, const size_t size);

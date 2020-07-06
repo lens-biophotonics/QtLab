@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QMenu>
+#include <qwt_plot_marker.h>
 
 class CameraPlot;
 
@@ -21,6 +22,8 @@ public:
 
     CameraPlot *getPlot() const;
 
+    void setPlotSize(QSize size);
+
 signals:
 
 public slots:
@@ -36,6 +39,8 @@ private:
 
     QString LUTPath;
     QString title;
+
+    QwtPlotMarker *cursorMarker;
 
     void setupUi();
     void setupLUTmenu();

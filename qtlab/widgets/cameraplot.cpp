@@ -56,6 +56,11 @@ void CameraPlot::setPlotSize(uint nRows, uint nCols)
     fillGradient();
 }
 
+void CameraPlot::setPlotSize(QSize size)
+{
+    setPlotSize(size.height(), size.width());
+}
+
 void CameraPlot::setData(const QVector<double> &data)
 {
     vec = data;
