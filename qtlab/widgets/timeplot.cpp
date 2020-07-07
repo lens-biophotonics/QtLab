@@ -210,7 +210,6 @@ void TimePlot::appendPoints(const QVector<double> &y)
 {
     if (!y.size())
         return;
-    double sr = static_cast<TimeScaleDraw*>(scaleDraw)->rate;
     if ((size_t)yData->size() + y.size() > nResSamples) {
         size_t _free = nResSamples - yData->size();
         size_t diff = y.size() - _free;
