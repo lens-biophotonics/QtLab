@@ -97,6 +97,12 @@ public:
         VoltUnits_FromCustomScale = DAQmx_Val_FromCustomScale,
     };
 
+    enum FreqUnits {
+        FreqUnits_Hz = DAQmx_Val_Hz,
+        FreqUnits_Ticks = DAQmx_Val_Ticks,
+        FreqUnits_FromCustomScale = DAQmx_Val_FromCustomScale,
+    };
+
     enum TerminalConfig {
         TermConf_Default = DAQmx_Val_Cfg_Default,
         TermConf_RSE = DAQmx_Val_RSE,
