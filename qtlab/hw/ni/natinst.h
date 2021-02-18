@@ -17,6 +17,8 @@ QStringList getDIPorts();
 QStringList getDOLines();
 QStringList getDOPorts();
 QStringList getTerminals();
+
+QString PFI2Line(QString term);
 }
 
 #endif // NATINST_H

@@ -69,3 +69,27 @@ DEF_NI_GET_FUNCTION(getDIPorts, DAQmxGetDevDIPorts)
 DEF_NI_GET_FUNCTION(getDOLines, DAQmxGetDevDOLines)
 DEF_NI_GET_FUNCTION(getDOPorts, DAQmxGetDevDOPorts)
 DEF_NI_GET_FUNCTION(getTerminals, DAQmxGetDevTerminals)
+
+/**
+ * @brief Transform a PFI terminal to a port/line string.
+ * @param term
+ * @return
+ *
+ * Example: /Dev1/PFI15 -> Dev1/port2/line7
+ *
+ * An null QString is returned in case of errors. The returned string might not be correct for some
+ * boards.
+ */
+
+QString NI::PFI2Line(QString term)
+{
+    int idx = term.indexOf("PFI");
+    if (idx == -1 || !term.startsWith("/")) return QString();
+    bool ok = false;
+    int pfi = term.mid(idx + 3).toInt(&ok);
+    if (!ok) return QString();
+    int port = pfi / 8 + 1;
+    int line = pfi % 8;
+    term.truncate(idx);
+    return term.mid(1).append(QString("port%1/line%2").arg(port).arg(line));
+}
