@@ -1,5 +1,5 @@
-#ifndef AOTF_H
-#define AOTF_H
+#ifndef AA_MPDSnCXX_H
+#define AA_MPDSnCXX_H
 
 #define AOTF_SWITCH_TIME 1
 #define AOTF_SERIAL_BAUD_RATE 57600
@@ -75,4 +75,4 @@ private:
     float castStringToFloatChkError(QString str);
 };
 
-#endif // AOTF_H
+#endif // AA_MPDSnCXX_H

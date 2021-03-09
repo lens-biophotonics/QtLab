@@ -16,16 +16,17 @@ set(SOURCE_FILES
     serialdevice.cpp
 
     cobolt.cpp
-
     filterwheel.cpp
+    AA_MPDSnCxx.cpp
 )
 
 set(HEADERS
     serialport.h
     serialdevice.h
-    cobolt.h
 
+    cobolt.h
     filterwheel.h
+    AA_MPDSnCxx.h
 )
 
 add_library(${TARGETNAME} SHARED ${SOURCE_FILES})
