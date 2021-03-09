@@ -90,12 +90,12 @@ QString SerialPort::receiveMsg()
     if (loggingEnabled) {
         logger->info("<<< " + msg);
     }
-    return msg.replace(lineEndTermination, "");
+    return msg.replace(rxLineEndTermination, "");
 }
 
 void SerialPort::sendMsg(QString msg)
 {
-    msg.append(lineEndTermination);
+    msg.append(txLineEndTermination);
     if (!isOpen()) {
         RUNTIME_ERROR("Device not open")
     }
@@ -108,27 +108,33 @@ void SerialPort::sendMsg(QString msg)
     }
 }
 
-QString SerialPort::receive()
+QString SerialPort::receive(QString until)
 {
     QString receivedLines;
-    do {
-        if (bytesAvailable() <= 0) {
-            if (!waitForReadyRead(_serialTimeout)) {
-                break;
-            }
-        }
+    while (true) {
+        waitForReadyRead(_serialTimeout);
+
         QString msg = receiveMsg();
         receivedLines.append(msg);
+
+        if (bytesAvailable() <= 0) {
+            if (!until.isNull()) {
+                if (!receivedLines.endsWith(until)) {
+                    continue;
+                }
+            }
+
+            break;
+        }
     }
-    while (bytesAvailable());
 
     return receivedLines;
 }
 
-QString SerialPort::transceive(QString command)
+QString SerialPort::transceive(QString command, QString until)
 {
     sendMsg(command);
-    return receive();
+    return receive(until);
 }
 
 void SerialPort::close()
@@ -199,14 +205,27 @@ void SerialPort::setSerialNumber(const QString &serialNumber)
     _serialNumber = serialNumber;
 }
 
-QString SerialPort::getLineEndTermination()
+QStringList SerialPort::getLineEndTermination()
 {
-    return lineEndTermination;
+    QStringList sl;
+    sl << txLineEndTermination << rxLineEndTermination;
+    return sl;
 }
 
-void SerialPort::setLineEndTermination(const QString &termination)
+void SerialPort::setLineEndTermination(const QString &tx, const QString &rx)
 {
-    lineEndTermination = termination;
+    txLineEndTermination = tx;
+    rxLineEndTermination = rx;
+}
+
+QString SerialPort::getTxLineEndTermination()
+{
+    return txLineEndTermination;
+}
+
+QString SerialPort::getRxLineEndTermination()
+{
+    return rxLineEndTermination;
 }
 
 void SerialPort::setLoggingEnabled(bool enable)

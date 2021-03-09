@@ -13,8 +13,8 @@ public:
     void close();
 
     void sendMsg(QString msg);
-    QString receive();
-    QString transceive(QString command);
+    QString receive(QString until = QString());
+    virtual QString transceive(QString command, QString until = QString());
     double getDouble(const QString &cmd);
     int getInt(const QString &cmd);
     QString getSerialNumber();
@@ -23,8 +23,13 @@ public:
 
     void setSerialNumber(const QString &serialNumber);
     void setTimeout(int ms);
-    QString getLineEndTermination();
-    void setLineEndTermination(const QString &termination);
+
+    QStringList getLineEndTermination();
+    void setLineEndTermination(const QString &tx, const QString &rx = QString());
+
+    QString getTxLineEndTermination();
+    QString getRxLineEndTermination();
+
     void setLoggingEnabled(bool enable);
 
     QState *getConnectedState() const;
@@ -42,7 +47,8 @@ protected:
 
 private:
     QString _serialNumber;
-    QString lineEndTermination;
+    QString txLineEndTermination;
+    QString rxLineEndTermination;
     bool loggingEnabled = false;
     int _serialTimeout;
 

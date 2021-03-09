@@ -9,7 +9,7 @@
 Cobolt::Cobolt(QObject *parent) : QObject(parent)
 {
     serial = new SerialPort(this);
-    serial->setLineEndTermination("\r\n");
+    serial->setLineEndTermination("\r\n", "\r\n");
 }
 
 Cobolt::~Cobolt()

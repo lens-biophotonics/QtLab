@@ -10,7 +10,7 @@
 FilterWheel::FilterWheel(QObject *parent) : QObject(parent)
 {
     serial = new SerialPort(this);
-    serial->setLineEndTermination("\r");
+    serial->setLineEndTermination("\r", "\r");
     positionCount = -1;
     setMotionTime(FILTERWHEEL_MOTION_TIME); // wait in ms between reaching any position
 }
