@@ -1,7 +1,6 @@
 #include <stdexcept>
 
 #include <QSerialPortInfo>
-#include <QTimer>
 #include <QStateMachine>
 
 #include <qtlab/core/logger.h>
@@ -9,7 +8,7 @@
 #include <qtlab/hw/serial/serialport.h>
 
 #define RUNTIME_ERROR(what) {                                               \
-        logger->critical(what);                                                \
+        logger->critical(what);                                             \
         throw std::runtime_error(what);                                     \
 }                                                                           \
 
@@ -86,12 +85,6 @@ void SerialPort::setupStateMachine()
 
 QString SerialPort::receiveMsg()
 {
-    qint64 numBytes;
-
-    numBytes = bytesAvailable();
-    if (numBytes > 1024)
-        numBytes = 1024;
-
     QString msg = readAll();
 
     if (loggingEnabled) {
