@@ -8,13 +8,13 @@
 
 class SerialPort;
 
-class AcoustoOpticFilter : public QObject
+class AA_MPDSnCxx : public QObject
 {
     Q_OBJECT
 
 public:
-    AcoustoOpticFilter(QObject *parent = nullptr);
-    virtual ~AcoustoOpticFilter();
+    AA_MPDSnCxx(QObject *parent = nullptr);
+    virtual ~AA_MPDSnCxx();
 
     SerialPort *getSerialPort() const;
 

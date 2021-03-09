@@ -6,7 +6,7 @@
 #include "serialport.h"
 
 
-AcoustoOpticFilter::AcoustoOpticFilter(QObject *parent) : QObject(parent)
+AA_MPDSnCxx::AA_MPDSnCxx(QObject *parent) : QObject(parent)
 {
     serial = new SerialPort(this);
     serial->setLineEndTermination("\r"); // carriage return
@@ -15,12 +15,12 @@ AcoustoOpticFilter::AcoustoOpticFilter(QObject *parent) : QObject(parent)
     setMotionTime(AOTF_SWITCH_TIME); // wait in ms between reaching any position
 }
 
-AcoustoOpticFilter::~AcoustoOpticFilter()
+AA_MPDSnCxx::~AA_MPDSnCxx()
 {
     close();
 }
 
-void AcoustoOpticFilter::open()
+void AA_MPDSnCxx::open()
 {
     bool ret = serial->open();
     if (!ret)
@@ -32,18 +32,18 @@ void AcoustoOpticFilter::open()
     }
 }
 
-void AcoustoOpticFilter::close()
+void AA_MPDSnCxx::close()
 {
     serial->close();
     emit disconnected();
 }
 
-SerialPort *AcoustoOpticFilter::getSerialPort() const
+SerialPort *AA_MPDSnCxx::getSerialPort() const
 {
     return serial;
 }
 
-QString AcoustoOpticFilter::getID()
+QString AA_MPDSnCxx::getID()
 {
     QString reply = transceiveChkSyntaxError("q");
     reply = reply.remove("\n");
@@ -51,7 +51,7 @@ QString AcoustoOpticFilter::getID()
     return reply;
 }
 
-QStringList AcoustoOpticFilter::getStatus()
+QStringList AA_MPDSnCxx::getStatus()
 {
     QStringList list;
     QString reply = transceiveChkSyntaxError("S");
@@ -60,89 +60,89 @@ QStringList AcoustoOpticFilter::getStatus()
     return list;
 }
 
-QString AcoustoOpticFilter::getChannelInfo()
+QString AA_MPDSnCxx::getChannelInfo()
 {
     QStringList reply = getStatus(); // TODO get channel info from here
     foreach(QString item, reply)
-         qDebug() << "List items = " << item;
+    qDebug() << "List items = " << item;
     return reply.at(1);
 }
 
-QString AcoustoOpticFilter::getDeviceInfo()
+QString AA_MPDSnCxx::getDeviceInfo()
 {
     QString reply = transceiveChkSyntaxError("S"); // TODO get profile info from here
     return reply;
 }
 
-int AcoustoOpticFilter::getChannel()
+int AA_MPDSnCxx::getChannel()
 {
     QString reply = transceiveChkSyntaxError("X");
     reply = reply.remove("Line number>").trimmed();
     return castStringToIntChkError(reply);
 }
 
-void AcoustoOpticFilter::setChannel(int n)
+void AA_MPDSnCxx::setChannel(int n)
 {
     if (n < 1 || n > 8) // TODO learn number of channels
         qDebug() << QString("ErrorAcoustoOpticFilter: requested channel %1 out of range [1,8]").arg(n);
     else {
         QString reply = transceiveChkSyntaxError(QString("X%1").arg(n));
         reply = reply.remove("Line number>").trimmed();
-        if (castStringToIntChkError(reply.at(2))!=n)
+        if (castStringToIntChkError(reply.at(2)) != n)
             qDebug() << QString("ErrorAcoustoOpticFilter: requested channel %1 not set").arg(n);
     }
 }
 
-float AcoustoOpticFilter::getFrequency()
+float AA_MPDSnCxx::getFrequency()
 {
     QString reply = transceiveChkSyntaxError("F"); // FIXME sets frequency to default value, use status output
     reply = reply.remove("Frequency>").trimmed();
     return castStringToFloatChkError(reply);
 }
 
-void AcoustoOpticFilter::setFrequency(float freq)
+void AA_MPDSnCxx::setFrequency(float freq)
 {
-    if (freq<74.0 || freq > 158.0) // TODO learn edge frequencies
+    if (freq < 74.0 || freq > 158.0) // TODO learn edge frequencies
         qDebug() << QString("ErrorAcoustoOpticFilter: requested frequency %1 out of range [74.0,158.0]").arg(freq);
     else {
         QString reply = transceiveChkSyntaxError(QString("F%1").arg(freq));
         reply = reply.remove("Frequency>").trimmed();
         QStringList list = reply.split(" ");
-        if (castStringToFloatChkError(list.at(1))!=freq)
+        if (castStringToFloatChkError(list.at(1)) != freq)
             qDebug() << QString("ErrorAcoustoOpticFilter: requested frequency %1 not set").arg(freq);
     }
 }
 
 
-int AcoustoOpticFilter::getPower()
+int AA_MPDSnCxx::getPower()
 {
     QString reply = transceiveChkSyntaxError("P"); // FIXME sets power to default value, use status output
     reply = reply.remove("Power>").trimmed();
     return castStringToIntChkError(reply);
 }
 
-void AcoustoOpticFilter::setPower(int amp)
+void AA_MPDSnCxx::setPower(int amp)
 {
-    if (amp<0 || amp > 63) // TODO learn max power
+    if (amp < 0 || amp > 63) // TODO learn max power
         qDebug() << QString("ErrorAcoustoOpticFilter: requested power %1 out of range [0,63]").arg(amp);
     else {
         QString reply = transceiveChkSyntaxError(QString("P%1").arg(amp));
         reply = reply.remove("Power>").trimmed();
         QStringList list = reply.split(" ");
-        if (castStringToIntChkError(list.at(1))!=amp)
+        if (castStringToIntChkError(list.at(1)) != amp)
             qDebug() << QString("ErrorAcoustoOpticFilter: requested power %1 not set").arg(amp);
     }
 }
 
 
-float AcoustoOpticFilter::getPowerDBm()
+float AA_MPDSnCxx::getPowerDBm()
 {
     QString reply = transceiveChkSyntaxError("D"); // FIXME sets power to default value, use status output
     reply = reply.remove("Power (dBm)>").trimmed();
     return castStringToFloatChkError(reply);
 }
 
-void AcoustoOpticFilter::setPowerDBm(float dBm)
+void AA_MPDSnCxx::setPowerDBm(float dBm)
 {
     if (dBm > 22.5) // TODO learn edge powers
         qDebug() << QString("ErrorAcoustoOpticFilter: requested power %1 out of range [,22.5]").arg(dBm);
@@ -150,7 +150,7 @@ void AcoustoOpticFilter::setPowerDBm(float dBm)
         QString reply = transceiveChkSyntaxError(QString("D%1").arg(dBm));
         reply = reply.remove("Power (dBm)>").trimmed();
         QStringList list = reply.split(" ");
-        if (castStringToFloatChkError(list.at(1))!=dBm)
+        if (castStringToFloatChkError(list.at(1)) != dBm)
             qDebug() << QString("ErrorAcoustoOpticFilter: requested power%1 not set").arg(dBm);
     }
 }
@@ -186,12 +186,12 @@ void AcoustoOpticFilter::setPowerDBm(float dBm)
 //    positionNumber = count;
 //}
 
-int AcoustoOpticFilter::getMotionTime() const
+int AA_MPDSnCxx::getMotionTime() const
 {
     return motionTime; // ms
 }
 
-void AcoustoOpticFilter::setMotionTime(const int timewait)
+void AA_MPDSnCxx::setMotionTime(const int timewait)
 {
     motionTime = timewait; // ms
 }
@@ -202,12 +202,12 @@ void AcoustoOpticFilter::setMotionTime(const int timewait)
 //    //transceiveChkSyntaxError(QString("M")); // Hard reset by software
 //}
 
-void AcoustoOpticFilter::reset()
+void AA_MPDSnCxx::reset()
 {
     transceiveChkSyntaxError(QString("M")); // Hard reset by software
 }
 
-void AcoustoOpticFilter::saveSettings() // save current settings as default on device power-up
+void AA_MPDSnCxx::saveSettings() // save current settings as default on device power-up
 {
     transceiveChkSyntaxError(QString("E"));
 }
@@ -225,12 +225,12 @@ void AcoustoOpticFilter::saveSettings() // save current settings as default on d
 //    transceiveChkSyntaxError(QString("pcount=%1").arg(n));
 //}
 
-QString AcoustoOpticFilter::getVerboseName() const
+QString AA_MPDSnCxx::getVerboseName() const
 {
     return verboseName;
 }
 
-void AcoustoOpticFilter::setVerboseName(const QString &value)
+void AA_MPDSnCxx::setVerboseName(const QString &value)
 {
     verboseName = value;
 }
@@ -254,7 +254,7 @@ void AcoustoOpticFilter::setVerboseName(const QString &value)
 //    }
 //}
 
-QString AcoustoOpticFilter::transceiveChkSyntaxError(QString cmd)
+QString AA_MPDSnCxx::transceiveChkSyntaxError(QString cmd)
 {
     serial->sendMsg(cmd);
     //removeEcho(cmd);
@@ -271,7 +271,7 @@ QString AcoustoOpticFilter::transceiveChkSyntaxError(QString cmd)
     return reply;
 }
 
-void AcoustoOpticFilter::removeEcho(QString cmd)
+void AA_MPDSnCxx::removeEcho(QString cmd)
 {
     QString cmdecho = QString();
     do {
@@ -281,17 +281,18 @@ void AcoustoOpticFilter::removeEcho(QString cmd)
     } while (!cmdecho.contains(cmd, Qt::CaseSensitive));
 }
 
-QString AcoustoOpticFilter::removeTrailingWhitespace(const QString& str) {
-  int n = str.size() - 1;
-  for (; n >= 0; --n) {
-    if (!str.at(n).isSpace()) {
-      return str.left(n + 1);
+QString AA_MPDSnCxx::removeTrailingWhitespace(const QString& str)
+{
+    int n = str.size() - 1;
+    for (; n >= 0; --n) {
+        if (!str.at(n).isSpace()) {
+            return str.left(n + 1);
+        }
     }
-  }
-  return "";
+    return "";
 }
 
-int AcoustoOpticFilter::castStringToIntChkError(QString str)
+int AA_MPDSnCxx::castStringToIntChkError(QString str)
 {
     bool ok;
     int integer = str.toInt(&ok);
@@ -301,7 +302,7 @@ int AcoustoOpticFilter::castStringToIntChkError(QString str)
     return integer;
 }
 
-float AcoustoOpticFilter::castStringToFloatChkError(QString str)
+float AA_MPDSnCxx::castStringToFloatChkError(QString str)
 {
     bool ok;
     float flt = str.toFloat(&ok);
