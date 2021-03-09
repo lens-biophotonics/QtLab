@@ -32,45 +32,21 @@ public:
     float getPowerDBm();
     void setPowerDBm(float dBm);
 
-
-//    int getPosition();
-//    int getPositionCount();
-//    int getPositionNumber() const;
-    int getMotionTime() const;
-//    QStringList getFilterListName() const;
-//    QString getFilterName(int n);
-//    void setPositionNumber(const int count);
-
-    QString getVerboseName() const;
-    void setVerboseName(const QString &value);
-
 public slots:
     void open();
     void close();
     void reset();
 
-    //void restoreDefaultSettings();
     void saveSettings();
-    //QString setPosition(int n);
-    //void setPositionCount(int n);
 
 signals:
     void connected();
     void disconnected();
-    //QStringList getFilterListName() const;
-    //QString getFilterName(int n);
-    //void setPositionNumber(const int count);
 private:
     SerialPort *serial = nullptr;
-    QString verboseName;
-    int positionNumber;
-    int motionTime; // ms
 
-    void setMotionTime(const int timewait);
     QString transceiveChkOK(QString cmd);
     QString transceiveChkSyntaxError(QString cmd);
-    void removeEcho(QString cmd);
-    QString removeTrailingWhitespace(const QString& str);
     int castStringToIntChkError(QString str);
     float castStringToFloatChkError(QString str);
 };

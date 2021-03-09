@@ -1,4 +1,3 @@
-#include <QRegularExpression>
 #include <QStringList>
 #include <QtDebug>
 
@@ -12,7 +11,6 @@ AA_MPDSnCxx::AA_MPDSnCxx(QObject *parent) : QObject(parent)
     serial->setLineEndTermination("\r"); // carriage return
     serial->setBaudRate(AOTF_SERIAL_BAUD_RATE);
     serial->setTimeout(1000);
-    setMotionTime(AOTF_SWITCH_TIME); // wait in ms between reaching any position
 }
 
 AA_MPDSnCxx::~AA_MPDSnCxx()
@@ -27,7 +25,6 @@ void AA_MPDSnCxx::open()
         throw std::runtime_error(QString("Cannot connect to AOTF with serial number " + serial->getSerialNumber()).toLatin1());
     else {
         serial->readAll();  // empty input buffer
-        //setPositionNumber(getPositionCount());
         emit connected();
     }
 }
@@ -47,7 +44,6 @@ QString AA_MPDSnCxx::getID()
 {
     QString reply = transceiveChkSyntaxError("q");
     reply = reply.remove("\n");
-    //reply = reply.trimmed();
     return reply;
 }
 
@@ -55,7 +51,6 @@ QStringList AA_MPDSnCxx::getStatus()
 {
     QStringList list;
     QString reply = transceiveChkSyntaxError("S");
-    //reply = reply.trimmed();
     list = reply.split("\n");
     return list;
 }
@@ -155,53 +150,6 @@ void AA_MPDSnCxx::setPowerDBm(float dBm)
     }
 }
 
-//    qDebug() << reply;
-//    QStringList list;
-//    list = reply.split("\n");
-//    list = list.replaceInStrings("Line number>","");
-//    foreach(QString item, list)
-//         qDebug() << "List items = " << item;
-
-
-
-//int AcoustoOpticFilter::getPosition()
-//{
-//    QString str = transceiveChkSyntaxError("pos?");
-//    return castStringToIntChkError(str);
-//}
-
-//int AcoustoOpticFilter::getPositionCount() // return wheel type, has either 6 or 12 filter slots
-//{
-//    QString str = transceiveChkSyntaxError("pcount?");
-//    return castStringToIntChkError(str);
-//}
-
-//int AcoustoOpticFilter::getPositionNumber() const
-//{
-//    return positionNumber;
-//}
-
-//void AcoustoOpticFilter::setPositionNumber(const int count)
-//{
-//    positionNumber = count;
-//}
-
-int AA_MPDSnCxx::getMotionTime() const
-{
-    return motionTime; // ms
-}
-
-void AA_MPDSnCxx::setMotionTime(const int timewait)
-{
-    motionTime = timewait; // ms
-}
-
-
-//void AcoustoOpticFilter::restoreDefaultSettings()
-//{
-//    //transceiveChkSyntaxError(QString("M")); // Hard reset by software
-//}
-
 void AA_MPDSnCxx::reset()
 {
     transceiveChkSyntaxError(QString("M")); // Hard reset by software
@@ -211,48 +159,6 @@ void AA_MPDSnCxx::saveSettings() // save current settings as default on device p
 {
     transceiveChkSyntaxError(QString("E"));
 }
-
-//QString AcoustoOpticFilter::setPosition(int n)
-//{
-//    if (n < 1 || n > positionNumber)
-//        return QString("ErrorAcoustoOpticFilter: requested position %1 out of range [1,%2]").arg(n).arg(positionNumber);
-//    else
-//        return transceiveChkSyntaxError(QString("pos=%1").arg(n));
-//}
-
-//void AcoustoOpticFilter::setPositionCount(int n)
-//{
-//    transceiveChkSyntaxError(QString("pcount=%1").arg(n));
-//}
-
-QString AA_MPDSnCxx::getVerboseName() const
-{
-    return verboseName;
-}
-
-void AA_MPDSnCxx::setVerboseName(const QString &value)
-{
-    verboseName = value;
-}
-
-//QStringList AcoustoOpticFilter::getFilterListName() const // TODO Dynamically load from text file?
-//{
-//    QStringList list;
-//    QString str = "NF03-405/488/561/635E,FF02-447/60,FF03-525/50,FF01-600/52,FF01-697/70,empty";
-//    list = str.split(",");
-//    return list;
-//}
-
-//QString AcoustoOpticFilter::getFilterName(int n)
-//{
-//    if (n < 1 || n > positionNumber) {
-//        return QString("ErrorAcoustoOpticFilter: requested position %1 out of range [1,%2]").arg(n).arg(positionNumber);
-//    }
-//    else {
-//        QStringList list = getFilterListName();
-//        return list.at(n);
-//    }
-//}
 
 QString AA_MPDSnCxx::transceiveChkSyntaxError(QString cmd)
 {
@@ -269,27 +175,6 @@ QString AA_MPDSnCxx::transceiveChkSyntaxError(QString cmd)
         throw std::runtime_error(reply.toLatin1());
     }
     return reply;
-}
-
-void AA_MPDSnCxx::removeEcho(QString cmd)
-{
-    QString cmdecho = QString();
-    do {
-        QString msg = serial->receive();
-        cmdecho.append(msg);
-        //qDebug() << cmdecho;
-    } while (!cmdecho.contains(cmd, Qt::CaseSensitive));
-}
-
-QString AA_MPDSnCxx::removeTrailingWhitespace(const QString& str)
-{
-    int n = str.size() - 1;
-    for (; n >= 0; --n) {
-        if (!str.at(n).isSpace()) {
-            return str.left(n + 1);
-        }
-    }
-    return "";
 }
 
 int AA_MPDSnCxx::castStringToIntChkError(QString str)
