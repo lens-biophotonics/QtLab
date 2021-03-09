@@ -1,10 +1,8 @@
 #ifndef AA_MPDSnCXX_H
 #define AA_MPDSnCXX_H
 
-#define AOTF_SWITCH_TIME 1
-#define AOTF_SERIAL_BAUD_RATE 57600
-
 #include <QObject>
+#include <QVector>
 
 class SerialPort;
 
@@ -12,43 +10,62 @@ class AA_MPDSnCxx : public QObject
 {
     Q_OBJECT
 
+    struct LineStatus {
+        int id;
+        double freq;
+        double power_dBm;
+        bool outputEnabled;
+        bool externalMode;
+    };
+
 public:
     AA_MPDSnCxx(QObject *parent = nullptr);
     virtual ~AA_MPDSnCxx();
 
     SerialPort *getSerialPort() const;
 
-    QString getID();
-    QStringList getStatus();
-    QString getChannelInfo();
-    QString getDeviceInfo();
+    QString getProductID();
+    QVector<LineStatus *> getStatus();
+    QVector<LineStatus *> getLineStatus();
 
-    int getChannel();
-    void setChannel(int n);
-    float getFrequency();
-    void setFrequency(float freq);
-    int getPower();
-    void setPower(int amp);
-    float getPowerDBm();
-    void setPowerDBm(float dBm);
+    int getSelectedChannel();
+    void selectChannel(int n);
+    double setFrequency(double freq);
+    int setPower(int p);
+    double setPower_dBm(double dBm);
+    double setPowerFineAdjustment(int line, int p);
+
+    int getNChannels() const;
+
+    void setExternalModeEnabled(bool enable);
+
+    void setBlanking(bool enableOutput, bool enableExternal, bool store = false);
+
 
 public slots:
     void open();
     void close();
     void reset();
 
-    void saveSettings();
+    void storeParams();
+
+    void switchOn();
+    void switchOff();
+
+    void setVMode5V();
+    void setVMode10V();
 
 signals:
     void connected();
     void disconnected();
 private:
     SerialPort *serial = nullptr;
+    int nChannels;
+    int selectedChannel;
 
-    QString transceiveChkOK(QString cmd);
-    QString transceiveChkSyntaxError(QString cmd);
-    int castStringToIntChkError(QString str);
-    float castStringToFloatChkError(QString str);
+    QStringList _getStatus();
+    QVector<LineStatus *> status;
+    void parseStatusLine(const QString &s);
 };
 
 #endif // AA_MPDSnCXX_H

@@ -1,4 +1,5 @@
 #include <QStringList>
+#include <QRegularExpression>
 #include <QtDebug>
 
 #include "AA_MPDSnCxx.h"
@@ -8,9 +9,9 @@
 AA_MPDSnCxx::AA_MPDSnCxx(QObject *parent) : QObject(parent)
 {
     serial = new SerialPort(this);
-    serial->setLineEndTermination("\r"); // carriage return
-    serial->setBaudRate(AOTF_SERIAL_BAUD_RATE);
-    serial->setTimeout(1000);
+    serial->setLineEndTermination("\r");
+    serial->setBaudRate(57600);
+    serial->setTimeout(200);
 }
 
 AA_MPDSnCxx::~AA_MPDSnCxx()
@@ -25,6 +26,18 @@ void AA_MPDSnCxx::open()
         throw std::runtime_error(QString("Cannot connect to AOTF with serial number " + serial->getSerialNumber()).toLatin1());
     else {
         serial->readAll();  // empty input buffer
+        nChannels = 0;
+        QStringList sl = _getStatus();
+        for (QString s : sl) {
+            if (s.startsWith("l")) {
+                nChannels++;
+            }
+        }
+        for (QString s : sl) {
+            status.append(new LineStatus());
+        }
+        getStatus();
+        getSelectedChannel();
         emit connected();
     }
 }
@@ -32,6 +45,7 @@ void AA_MPDSnCxx::open()
 void AA_MPDSnCxx::close()
 {
     serial->close();
+    qDeleteAll(status);
     emit disconnected();
 }
 
@@ -40,159 +54,257 @@ SerialPort *AA_MPDSnCxx::getSerialPort() const
     return serial;
 }
 
-QString AA_MPDSnCxx::getID()
+QString AA_MPDSnCxx::getProductID()
 {
-    QString reply = transceiveChkSyntaxError("q");
-    reply = reply.remove("\n");
-    return reply;
+    return serial->transceive("q", "?").remove("\n\r?").trimmed();
 }
 
-QStringList AA_MPDSnCxx::getStatus()
+QStringList AA_MPDSnCxx::_getStatus()
 {
     QStringList list;
-    QString reply = transceiveChkSyntaxError("S");
-    list = reply.split("\n");
+    QString reply = serial->transceive("S", "?").remove("?");
+    list = reply.split("\n\r");
     return list;
 }
 
-QString AA_MPDSnCxx::getChannelInfo()
+/**
+ * @brief Query and return the status of lines.
+ * @return
+ */
+QVector<AA_MPDSnCxx::LineStatus *> AA_MPDSnCxx::getStatus()
 {
-    QStringList reply = getStatus(); // TODO get channel info from here
-    foreach(QString item, reply)
-    qDebug() << "List items = " << item;
-    return reply.at(1);
+    QStringList sl = _getStatus();
+    for (QString s : sl) {
+        if (s.startsWith("l")) {
+            parseStatusLine(s);
+        }
+    }
+    return status;
 }
 
-QString AA_MPDSnCxx::getDeviceInfo()
+/**
+ * @brief Return the line status (device is not queried).
+ * @return
+ */
+QVector<AA_MPDSnCxx::LineStatus *> AA_MPDSnCxx::getLineStatus()
 {
-    QString reply = transceiveChkSyntaxError("S"); // TODO get profile info from here
-    return reply;
+    return status;
 }
 
-int AA_MPDSnCxx::getChannel()
+int AA_MPDSnCxx::getSelectedChannel()
 {
-    QString reply = transceiveChkSyntaxError("X");
-    reply = reply.remove("Line number>").trimmed();
-    return castStringToIntChkError(reply);
+    QString s = serial->transceive("X", "?");
+    bool ok = false;
+    int c = s.remove("Line number>").remove("\n\r?").toInt(&ok);
+    if (!ok) {
+        throw std::runtime_error(("Invalid response: " + s).toStdString());
+    }
+    selectedChannel = c;
+    return c;
 }
 
-void AA_MPDSnCxx::setChannel(int n)
+void AA_MPDSnCxx::selectChannel(int n)
 {
-    if (n < 1 || n > 8) // TODO learn number of channels
-        qDebug() << QString("ErrorAcoustoOpticFilter: requested channel %1 out of range [1,8]").arg(n);
-    else {
-        QString reply = transceiveChkSyntaxError(QString("X%1").arg(n));
-        reply = reply.remove("Line number>").trimmed();
-        if (castStringToIntChkError(reply.at(2)) != n)
-            qDebug() << QString("ErrorAcoustoOpticFilter: requested channel %1 not set").arg(n);
+    if (n < 1 || n > nChannels) {
+        throw std::runtime_error(QString("Invalid channel %1").arg(n).toStdString());
+    }
+
+    QString s = serial->transceive(QString("X%1").arg(n), "?");
+
+    bool ok;
+    s.split("Line number>").last().remove("\n\r?").toInt(&ok);
+
+    if (!ok) {
+        throw std::runtime_error(("Invalid response: " + s).toStdString());
     }
 }
 
-float AA_MPDSnCxx::getFrequency()
+double AA_MPDSnCxx::setFrequency(double freq)
 {
-    QString reply = transceiveChkSyntaxError("F"); // FIXME sets frequency to default value, use status output
-    reply = reply.remove("Frequency>").trimmed();
-    return castStringToFloatChkError(reply);
-}
-
-void AA_MPDSnCxx::setFrequency(float freq)
-{
-    if (freq < 74.0 || freq > 158.0) // TODO learn edge frequencies
-        qDebug() << QString("ErrorAcoustoOpticFilter: requested frequency %1 out of range [74.0,158.0]").arg(freq);
-    else {
-        QString reply = transceiveChkSyntaxError(QString("F%1").arg(freq));
-        reply = reply.remove("Frequency>").trimmed();
-        QStringList list = reply.split(" ");
-        if (castStringToFloatChkError(list.at(1)) != freq)
-            qDebug() << QString("ErrorAcoustoOpticFilter: requested frequency %1 not set").arg(freq);
+    QString s = serial->transceive(QString("F%1").arg(freq, 0, 'f', 2), "?");
+    bool ok;
+    double d = s.split("Frequency>").last().remove("\n\r?").trimmed().toDouble(&ok);
+    if (!ok) {
+        throw std::runtime_error(("Invalid response: " + s).toStdString());
     }
+    return d;
 }
 
-
-int AA_MPDSnCxx::getPower()
+int AA_MPDSnCxx::setPower(int p)
 {
-    QString reply = transceiveChkSyntaxError("P"); // FIXME sets power to default value, use status output
-    reply = reply.remove("Power>").trimmed();
-    return castStringToIntChkError(reply);
-}
-
-void AA_MPDSnCxx::setPower(int amp)
-{
-    if (amp < 0 || amp > 63) // TODO learn max power
-        qDebug() << QString("ErrorAcoustoOpticFilter: requested power %1 out of range [0,63]").arg(amp);
-    else {
-        QString reply = transceiveChkSyntaxError(QString("P%1").arg(amp));
-        reply = reply.remove("Power>").trimmed();
-        QStringList list = reply.split(" ");
-        if (castStringToIntChkError(list.at(1)) != amp)
-            qDebug() << QString("ErrorAcoustoOpticFilter: requested power %1 not set").arg(amp);
+    if (p < 0 || p > 63) {
+        throw std::runtime_error(QString("ErrorAcoustoOpticFilter: requested power %1 out of range [0,63]").arg(p).toStdString());
     }
-}
-
-
-float AA_MPDSnCxx::getPowerDBm()
-{
-    QString reply = transceiveChkSyntaxError("D"); // FIXME sets power to default value, use status output
-    reply = reply.remove("Power (dBm)>").trimmed();
-    return castStringToFloatChkError(reply);
-}
-
-void AA_MPDSnCxx::setPowerDBm(float dBm)
-{
-    if (dBm > 22.5) // TODO learn edge powers
-        qDebug() << QString("ErrorAcoustoOpticFilter: requested power %1 out of range [,22.5]").arg(dBm);
-    else {
-        QString reply = transceiveChkSyntaxError(QString("D%1").arg(dBm));
-        reply = reply.remove("Power (dBm)>").trimmed();
-        QStringList list = reply.split(" ");
-        if (castStringToFloatChkError(list.at(1)) != dBm)
-            qDebug() << QString("ErrorAcoustoOpticFilter: requested power%1 not set").arg(dBm);
+    QString s = serial->transceive(QString("P%1").arg(p), "?");
+    bool ok;
+    double i = s.split("Power>").last().remove("\n\r?").trimmed().toInt(&ok);
+    if (!ok || i != p) {
+        throw std::runtime_error(("Invalid response: " + s).toStdString());
     }
+    return i;
+}
+
+double AA_MPDSnCxx::setPowerFineAdjustment(int line, int p)
+{
+    if (p < 0 || p > 1023) {
+        throw std::runtime_error(QString("ErrorAcoustoOpticFilter: requested power %1 out of range [0,1023]").arg(p).toStdString());
+    }
+    QString s = serial->transceive(QString("L%1P%2").arg(line).arg(p, 4), "\n\r");
+    QRegularExpression rx("^l(\\d)F([0-9.]+)P(-?[0-9.]+)S([0,1])\n\r$");
+    QRegularExpressionMatch match = rx.match(s);
+
+    auto errMsg = QString("Invalid response: " + s).toStdString();
+    if (!match.hasMatch()) {
+        throw std::runtime_error(errMsg);
+    }
+
+    bool ok;
+    int c = 1;
+
+    int i = match.captured(c++).toUInt(&ok);
+    if (!ok || i != line) {
+        throw std::runtime_error(errMsg);
+    }
+
+    double d;
+
+    LineStatus *st = status.at(line);
+
+    d = match.captured(c++).toDouble(&ok);
+    if (!ok) {
+        throw std::runtime_error(errMsg);
+    }
+    st->freq = d;
+
+    d = match.captured(c++).toDouble(&ok);
+    if (!ok) {
+        throw std::runtime_error(errMsg);
+    }
+    st->power_dBm = d;
+
+    i = match.captured(c++).toInt(&ok);
+    if (!ok) {
+        throw std::runtime_error(errMsg);
+    }
+    st->outputEnabled = i;
+
+    return st->power_dBm;
+}
+
+double AA_MPDSnCxx::setPower_dBm(double dBm)
+{
+    QString s = serial->transceive(QString("D%1").arg(dBm), "?");
+    bool ok;
+    double d = s.split("Power (dBm)>").last().remove("dBm\n\r?").trimmed().toDouble(&ok);
+    if (!ok) {
+        throw std::runtime_error(("Invalid response: " + s).toStdString());
+    }
+    return d;
 }
 
 void AA_MPDSnCxx::reset()
 {
-    transceiveChkSyntaxError(QString("M")); // Hard reset by software
+    // We use transceive() instead of sendMsg() even if there is no response
+    // because the reset command needs some sleep time.. we're using the
+    // transceive timeout for this.
+    serial->transceive("M");
 }
 
-void AA_MPDSnCxx::saveSettings() // save current settings as default on device power-up
+/**
+ * @brief Save current settings as default on device power-up
+ */
+void AA_MPDSnCxx::storeParams()
 {
-    transceiveChkSyntaxError(QString("E"));
+    serial->transceive("E", "?");
 }
 
-QString AA_MPDSnCxx::transceiveChkSyntaxError(QString cmd)
+int AA_MPDSnCxx::getNChannels() const
 {
-    serial->sendMsg(cmd);
-    //removeEcho(cmd);
-    QString reply = serial->receive();
-    //reply.append(serial->receive()); // sometimes the device does not send the full reply during one communication
-    //reply.remove(serial->getLineEndTermination());
-    reply = reply.remove("?");
-    reply = reply.trimmed();
-    //reply.remove(QRegExp("[<>]"));
-    //qDebug() << reply;
-    if (reply.startsWith("\f")) {
-        throw std::runtime_error(reply.toLatin1());
+    return nChannels;
+}
+
+void AA_MPDSnCxx::switchOn()
+{
+    serial->transceive("o1", "?");
+}
+
+void AA_MPDSnCxx::switchOff()
+{
+    serial->transceive("o0", "?");
+}
+
+void AA_MPDSnCxx::setExternalModeEnabled(bool enable)
+{
+    if (enable) {
+        serial->transceive("i1", "?");  // sic
+    } else {
+        serial->transceive("i0", "?");  // sic
     }
-    return reply;
+    getStatus();
 }
 
-int AA_MPDSnCxx::castStringToIntChkError(QString str)
+void AA_MPDSnCxx::setVMode5V()
 {
+    serial->transceive("v0", "?");
+}
+
+void AA_MPDSnCxx::setVMode10V()
+{
+    serial->transceive("v1", "?");
+}
+
+void AA_MPDSnCxx::setBlanking(bool enableOutput, bool enableExternal, bool store)
+{
+    QString s = QString("L0I%1O%2").arg((int)enableExternal).arg((int)enableOutput);
+    if (store) {
+        s += "E";
+    }
+    QString r = serial->transceive(s, "\n\r");
+    QRegularExpression rx("^BS([0,1])I([0,1])\n\r$");
+    QRegularExpressionMatch match = rx.match(r);
+
+    if (!match.hasMatch()) {
+        throw std::runtime_error(("Cannot parse string: " + r).toStdString());
+    }
+
+    bool ok1, ok2;
+
+    bool output = match.captured(1).toInt(&ok1);
+    bool external = match.captured(2).toInt(&ok2);
+
+    if (!(output == enableOutput && external == enableExternal && ok1 && ok2)) {
+        throw std::runtime_error(("Cannot parse string: " + r).toStdString());
+    }
+}
+
+void AA_MPDSnCxx::parseStatusLine(const QString &s)
+{
+    QRegularExpression rx("^l(\\d) F=([0-9.]+) P=(-?[0-9.]+) (ON|OFF) (INT|EXT)ERNAL$");
+    QRegularExpressionMatch match = rx.match(s);
+    if (!match.hasMatch()) {
+        throw std::runtime_error(("Cannot parse string: " + s).toStdString());
+    }
     bool ok;
-    int integer = str.toInt(&ok);
-    if (!ok) {
-        throw std::runtime_error(QString("Cannot convert string to int: " + str).toLatin1());
+    int count = 0;
+    int c = 1;
+    int line = match.captured(c++).toInt(&ok); count += ok;
+    double freq = match.captured(c++).toDouble(&ok); count += ok;
+    double pow_dBm = match.captured(c++).toDouble(&ok); count += ok;
+    if (count != 3) {
+        throw std::runtime_error(("Cannot parse string: " + s).toStdString());
     }
-    return integer;
-}
-
-float AA_MPDSnCxx::castStringToFloatChkError(QString str)
-{
-    bool ok;
-    float flt = str.toFloat(&ok);
-    if (!ok) {
-        throw std::runtime_error(QString("Cannot convert string to float: " + str).toLatin1());
+    LineStatus *st = status.at(line);
+    st->id = line;
+    st->freq = freq;
+    st->power_dBm = pow_dBm;
+    if (match.captured(c++) == "ON") {
+        st->outputEnabled = true;
+    } else {
+        st->outputEnabled = false;
     }
-    return flt;
+    if (match.captured(c++) == "EXT") {
+        st->externalMode = true;
+    } else {
+        st->externalMode = false;
+    }
 }
