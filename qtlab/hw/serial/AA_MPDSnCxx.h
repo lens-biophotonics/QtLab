@@ -55,6 +55,15 @@ public slots:
     void setVMode5V();
     void setVMode10V();
 
+    double stepFrequencyUp();
+    double stepFrequencyDown();
+
+    int stepPowerUp();
+    int stepPowerDown();
+
+    int stepProfileUp();
+    int stepProfileDown();
+
 signals:
     void connected();
     void disconnected();
@@ -66,6 +75,9 @@ private:
     QStringList _getStatus();
     QVector<LineStatus *> status;
     void parseStatusLine(const QString &s);
+    double _stepFrequency(bool up);
+    int _stepPower(bool up);
+    int _stepProfile(bool up);
 };
 
 #endif // AA_MPDSnCXX_H

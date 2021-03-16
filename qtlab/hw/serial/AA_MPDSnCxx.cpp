@@ -253,6 +253,100 @@ void AA_MPDSnCxx::setVMode10V()
     serial->transceive("v1", "?");
 }
 
+double AA_MPDSnCxx::_stepFrequency(bool up)
+{
+    QString r = serial->transceive(up ? "6" : "4", "?");
+    QRegularExpression rx("Frequency> ([0-9.]+) MHz");
+    QRegularExpressionMatch match = rx.match(r);
+    if (!match.hasMatch()) {
+        throw std::runtime_error(("Cannot parse string: " + r).toStdString());
+    }
+
+    return match.captured(1).toDouble();
+}
+
+int AA_MPDSnCxx::_stepPower(bool up)
+{
+    QString r = serial->transceive(up ? "8" : "2", "?");
+    QRegularExpression rx("P=(\\d+)[(]([0-9.]+)dBm[)]");
+    QRegularExpressionMatch match = rx.match(r);
+    if (!match.hasMatch()) {
+        throw std::runtime_error(("Cannot parse string: " + r).toStdString());
+    }
+
+    status.at(selectedChannel)->power_dBm = match.captured(2).toDouble();
+    return match.captured(1).toInt();
+}
+
+int AA_MPDSnCxx::_stepProfile(bool up)
+{
+    QString r = serial->transceive(up ? "3" : "1", "\n\n\r> ");
+    QRegularExpression rx("Selected profile: (\\d)\n\r");
+    QRegularExpressionMatch match = rx.match(r);
+    if (!match.hasMatch()) {
+        throw std::runtime_error(("Cannot parse string: " + r).toStdString());
+    }
+
+    getStatus();
+    return match.captured(1).toInt();
+}
+
+double AA_MPDSnCxx::stepFrequencyUp()
+{
+    return _stepFrequency(true);
+}
+
+double AA_MPDSnCxx::stepFrequencyDown()
+{
+    return _stepFrequency(false);
+}
+
+/**
+ * @brief Increment fine power adjustment.
+ * @return Fine power adjustment.
+ *
+ * The LineStatus::power_dBm is also updated accordingly.
+ */
+int AA_MPDSnCxx::stepPowerUp()
+{
+    return _stepPower(true);
+}
+
+/**
+ * @brief Decrement fine power adjustment.
+ * @return Fine power adjustment.
+ *
+ * The LineStatus::power_dBm is also updated accordingly.
+ */
+int AA_MPDSnCxx::stepPowerDown()
+{
+    return _stepPower(false);
+}
+
+/**
+ * @brief Increment profile.
+ * @return Current profile.
+ *
+ * The LineStatus struct is also updated with the values of the newly selected
+ * profile.
+ */
+int AA_MPDSnCxx::stepProfileUp()
+{
+    return _stepProfile(true);
+}
+
+/**
+ * @brief Decrement profile.
+ * @return Current profile.
+ *
+ * The LineStatus struct is also updated with the values of the newly selected
+ * profile.
+ */
+int AA_MPDSnCxx::stepProfileDown()
+{
+    return _stepProfile(true);
+}
+
 void AA_MPDSnCxx::setBlanking(bool enableOutput, bool enableExternal, bool store)
 {
     QString s = QString("L0I%1O%2").arg((int)enableExternal).arg((int)enableOutput);
