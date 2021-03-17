@@ -4,46 +4,20 @@
 #include <QStringList>
 
 #include <qtlab/hw/serial/filterwheel.h>
-#include <qtlab/hw/serial/serialport.h>
 
 
-FilterWheel::FilterWheel(QObject *parent) : QObject(parent)
+FilterWheel::FilterWheel(QObject *parent) : SerialDevice(parent)
 {
-    serial = new SerialPort(this);
-    serial->setLineEndTermination("\r", "\r");
+    serialPort->setLineEndTermination("\r", "\r");
     positionCount = -1;
     setMotionTime(FILTERWHEEL_MOTION_TIME); // wait in ms between reaching any position
 }
 
-FilterWheel::~FilterWheel()
+void FilterWheel::postConnect_impl()
 {
-    close();
-}
+    getPositionCount();
+};
 
-void FilterWheel::open()
-{
-    bool ret = serial->open();
-    if (!ret) {
-        QString msg("Cannot connect to Filter Wheel on serial port %1");
-        msg = msg.arg(serial->portName());
-        throw std::runtime_error(msg.toLatin1());
-    } else {
-        serial->readAll();  // empty input buffer
-        getPositionCount();
-        emit connected();
-    }
-}
-
-void FilterWheel::close()
-{
-    serial->close();
-    emit disconnected();
-}
-
-SerialPort *FilterWheel::getSerialPort() const
-{
-    return serial;
-}
 
 QString FilterWheel::getID()
 {
@@ -167,10 +141,10 @@ void FilterWheel::ping()
 
 QString FilterWheel::transceiveChkSyntaxError(QString cmd)
 {
-    serial->sendMsg(cmd);
+    serialPort->sendMsg(cmd);
     removeEcho(cmd);
-    QString response = serial->receive();
-    response.append(serial->receive()); // sometimes the device does not send the full response during one communication
+    QString response = serialPort->receive();
+    response.append(serialPort->receive()); // sometimes the device does not send the full response during one communication
     response.remove('\r');
     response.remove(QRegExp("[<>]"));
     if (response.startsWith("Command error")) {
@@ -183,7 +157,7 @@ void FilterWheel::removeEcho(QString cmd)
 {
     QString cmdecho = QString();
     do {
-        QString msg = serial->receive();
+        QString msg = serialPort->receive();
         cmdecho.append(msg);
     } while (!cmdecho.contains(cmd, Qt::CaseSensitive));
 }

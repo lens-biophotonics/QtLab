@@ -4,10 +4,9 @@
 #define FILTERWHEEL_MOTION_TIME 3000
 
 #include <QObject>
+#include <qtlab/hw/serial/serialdevice.h>
 
-class SerialPort;
-
-class FilterWheel : public QObject
+class FilterWheel : public SerialDevice
 {
     Q_OBJECT
 
@@ -37,9 +36,6 @@ public:
     Q_ENUM(SERIAL_BAUD_RATE)
 
     FilterWheel(QObject *parent = nullptr);
-    virtual ~FilterWheel();
-
-    SerialPort *getSerialPort() const;
 
     QString getID();
     FilterWheel::SERIAL_BAUD_RATE getBaudRate();
@@ -51,9 +47,6 @@ public:
     FilterWheel::TRIGGER_MODE getTriggerMode();
 
 public slots:
-    void open();
-    void close();
-
     void restoreDefaultSettings();
     void saveSettings();
     void setBaudRate(FilterWheel::SERIAL_BAUD_RATE n);
@@ -63,12 +56,10 @@ public slots:
     void setSpeedMode(FilterWheel::SPEED_MODE status);
     void setTriggerMode(FilterWheel::TRIGGER_MODE status);
 
-signals:
-    void connected();
-    void disconnected();
+protected:
+    virtual void postConnect_impl() override;
 
 private:
-    SerialPort *serial = nullptr;
     QString verboseName;
     int positionCount;
     int motionTime; // ms

@@ -13,6 +13,7 @@ set(EXPORT_NAME Serial)
 
 set(SOURCE_FILES
     serialport.cpp
+    serialdevice.cpp
 
     cobolt.cpp
 
@@ -21,7 +22,7 @@ set(SOURCE_FILES
 
 set(HEADERS
     serialport.h
-
+    serialdevice.h
     cobolt.h
 
     filterwheel.h

@@ -2,10 +2,9 @@
 #define COBOLT_H
 
 #include <QObject>
+#include <qtlab/hw/serial/serialdevice.h>
 
-class SerialPort;
-
-class Cobolt : public QObject
+class Cobolt : public SerialDevice
 {
     Q_OBJECT
 
@@ -33,9 +32,6 @@ class Cobolt : public QObject
 
 public:
     Cobolt(QObject *parent = nullptr);
-    virtual ~Cobolt();
-
-    SerialPort *getSerialPort() const;
 
     QString getSerialNumber();
     QString getLaserModel();
@@ -61,9 +57,6 @@ public:
     void setVerboseName(const QString &value);
 
 public slots:
-    void open();
-    void close();
-
     void setOutputPower(double W);
     void setDriveCurrent(double mA);
     void setModulationHighCurrent(double mA);
@@ -82,12 +75,10 @@ public slots:
     void clearFault();
     void ping();
 
-signals:
-    void connected();
-    void disconnected();
+protected:
+    virtual void postConnect_impl() override;
 
 private:
-    SerialPort *serial = nullptr;
     QString verboseName;
 
     QString transceiveChkOK(QString cmd);
