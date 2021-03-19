@@ -26,17 +26,7 @@ public:
     QVector<LineStatus *> getLineStatus();
 
     int getSelectedChannel();
-    void selectChannel(int n);
-    double setFrequency(double freq);
-    int setPower(int p);
-    double setPower_dBm(double dBm);
-    double setPowerFineAdjustment(int line, int p);
-
     int getNChannels() const;
-
-    void setExternalModeEnabled(bool enable);
-
-    void setBlanking(bool enableOutput, bool enableExternal, bool store = false);
 
 
 public slots:
@@ -46,6 +36,16 @@ public slots:
 
     void switchOn();
     void switchOff();
+
+    void setExternalModeEnabled(bool enable);
+
+    void selectChannel(int n);
+    double setFrequency(double freq);
+    int setPower(int p);
+    double setPower_dBm(double dBm);
+    double setPowerFineAdjustment(int line, int p);
+
+    void setBlanking(bool enableOutput, bool enableExternal, bool store = false);
 
     void setVMode5V();
     void setVMode10V();
