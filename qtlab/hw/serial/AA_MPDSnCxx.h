@@ -4,9 +4,9 @@
 #include <QObject>
 #include <QVector>
 
-class SerialPort;
+#include <qtlab/hw/serial/serialdevice.h>
 
-class AA_MPDSnCxx : public QObject
+class AA_MPDSnCxx : public SerialDevice
 {
     Q_OBJECT
 
@@ -20,9 +20,6 @@ class AA_MPDSnCxx : public QObject
 
 public:
     AA_MPDSnCxx(QObject *parent = nullptr);
-    virtual ~AA_MPDSnCxx();
-
-    SerialPort *getSerialPort() const;
 
     QString getProductID();
     QVector<LineStatus *> getStatus();
@@ -43,8 +40,6 @@ public:
 
 
 public slots:
-    void open();
-    void close();
     void reset();
 
     void storeParams();
@@ -64,11 +59,10 @@ public slots:
     int stepProfileUp();
     int stepProfileDown();
 
-signals:
-    void connected();
-    void disconnected();
+protected:
+    virtual void postConnect_impl() override;
+
 private:
-    SerialPort *serial = nullptr;
     int nChannels;
     int selectedChannel;
 
