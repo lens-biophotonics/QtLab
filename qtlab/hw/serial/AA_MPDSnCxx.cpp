@@ -193,19 +193,19 @@ void AA_MPDSnCxx::storeParams()
     serialPort->transceive("E", "?");
 }
 
+void AA_MPDSnCxx::setOutputEnabled(bool enable)
+{
+    serialPort->transceive(QString("o%1").arg(enable ? "1" : "0"), "?");
+}
+
 int AA_MPDSnCxx::getNChannels() const
 {
     return nChannels;
 }
 
-void AA_MPDSnCxx::switchOn()
+void AA_MPDSnCxx::setOutputEnabled(int line, bool enable)
 {
-    serialPort->transceive("o1", "?");
-}
-
-void AA_MPDSnCxx::switchOff()
-{
-    serialPort->transceive("o0", "?");
+    QString s = QString("L%1O%2").arg(line).arg(enable);
 }
 
 void AA_MPDSnCxx::setExternalModeEnabled(bool enable)
@@ -216,6 +216,11 @@ void AA_MPDSnCxx::setExternalModeEnabled(bool enable)
         serialPort->transceive("i0", "?");  // sic
     }
     getStatus();
+}
+
+void AA_MPDSnCxx::setExternalModeEnabled(int line, bool enable)
+{
+    QString s = QString("L%1I%2").arg(line).arg(enable);
 }
 
 void AA_MPDSnCxx::setVMode5V()

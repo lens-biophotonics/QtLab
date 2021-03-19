@@ -34,10 +34,11 @@ public slots:
 
     void storeParams();
 
-    void switchOn();
-    void switchOff();
+    void setOutputEnabled(bool enable);
+    void setOutputEnabled(int line, bool enable);
 
     void setExternalModeEnabled(bool enable);
+    void setExternalModeEnabled(int line, bool enable);
 
     void selectChannel(int n);
     double setFrequency(double freq);
