@@ -66,6 +66,11 @@ QVector<AA_MPDSnCxx::LineStatus *> AA_MPDSnCxx::getLineStatus()
     return status;
 }
 
+AA_MPDSnCxx::LineStatus *AA_MPDSnCxx::selectedChanelStatus()
+{
+    return status.at(selectedChannel);
+}
+
 int AA_MPDSnCxx::getSelectedChannel()
 {
     QString s = serialPort->transceive("X", "?");

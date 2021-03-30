@@ -11,6 +11,15 @@ class AA_MPDSnCxx : public SerialDevice
     Q_OBJECT
 
     struct LineStatus {
+        friend class AA_MPDSnCxx;
+public:
+        int getId() const {return id;}
+        double getFreq() const {return freq;}
+        double getPower_dBm() const {return power_dBm;}
+        bool isOutputEnabled() const {return outputEnabled;}
+        bool isExternalModeEnabled() const {return externalMode;}
+
+private:
         int id;
         double freq;
         double power_dBm;
@@ -24,6 +33,7 @@ public:
     QString getProductID();
     QVector<LineStatus *> getStatus();
     QVector<LineStatus *> getLineStatus();
+    LineStatus *selectedChanelStatus();
 
     int getSelectedChannel();
     int getNChannels() const;
