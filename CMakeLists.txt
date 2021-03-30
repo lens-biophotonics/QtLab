@@ -44,6 +44,7 @@ add_subdirectory(qtlab/hw/serial)
 if(BUILD_WIDGETS)
     add_subdirectory(qtlab/widgets)
     add_subdirectory(qtlab/hw/pi-widgets)
+    add_subdirectory(qtlab/hw/serial-widgets)
 endif()
 
 add_subdirectory(docker)
