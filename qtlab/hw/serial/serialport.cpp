@@ -29,15 +29,6 @@ SerialPort::SerialPort(QObject *parent)
 
 bool SerialPort::open(OpenMode mode)
 {
-    if (!_serialNumber.isEmpty())
-    {
-        QSerialPortInfo info = findPortFromSerialNumber(_serialNumber);
-        if (!info.portName().isEmpty()) {
-            logger->info(QString("Found serial number %1 on %2")
-                         .arg(info.serialNumber()).arg(info.portName()));
-            setPort(info);
-        }
-    }
     bool ret = QSerialPort::open(mode);
     if (!ret) {
         return false;
@@ -195,14 +186,21 @@ void SerialPort::setTimeout(int ms)
     _serialTimeout = ms;
 }
 
-QString SerialPort::getSerialNumber()
+QSerialPortInfo SerialPort::portInfo() const
 {
-    return _serialNumber;
+    return QSerialPortInfo(*this);
 }
 
-void SerialPort::setSerialNumber(const QString &serialNumber)
+void SerialPort::setPortBySerialNumber(const QString &serialNumber)
 {
-    _serialNumber = serialNumber;
+    QSerialPortInfo pi = findPortFromSerialNumber(serialNumber);
+    if (pi.isNull()) {
+        logger->warning("Cannot find serial port for serial number" + serialNumber);
+        return;
+    }
+    setPort(pi);
+    logger->info(QString("Found serial number %1 on %2")
+                 .arg(portInfo().serialNumber()).arg(portInfo().portName()));
 }
 
 QStringList SerialPort::getLineEndTermination()

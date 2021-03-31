@@ -17,11 +17,11 @@ public:
     virtual QString transceive(QString command, QString until = QString());
     double getDouble(const QString &cmd);
     int getInt(const QString &cmd);
-    QString getSerialNumber();
+    QSerialPortInfo portInfo() const;
 
     static QSerialPortInfo findPortFromSerialNumber(const QString &sn);
 
-    void setSerialNumber(const QString &serialNumber);
+    void setPortBySerialNumber(const QString &serialNumber);
     void setTimeout(int ms);
 
     QStringList getLineEndTermination();
@@ -46,7 +46,6 @@ protected:
     virtual bool open_impl();
 
 private:
-    QString _serialNumber;
     QString txLineEndTermination;
     QString rxLineEndTermination;
     bool loggingEnabled = false;
