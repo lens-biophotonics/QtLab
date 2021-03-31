@@ -1,6 +1,6 @@
 #include <QStringList>
 #include <QRegularExpression>
-#include <QtDebug>
+#include <QThread>
 
 #include "AA_MPDSnCxx.h"
 #include "serialport.h"
@@ -25,8 +25,29 @@ void AA_MPDSnCxx::postConnect_impl()
     for (QString s : sl) {
         status.append(new LineStatus());
     }
+    refresh();
+}
+
+bool AA_MPDSnCxx::isBlankingExternal() const
+{
+    return blankingExternal;
+}
+
+void AA_MPDSnCxx::refresh()
+{
     getStatus();
     getSelectedChannel();
+    parseHelp();
+}
+
+bool AA_MPDSnCxx::isBlankingEnabled() const
+{
+    return blankingEnabled;
+}
+
+bool AA_MPDSnCxx::isVMode10V() const
+{
+    return VMode10V;
 }
 
 QString AA_MPDSnCxx::getProductID()
@@ -52,6 +73,22 @@ QVector<AA_MPDSnCxx::LineStatus *> AA_MPDSnCxx::getStatus()
     for (QString s : sl) {
         if (s.startsWith("l")) {
             parseStatusLine(s);
+        } else if (s.startsWith("Blanking")) {
+            QRegularExpression rx("^Blanking (ON|OFF) (INT|EXT)ERNAL$");
+            QRegularExpressionMatch match = rx.match(s);
+            if (!match.hasMatch()) {
+                throw std::runtime_error(QString("Invalid response: %1").arg(s).toStdString());
+            }
+            if (match.captured(1) == "ON") {
+                blankingEnabled = true;
+            } else {
+                blankingEnabled = false;
+            }
+            if (match.captured(2) == "EXT") {
+                blankingExternal = true;
+            } else {
+                blankingExternal = false;
+            }
         }
     }
     return status;
@@ -107,14 +144,12 @@ double AA_MPDSnCxx::setFrequency(double freq)
     if (!ok) {
         throw std::runtime_error(("Invalid response: " + s).toStdString());
     }
+    status.at(selectedChannel)->freq = d;
     return d;
 }
 
 int AA_MPDSnCxx::setPower(int p)
 {
-    if (p < 0 || p > 63) {
-        throw std::runtime_error(QString("ErrorAcoustoOpticFilter: requested power %1 out of range [0,63]").arg(p).toStdString());
-    }
     QString s = serialPort->transceive(QString("P%1").arg(p), "?");
     bool ok;
     double i = s.split("Power>").last().remove("\n\r?").trimmed().toInt(&ok);
@@ -126,49 +161,11 @@ int AA_MPDSnCxx::setPower(int p)
 
 double AA_MPDSnCxx::setPowerFineAdjustment(int line, int p)
 {
-    if (p < 0 || p > 1023) {
-        throw std::runtime_error(QString("ErrorAcoustoOpticFilter: requested power %1 out of range [0,1023]").arg(p).toStdString());
-    }
     QString s = serialPort->transceive(QString("L%1P%2").arg(line).arg(p, 4), "\n\r");
-    QRegularExpression rx("^l(\\d)F([0-9.]+)P(-?[0-9.]+)S([0,1])\n\r$");
-    QRegularExpressionMatch match = rx.match(s);
 
-    auto errMsg = QString("Invalid response: " + s).toStdString();
-    if (!match.hasMatch()) {
-        throw std::runtime_error(errMsg);
-    }
+    parseLResponse(s);
 
-    bool ok;
-    int c = 1;
-
-    int i = match.captured(c++).toUInt(&ok);
-    if (!ok || i != line) {
-        throw std::runtime_error(errMsg);
-    }
-
-    double d;
-
-    LineStatus *st = status.at(line);
-
-    d = match.captured(c++).toDouble(&ok);
-    if (!ok) {
-        throw std::runtime_error(errMsg);
-    }
-    st->freq = d;
-
-    d = match.captured(c++).toDouble(&ok);
-    if (!ok) {
-        throw std::runtime_error(errMsg);
-    }
-    st->power_dBm = d;
-
-    i = match.captured(c++).toInt(&ok);
-    if (!ok) {
-        throw std::runtime_error(errMsg);
-    }
-    st->outputEnabled = i;
-
-    return st->power_dBm;
+    return status.at(line)->power_dBm;
 }
 
 double AA_MPDSnCxx::setPower_dBm(double dBm)
@@ -179,15 +176,15 @@ double AA_MPDSnCxx::setPower_dBm(double dBm)
     if (!ok) {
         throw std::runtime_error(("Invalid response: " + s).toStdString());
     }
+    status.at(selectedChannel)->power_dBm = d;
     return d;
 }
 
 void AA_MPDSnCxx::reset()
 {
-    // We use transceive() instead of sendMsg() even if there is no response
-    // because the reset command needs some sleep time.. we're using the
-    // transceive timeout for this.
     serialPort->transceive("M");
+    thread()->msleep(200);
+    getStatus();
 }
 
 /**
@@ -198,19 +195,9 @@ void AA_MPDSnCxx::storeParams()
     serialPort->transceive("E", "?");
 }
 
-void AA_MPDSnCxx::setOutputEnabled(bool enable)
-{
-    serialPort->transceive(QString("o%1").arg(enable ? "1" : "0"), "?");
-}
-
 int AA_MPDSnCxx::getNChannels() const
 {
     return nChannels;
-}
-
-void AA_MPDSnCxx::setOutputEnabled(int line, bool enable)
-{
-    QString s = QString("L%1O%2").arg(line).arg(enable);
 }
 
 void AA_MPDSnCxx::setExternalModeEnabled(bool enable)
@@ -225,7 +212,18 @@ void AA_MPDSnCxx::setExternalModeEnabled(bool enable)
 
 void AA_MPDSnCxx::setExternalModeEnabled(int line, bool enable)
 {
-    QString s = QString("L%1I%2").arg(line).arg(enable);
+    parseLResponse(serialPort->transceive(QString("L%1I%2").arg(line).arg(enable), "\n\r"));
+    status.at(line)->externalMode = enable;
+}
+
+void AA_MPDSnCxx::setOutputEnabled(bool enable)
+{
+    serialPort->transceive(QString("o%1").arg(enable ? "1" : "0"), "?");
+}
+
+void AA_MPDSnCxx::setOutputEnabled(int line, bool enable)
+{
+    parseLResponse(serialPort->transceive(QString("L%1O%2").arg(line).arg(enable), "\n\r"));
 }
 
 void AA_MPDSnCxx::setVMode5V()
@@ -247,7 +245,9 @@ double AA_MPDSnCxx::_stepFrequency(bool up)
         throw std::runtime_error(("Cannot parse string: " + r).toStdString());
     }
 
-    return match.captured(1).toDouble();
+    double d = match.captured(1).toDouble();
+    status.at(selectedChannel)->freq = d;
+    return d;
 }
 
 int AA_MPDSnCxx::_stepPower(bool up)
@@ -334,7 +334,7 @@ int AA_MPDSnCxx::stepProfileDown()
 
 void AA_MPDSnCxx::setBlanking(bool enableOutput, bool enableExternal, bool store)
 {
-    QString s = QString("L0I%1O%2").arg((int)enableExternal).arg((int)enableOutput);
+    QString s = QString("L0I%1O%2").arg((int)(!enableExternal)).arg((int)enableOutput);
     if (store) {
         s += "E";
     }
@@ -350,10 +350,14 @@ void AA_MPDSnCxx::setBlanking(bool enableOutput, bool enableExternal, bool store
 
     bool output = match.captured(1).toInt(&ok1);
     bool external = match.captured(2).toInt(&ok2);
+    external = !external;
 
     if (!(output == enableOutput && external == enableExternal && ok1 && ok2)) {
         throw std::runtime_error(("Cannot parse string: " + r).toStdString());
     }
+
+    blankingEnabled = output;
+    blankingExternal = external;
 }
 
 void AA_MPDSnCxx::parseStatusLine(const QString &s)
@@ -386,4 +390,79 @@ void AA_MPDSnCxx::parseStatusLine(const QString &s)
     } else {
         st->externalMode = false;
     }
+}
+
+void AA_MPDSnCxx::parseLResponse(const QString &s)
+{
+    QRegularExpression rx("^l(\\d)F([0-9.]+)P(-?[0-9.]+)S([0,1])\n\r$");
+    QRegularExpressionMatch match = rx.match(s);
+
+    auto errMsg = QString("Invalid response: " + s).toStdString();
+    if (!match.hasMatch()) {
+        throw std::runtime_error(errMsg);
+    }
+
+    bool ok;
+    int c = 1;
+
+    int i = match.captured(c++).toUInt(&ok);
+
+    double d;
+
+    LineStatus *st = status.at(i);
+
+    d = match.captured(c++).toDouble(&ok);
+    if (!ok) {
+        throw std::runtime_error(errMsg);
+    }
+    st->freq = d;
+
+    d = match.captured(c++).toDouble(&ok);
+    if (!ok) {
+        throw std::runtime_error(errMsg);
+    }
+    st->power_dBm = d;
+
+    i = match.captured(c++).toInt(&ok);
+    if (!ok) {
+        throw std::runtime_error(errMsg);
+    }
+    st->outputEnabled = i;
+}
+
+void AA_MPDSnCxx::parseHelp()
+{
+    QString s = serialPort->transceive(".", "\n\n\r> ");
+    QRegularExpression rx("VMode: ([510]+)V");
+    QRegularExpressionMatch match = rx.match(s);
+
+    auto errMsg = QString("Invalid response: " + s).toStdString();
+    if (!match.hasMatch()) {
+        throw std::runtime_error(errMsg);
+    }
+
+    bool ok;
+
+    int i = match.captured(1).toUInt(&ok);
+    if (!ok) {
+        throw std::runtime_error(errMsg);
+    }
+    if (i == 5) {
+        VMode10V = false;
+    } else if (i == 10) {
+        VMode10V = true;
+    } else {
+        throw std::runtime_error(errMsg);
+    }
+
+    rx.setPattern("Selected profile: ([0-9]+)");
+    match = rx.match(s);
+    if (!match.hasMatch()) {
+        throw std::runtime_error(errMsg);
+    }
+    i = match.captured(1).toUInt(&ok);
+    if (!ok) {
+        throw std::runtime_error(errMsg);
+    }
+    selectedProfile = i;
 }

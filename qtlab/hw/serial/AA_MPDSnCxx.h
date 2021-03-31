@@ -10,6 +10,8 @@ class AA_MPDSnCxx : public SerialDevice
 {
     Q_OBJECT
 
+public:
+
     struct LineStatus {
         friend class AA_MPDSnCxx;
 public:
@@ -27,7 +29,6 @@ private:
         bool externalMode;
     };
 
-public:
     AA_MPDSnCxx(QObject *parent = nullptr);
 
     QString getProductID();
@@ -38,8 +39,12 @@ public:
     int getSelectedChannel();
     int getNChannels() const;
 
+    bool isVMode10V() const;
+    bool isBlankingEnabled() const;
+    bool isBlankingExternal() const;
 
 public slots:
+    void refresh();
     void reset();
 
     void storeParams();
@@ -76,10 +81,16 @@ protected:
 private:
     int nChannels;
     int selectedChannel;
+    int selectedProfile;
+    bool VMode10V;
+    bool blankingEnabled;
+    bool blankingExternal;
 
     QStringList _getStatus();
     QVector<LineStatus *> status;
     void parseStatusLine(const QString &s);
+    void parseLResponse(const QString &s);
+    void parseHelp();
     double _stepFrequency(bool up);
     int _stepPower(bool up);
     int _stepProfile(bool up);
