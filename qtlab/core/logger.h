@@ -32,6 +32,6 @@ private:
     QString name;
 };
 
-Logger *getLogger(QString name);
+Logger *getLogger(QString name = QString());
 
 #endif // LOGGER_H

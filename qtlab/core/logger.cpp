@@ -8,7 +8,11 @@ Logger::Logger(QString name) : QObject(nullptr), name(name)
 
 void Logger::_msg(QString str, QtMsgType type) const
 {
-    str.prepend(QString("[%1] ").arg(name));
+    if (name.isNull()) {
+        str.prepend(" ");
+    } else {
+        str.prepend(QString("[%1] ").arg(name));
+    }
     struct Message m = {
         .type = type,
         .msg = str,
