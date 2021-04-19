@@ -155,7 +155,7 @@ QSerialPortInfo SerialPort::findPortFromSerialNumber(const QString &sn)
 
 double SerialPort::getDouble(const QString &cmd)
 {
-    QString str = transceive(cmd);
+    QString str = transceive(cmd, rxLineEndTermination);
     bool ok;
     double f = str.toDouble(&ok);
     if (!ok) {
@@ -172,7 +172,7 @@ double SerialPort::getDouble(const QString &cmd)
 
 int SerialPort::getInt(const QString &cmd)
 {
-    QString str = transceive(cmd);
+    QString str = transceive(cmd, rxLineEndTermination);
     bool ok;
     int integer = str.toInt(&ok);
     if (!ok) {
