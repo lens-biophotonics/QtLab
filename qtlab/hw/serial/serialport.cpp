@@ -74,15 +74,6 @@ void SerialPort::setupStateMachine()
     sm->start();
 }
 
-QString SerialPort::receiveMsg()
-{
-    QString msg = readAll();
-
-    if (loggingEnabled) {
-        logger->info("<<< " + msg);
-    }
-    return msg.replace(rxLineEndTermination, "");
-}
 
 void SerialPort::sendMsg(QString msg)
 {
@@ -105,7 +96,12 @@ QString SerialPort::receive(QString until)
     while (true) {
         waitForReadyRead(_serialTimeout);
 
-        QString msg = receiveMsg();
+        QString msg = readAll();
+
+        if (loggingEnabled) {
+            logger->info("<<< " + msg);
+        }
+
         receivedLines.append(msg);
 
         if (bytesAvailable() <= 0) {
@@ -117,6 +113,11 @@ QString SerialPort::receive(QString until)
 
             break;
         }
+    }
+
+    if (receivedLines.endsWith(rxLineEndTermination)) {
+        int n = rxLineEndTermination.size();
+        receivedLines.remove(receivedLines.size() - n, n);
     }
 
     return receivedLines;

@@ -36,9 +36,6 @@ public:
     QState *getConnectedState() const;
     QState *getDisconnectedState() const;
 
-private slots:
-    QString receiveMsg();
-
 signals:
     void opened();
     void closed();
