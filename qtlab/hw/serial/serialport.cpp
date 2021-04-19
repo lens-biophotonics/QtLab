@@ -181,6 +181,23 @@ int SerialPort::getInt(const QString &cmd)
     return integer;
 }
 
+/**
+ * @brief Convenience function to retrieve an uint.
+ * @param cmd The command to be sent.
+ * @return The retrieved int.
+ */
+
+int SerialPort::getUInt(const QString &cmd)
+{
+    QString str = transceive(cmd, rxLineEndTermination);
+    bool ok;
+    int integer = str.toUInt(&ok);
+    if (!ok) {
+        throw std::runtime_error(QString("Cannot convert string to uint: " + str).toLatin1());
+    }
+    return integer;
+}
+
 void SerialPort::setTimeout(int ms)
 {
     _serialTimeout = ms;

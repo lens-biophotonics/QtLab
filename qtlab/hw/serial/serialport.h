@@ -17,6 +17,7 @@ public:
     virtual QString transceive(QString command, QString until = QString());
     double getDouble(const QString &cmd);
     int getInt(const QString &cmd);
+    int getUInt(const QString &cmd);
     QSerialPortInfo portInfo() const;
 
     static QSerialPortInfo findPortFromSerialNumber(const QString &sn);
