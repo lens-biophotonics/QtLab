@@ -8,9 +8,9 @@
 
 AA_MPDSnCxx::AA_MPDSnCxx(QObject *parent) : SerialDevice(parent)
 {
-    serialPort->setLineEndTermination("\r");
-    serialPort->setBaudRate(57600);
-    serialPort->setTimeout(200);
+    serial->setLineEndTermination("\r");
+    serial->setBaudRate(57600);
+    serial->setTimeout(200);
 }
 
 void AA_MPDSnCxx::postConnect_impl()
@@ -52,13 +52,13 @@ bool AA_MPDSnCxx::isVMode10V() const
 
 QString AA_MPDSnCxx::getProductID()
 {
-    return serialPort->transceive("q", "?").remove("\n\r?").trimmed();
+    return serial->transceive("q", "?").remove("\n\r?").trimmed();
 }
 
 QStringList AA_MPDSnCxx::_getStatus()
 {
     QStringList list;
-    QString reply = serialPort->transceive("S", "?").remove("?");
+    QString reply = serial->transceive("S", "?").remove("?");
     list = reply.split("\n\r");
     return list;
 }
@@ -110,7 +110,7 @@ AA_MPDSnCxx::LineStatus *AA_MPDSnCxx::selectedChanelStatus()
 
 int AA_MPDSnCxx::getSelectedChannel()
 {
-    QString s = serialPort->transceive("X", "?");
+    QString s = serial->transceive("X", "?");
     bool ok = false;
     int c = s.remove("Line number>").remove("\n\r?").toInt(&ok);
     if (!ok) {
@@ -126,7 +126,7 @@ void AA_MPDSnCxx::selectChannel(int n)
         throw std::runtime_error(QString("Invalid channel %1").arg(n).toStdString());
     }
 
-    QString s = serialPort->transceive(QString("X%1").arg(n), "?");
+    QString s = serial->transceive(QString("X%1").arg(n), "?");
 
     bool ok;
     s.split("Line number>").last().remove("\n\r?").toInt(&ok);
@@ -138,7 +138,7 @@ void AA_MPDSnCxx::selectChannel(int n)
 
 double AA_MPDSnCxx::setFrequency(double freq)
 {
-    QString s = serialPort->transceive(QString("F%1").arg(freq, 0, 'f', 2), "?");
+    QString s = serial->transceive(QString("F%1").arg(freq, 0, 'f', 2), "?");
     bool ok;
     double d = s.split("Frequency>").last().remove("\n\r?").trimmed().toDouble(&ok);
     if (!ok) {
@@ -150,7 +150,7 @@ double AA_MPDSnCxx::setFrequency(double freq)
 
 int AA_MPDSnCxx::setPower(int p)
 {
-    QString s = serialPort->transceive(QString("P%1").arg(p), "?");
+    QString s = serial->transceive(QString("P%1").arg(p), "?");
     bool ok;
     double i = s.split("Power>").last().remove("\n\r?").trimmed().toInt(&ok);
     if (!ok || i != p) {
@@ -161,7 +161,7 @@ int AA_MPDSnCxx::setPower(int p)
 
 double AA_MPDSnCxx::setPowerFineAdjustment(int line, int p)
 {
-    QString s = serialPort->transceive(QString("L%1P%2").arg(line).arg(p, 4), "\n\r");
+    QString s = serial->transceive(QString("L%1P%2").arg(line).arg(p, 4), "\n\r");
 
     parseLResponse(s);
 
@@ -170,7 +170,7 @@ double AA_MPDSnCxx::setPowerFineAdjustment(int line, int p)
 
 double AA_MPDSnCxx::setPower_dBm(double dBm)
 {
-    QString s = serialPort->transceive(QString("D%1").arg(dBm), "?");
+    QString s = serial->transceive(QString("D%1").arg(dBm), "?");
     bool ok;
     double d = s.split("Power (dBm)>").last().remove("dBm\n\r?").trimmed().toDouble(&ok);
     if (!ok) {
@@ -182,7 +182,7 @@ double AA_MPDSnCxx::setPower_dBm(double dBm)
 
 void AA_MPDSnCxx::reset()
 {
-    serialPort->transceive("M");
+    serial->transceive("M");
     thread()->msleep(200);
     getStatus();
 }
@@ -192,7 +192,7 @@ void AA_MPDSnCxx::reset()
  */
 void AA_MPDSnCxx::storeParams()
 {
-    serialPort->transceive("E", "?");
+    serial->transceive("E", "?");
 }
 
 int AA_MPDSnCxx::getNChannels() const
@@ -203,42 +203,42 @@ int AA_MPDSnCxx::getNChannels() const
 void AA_MPDSnCxx::setExternalModeEnabled(bool enable)
 {
     if (enable) {
-        serialPort->transceive("i1", "?");  // sic
+        serial->transceive("i1", "?");  // sic
     } else {
-        serialPort->transceive("i0", "?");  // sic
+        serial->transceive("i0", "?");  // sic
     }
     getStatus();
 }
 
 void AA_MPDSnCxx::setExternalModeEnabled(int line, bool enable)
 {
-    parseLResponse(serialPort->transceive(QString("L%1I%2").arg(line).arg(enable), "\n\r"));
+    parseLResponse(serial->transceive(QString("L%1I%2").arg(line).arg(enable), "\n\r"));
     status.at(line)->externalMode = enable;
 }
 
 void AA_MPDSnCxx::setOutputEnabled(bool enable)
 {
-    serialPort->transceive(QString("o%1").arg(enable ? "1" : "0"), "?");
+    serial->transceive(QString("o%1").arg(enable ? "1" : "0"), "?");
 }
 
 void AA_MPDSnCxx::setOutputEnabled(int line, bool enable)
 {
-    parseLResponse(serialPort->transceive(QString("L%1O%2").arg(line).arg(enable), "\n\r"));
+    parseLResponse(serial->transceive(QString("L%1O%2").arg(line).arg(enable), "\n\r"));
 }
 
 void AA_MPDSnCxx::setVMode5V()
 {
-    serialPort->transceive("v0", "?");
+    serial->transceive("v0", "?");
 }
 
 void AA_MPDSnCxx::setVMode10V()
 {
-    serialPort->transceive("v1", "?");
+    serial->transceive("v1", "?");
 }
 
 double AA_MPDSnCxx::_stepFrequency(bool up)
 {
-    QString r = serialPort->transceive(up ? "6" : "4", "?");
+    QString r = serial->transceive(up ? "6" : "4", "?");
     QRegularExpression rx("Frequency> ([0-9.]+) MHz");
     QRegularExpressionMatch match = rx.match(r);
     if (!match.hasMatch()) {
@@ -252,7 +252,7 @@ double AA_MPDSnCxx::_stepFrequency(bool up)
 
 int AA_MPDSnCxx::_stepPower(bool up)
 {
-    QString r = serialPort->transceive(up ? "8" : "2", "?");
+    QString r = serial->transceive(up ? "8" : "2", "?");
     QRegularExpression rx("P=(\\d+)[(]([0-9.]+)dBm[)]");
     QRegularExpressionMatch match = rx.match(r);
     if (!match.hasMatch()) {
@@ -265,7 +265,7 @@ int AA_MPDSnCxx::_stepPower(bool up)
 
 int AA_MPDSnCxx::_stepProfile(bool up)
 {
-    QString r = serialPort->transceive(up ? "3" : "1", "\n\n\r> ");
+    QString r = serial->transceive(up ? "3" : "1", "\n\n\r> ");
     QRegularExpression rx("Selected profile: (\\d)\n\r");
     QRegularExpressionMatch match = rx.match(r);
     if (!match.hasMatch()) {
@@ -338,7 +338,7 @@ void AA_MPDSnCxx::setBlanking(bool enableOutput, bool enableExternal, bool store
     if (store) {
         s += "E";
     }
-    QString r = serialPort->transceive(s, "\n\r");
+    QString r = serial->transceive(s, "\n\r");
     QRegularExpression rx("^BS([0,1])I([0,1])\n\r$");
     QRegularExpressionMatch match = rx.match(r);
 
@@ -432,7 +432,7 @@ void AA_MPDSnCxx::parseLResponse(const QString &s)
 
 void AA_MPDSnCxx::parseHelp()
 {
-    QString s = serialPort->transceive(".", "\n\n\r> ");
+    QString s = serial->transceive(".", "\n\n\r> ");
     QRegularExpression rx("VMode: ([510]+)V");
     QRegularExpressionMatch match = rx.match(s);
 

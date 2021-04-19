@@ -8,7 +8,7 @@
 
 FilterWheel::FilterWheel(QObject *parent) : SerialDevice(parent)
 {
-    serialPort->setLineEndTermination("\r", "\r");
+    serial->setLineEndTermination("\r", "\r");
     positionCount = -1;
     setMotionTime(FILTERWHEEL_MOTION_TIME); // wait in ms between reaching any position
 }
@@ -141,10 +141,10 @@ void FilterWheel::ping()
 
 QString FilterWheel::transceiveChkSyntaxError(QString cmd)
 {
-    serialPort->sendMsg(cmd);
+    serial->sendMsg(cmd);
     removeEcho(cmd);
-    QString response = serialPort->receive();
-    response.append(serialPort->receive()); // sometimes the device does not send the full response during one communication
+    QString response = serial->receive();
+    response.append(serial->receive()); // sometimes the device does not send the full response during one communication
     response.remove('\r');
     response.remove(QRegExp("[<>]"));
     if (response.startsWith("Command error")) {
@@ -157,7 +157,7 @@ void FilterWheel::removeEcho(QString cmd)
 {
     QString cmdecho = QString();
     do {
-        QString msg = serialPort->receive();
+        QString msg = serial->receive();
         cmdecho.append(msg);
     } while (!cmdecho.contains(cmd, Qt::CaseSensitive));
 }

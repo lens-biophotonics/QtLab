@@ -8,7 +8,7 @@
 
 Cobolt::Cobolt(QObject *parent) : SerialDevice(parent)
 {
-    serialPort->setLineEndTermination("\r\n", "\r\n");
+    serial->setLineEndTermination("\r\n", "\r\n");
 }
 
 void Cobolt::postConnect_impl()
@@ -67,12 +67,12 @@ int Cobolt::getWavelength()
 
 double Cobolt::getOutputPower()
 {
-    return serialPort->getDouble("pa?");
+    return serial->getDouble("pa?");
 }
 
 double Cobolt::getOutputPowerSetPoint()
 {
-    return serialPort->getDouble("p?");
+    return serial->getDouble("p?");
 }
 
 /**
@@ -82,68 +82,68 @@ double Cobolt::getOutputPowerSetPoint()
 
 double Cobolt::getDriveCurrent()
 {
-    return serialPort->getDouble("i?");
+    return serial->getDouble("i?");
 }
 
 double Cobolt::getHours()
 {
-    return serialPort->getDouble("hrs?");
+    return serial->getDouble("hrs?");
 }
 
 double Cobolt::getModulationHighCurrent()
 {
-    return serialPort->getDouble("gmc?");
+    return serial->getDouble("gmc?");
 }
 
 double Cobolt::getModulationLowCurrent()
 {
-    return serialPort->getDouble("glth?");
+    return serial->getDouble("glth?");
 }
 
 double Cobolt::getTECLDSetTemperature()
 {
-    return serialPort->getDouble("gtec4t?");
+    return serial->getDouble("gtec4t?");
 }
 
 double Cobolt::readTECLDTemperature()
 {
-    return serialPort->getDouble("rtec4t?");
+    return serial->getDouble("rtec4t?");
 }
 
 Cobolt::OPERATING_FAULT Cobolt::getOperatingFault()
 {
-    return static_cast<OPERATING_FAULT>(serialPort->getInt("f?"));
+    return static_cast<OPERATING_FAULT>(serial->getInt("f?"));
 }
 
 bool Cobolt::isInterlockOpen()
 {
-    return serialPort->getInt("ilk?");
+    return serial->getInt("ilk?");
 }
 
 bool Cobolt::isAnalogModulationEnabled()
 {
-    return serialPort->getInt("games?");
+    return serial->getInt("games?");
 }
 
 bool Cobolt::isDigitalModulationEnabled()
 {
-    return serialPort->getInt("gdmes?");
+    return serial->getInt("gdmes?");
 }
 
 bool Cobolt::isAnalogLowImpedanceEnabled()
 {
-    return serialPort->getInt("galis?");
+    return serial->getInt("galis?");
 }
 
 Cobolt::ON_OFF_STATE Cobolt::getOnOffState()
 {
-    int state = serialPort->getInt("l?");
+    int state = serial->getInt("l?");
     return static_cast<ON_OFF_STATE>(state);
 }
 
 Cobolt::OPERATING_MODE Cobolt::getOperatingMode()
 {
-    int mode = serialPort->getInt("gom?");
+    int mode = serial->getInt("gom?");
     return static_cast<OPERATING_MODE>(mode);
 }
 
@@ -239,7 +239,7 @@ void Cobolt::setVerboseName(const QString &value)
 
 QString Cobolt::transceiveChkOK(QString cmd)
 {
-    QString response = serialPort->transceive(cmd);
+    QString response = serial->transceive(cmd);
     if (response != "OK") {
         throw std::runtime_error(response.toLatin1());
     }
@@ -248,7 +248,7 @@ QString Cobolt::transceiveChkOK(QString cmd)
 
 QString Cobolt::transceiveChkSyntaxError(QString cmd)
 {
-    QString response = serialPort->transceive(cmd);
+    QString response = serial->transceive(cmd);
     if (response.startsWith("Syntax error")) {
         throw std::runtime_error(response.toLatin1());
     }

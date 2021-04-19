@@ -16,7 +16,7 @@ public:
     explicit SerialDevice(QObject *parent = nullptr);
     virtual ~SerialDevice();
 
-    SerialPort *getSerialPort() const;
+    SerialPort *serialPort() const;
 
 public slots:
     void connect();
@@ -28,7 +28,7 @@ signals:
 
 protected:
     virtual void postConnect_impl();
-    SerialPort *serialPort = nullptr;
+    SerialPort *serial = nullptr;
 };
 
 #endif // SERIALDEVICE_H

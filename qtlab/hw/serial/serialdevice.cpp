@@ -2,27 +2,27 @@
 
 SerialDevice::SerialDevice(QObject *parent) : QObject(parent)
 {
-    serialPort = new SerialPort();
+    serial = new SerialPort();
 }
 
 SerialDevice::~SerialDevice()
 {
     disconnect();
-    delete serialPort;
+    delete serial;
 }
 
 void SerialDevice::connect()
 {
-    if (serialPort->isOpen()) {
+    if (serial->isOpen()) {
         return;
     }
-    bool ret = serialPort->open();
+    bool ret = serial->open();
     if (!ret) {
         QString msg("Cannot connect to Device on serial port %1");
-        msg = msg.arg(serialPort->portName());
+        msg = msg.arg(serial->portName());
         throw std::runtime_error(msg.toLatin1());
     } else {
-        serialPort->readAll();  // empty input buffer
+        serial->readAll();  // empty input buffer
         postConnect_impl();
         emit connected();
     }
@@ -30,16 +30,16 @@ void SerialDevice::connect()
 
 void SerialDevice::disconnect()
 {
-    if (!serialPort->isOpen()) {
+    if (!serial->isOpen()) {
         return;
     }
-    serialPort->close();
+    serial->close();
     emit disconnected();
 }
 
-SerialPort *SerialDevice::getSerialPort() const
+SerialPort *SerialDevice::serialPort() const
 {
-    return serialPort;
+    return serial;
 }
 
 /**
