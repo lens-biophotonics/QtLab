@@ -15,6 +15,14 @@ foreach(_comp ${_supported_components})
   endif()
 endforeach()
 
+if(";${QtLab_FIND_COMPONENTS};" MATCHES Widgets)
+    find_dependency(Qt5 REQUIRED Widgets)
+endif()
+
+if(";${QtLab_FIND_COMPONENTS};" MATCHES Serial)
+find_dependency(Qt5 REQUIRED SerialPort)
+endif()
+
 set(QtLab_FOUND True)
 
 foreach(_comp ${QtLab_FIND_COMPONENTS})
