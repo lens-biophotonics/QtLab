@@ -3,7 +3,11 @@
 
 #include <QMap>
 
-#include <PI/PI_GCS2_DLL.h>
+#ifdef WIN32
+#include <windows.h>
+#endif
+
+#include <PI_GCS2_DLL.h>
 
 #include <qtlab/hw/pi/pidaisychain.h>
 
@@ -23,8 +27,18 @@ PIDaisyChain::~PIDaisyChain()
 void PIDaisyChain::open(const QString &serialPortName, const int baud)
 {
     std::unique_ptr<char[]> buf(new char[1024]);
+#ifdef Q_OS_UNIX
     id = PI_OpenRS232DaisyChainByDevName(serialPortName.toStdString().c_str(),
                                          baud, &_nOfDevices, buf.get(), 1024);
+#endif
+#ifdef Q_OS_WIN
+    bool ok;
+    int portNumber = serialPortName.split("COM").at(1).toInt(&ok);
+    if (!ok) {
+        throw std::runtime_error("Invalid serialPortName");
+    }
+    id = PI_OpenRS232DaisyChain(portNumber, baud, &_nOfDevices, buf.get(), 1024);
+#endif
 
     if (id == -1) {
         throw std::runtime_error("PI_OpenRS232DaisyChainByDevName failed");

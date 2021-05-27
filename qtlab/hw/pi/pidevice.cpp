@@ -44,7 +44,17 @@ PIDevice::~PIDevice()
 
 void PIDevice::connectSerial(const QString &portName, const int baud)
 {
+#ifdef Q_OS_UNIX
     id = PI_ConnectRS232ByDevName(portName.toStdString().c_str(), baud);
+#endif
+#ifdef Q_OS_WIN
+    bool ok;
+    int portNumber = portName.split("COM").at(1).toInt(&ok);
+    if (!ok) {
+        throw std::runtime_error("Invalid serialPortName");
+    }
+    id = PI_ConnectRS232(portNumber, baud);
+#endif
 
     if (id == -1) {
         throw std::runtime_error("PI_ConnectRS232ByDevName failed");

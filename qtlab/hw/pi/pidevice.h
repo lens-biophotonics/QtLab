@@ -3,7 +3,13 @@
 
 #include <memory>
 
-#include <PI/PI_GCS2_DLL.h>
+#ifdef WIN32
+#include <windows.h>
+#endif
+
+#include "qtlab-hw-pi_export.h"
+
+#include <PI_GCS2_DLL.h>
 
 #include <QObject>
 #include <QState>
@@ -13,7 +19,7 @@
 typedef BOOL (*PI_qVectorOfDoubles)(int, const char*, double*);
 typedef BOOL (*PI_vectorOfDoubles)(int, const char*, const double*);
 
-class PIDevice : public QObject
+class QTLAB_HW_PI_EXPORT PIDevice : public QObject
 {
     Q_OBJECT
 

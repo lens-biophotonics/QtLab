@@ -22,7 +22,7 @@ set(HEADERS
 
 add_library(${TARGETNAME} SHARED ${SOURCEFILES})
 
-target_link_libraries(${TARGETNAME} PRIVATE
+target_link_libraries(${TARGETNAME} PUBLIC
     Qt5::SerialPort
     qtlab-core
 )
@@ -34,6 +34,7 @@ if(UNIX)
 endif()
 
 if(PIGCS_FOUND)
+    set(QTLAB_HW_PI TRUE PARENT_SCOPE)
     target_link_libraries(${TARGETNAME} PUBLIC ${PIGCS_LIBRARY})
     target_compile_definitions(${TARGETNAME} PRIVATE WITH_HARDWARE)
 else()
@@ -41,4 +42,5 @@ else()
             "Library ${TARGETNAME} will be built in demo mode.")
 endif()
 
+set(${TARGETNAME}_GEN_EXPORT_HEADER TRUE)
 include(install_targets)
