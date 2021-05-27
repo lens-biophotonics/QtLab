@@ -3,6 +3,8 @@ find_package(Qt5 5.8 REQUIRED COMPONENTS
 )
 
 find_package(Qwt)
+find_package(PIGCS)
+find_package(Qt5 5.8 COMPONENTS SerialPort)
 
 set(TARGETNAME qtlab-widgets)
 set(EXPORT_NAME Widgets)
@@ -25,12 +27,27 @@ if(WIN32)
     target_compile_definitions(${TARGETNAME} PUBLIC QWT_DLL)
 endif()
 
+if (PIGCS_FOUND)
+    set(SOURCE_FILES ${SOURCE_FILES} picontrollersettingswidget.cpp)
+    target_link_libraries(${TARGETNAME}
+        PUBLIC
+            ${PIGCS_LIBRARY}
+            Qt5::SerialPort
+    )
+    target_include_directories(${TARGETNAME}
+        PUBLIC
+            ${PIGCS_INCLUDE_DIR}
+    )
+else()
+    message("Could not find PIGCS. PI widgets will not be built")
+endif()
+
 if (Qwt_FOUND)
     set(SOURCE_FILES ${SOURCE_FILES} cameradisplay.cpp cameraplot.cpp timeplot.cpp)
     target_link_libraries(${TARGETNAME}
         PUBLIC
-            ${Qwt_LIBRARY}
-    )
+        ${Qwt_LIBRARY}
+        )
 else()
     message("Could not find Qwt. Camera widgets will not be built")
 endif()
@@ -48,6 +65,8 @@ set(HEADERS
     customspinbox.h
 
     logwidget.h
+
+    picontrollersettingswidget.h
 )
 
 target_link_libraries(${TARGETNAME}
