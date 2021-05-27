@@ -1,3 +1,5 @@
+#include <stdexcept>
+
 #include <QGroupBox>
 #include <QGridLayout>
 #include <QPushButton>
@@ -15,12 +17,12 @@
 
 #include "picontrollersettingswidget.h"
 
-enum REFERENCE_ACTION {
+typedef enum {
     REFACTION_DONT_REFERENCE = 0,
     REFACTION_POS_LIMITS = 1,
     REFACTION_NEG_LIMITS = 2,
     REFACTION_REF_SWITCH = 3,
-};
+} REFERENCE_ACTION;
 
 PIControllerSettingsWidget::PIControllerSettingsWidget(
     PIDevice *device,
@@ -159,11 +161,11 @@ void PIControllerSettingsWidget::setupUI()
     QListView *view = new QListView();
     view->setFixedWidth(300);
     serialPortComboBox->setView(view);
-    serialPortComboBox->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLength);
+    serialPortComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     serialPortComboBox->setMinimumContentsLength(15);
 
     for (const QSerialPortInfo &info : QSerialPortInfo::availablePorts()) {
-        if (info.manufacturer() != "PI") {
+        if (info.manufacturer() != "PI" && !info.description().startsWith("PI")) {
             continue;
         }
         QString descr = QString("%1 (%2, %3)")

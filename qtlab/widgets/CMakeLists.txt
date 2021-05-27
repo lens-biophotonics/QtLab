@@ -3,7 +3,6 @@ find_package(Qt5 5.8 REQUIRED COMPONENTS
 )
 
 find_package(Qwt)
-find_package(PIGCS)
 find_package(Qt5 5.8 COMPONENTS SerialPort)
 
 set(TARGETNAME qtlab-widgets)
@@ -27,16 +26,14 @@ if(WIN32)
     target_compile_definitions(${TARGETNAME} PUBLIC QWT_DLL)
 endif()
 
-if (PIGCS_FOUND)
-    set(SOURCE_FILES ${SOURCE_FILES} picontrollersettingswidget.cpp)
+if (QTLAB_HW_PI)
+    set(SOURCE_FILES ${SOURCE_FILES}
+        picontrollersettingswidget.cpp
+        pipositioncontrolwidget.cpp
+    )
     target_link_libraries(${TARGETNAME}
         PUBLIC
-            ${PIGCS_LIBRARY}
-            Qt5::SerialPort
-    )
-    target_include_directories(${TARGETNAME}
-        PUBLIC
-            ${PIGCS_INCLUDE_DIR}
+            qtlab-hw-pi
     )
 else()
     message("Could not find PIGCS. PI widgets will not be built")
@@ -67,6 +64,7 @@ set(HEADERS
     logwidget.h
 
     picontrollersettingswidget.h
+    pipositioncontrolwidget.h
 )
 
 target_link_libraries(${TARGETNAME}
