@@ -48,6 +48,21 @@ void PIPositionControlWidget::setupUI()
     setLayout(vLayout);
 }
 
+QDoubleSpinBox *PIPositionControlWidget::getStepSpinBox(int i) const
+{
+    return stepSpinBoxList.at(i);
+}
+
+DoubleSpinBox *PIPositionControlWidget::getVelocitySpinBox(int i) const
+{
+    return velocitySpinBoxList.at(i);
+}
+
+DoubleSpinBox *PIPositionControlWidget::getPositionSpinbox(int i) const
+{
+    return positionSpinboxList.at(i);
+}
+
 void PIPositionControlWidget::appendRow(
     PIDevice *device, const QString &axis, const QString &axisName)
 {
@@ -61,7 +76,9 @@ void PIPositionControlWidget::appendRow(
     grid->addWidget(haltPushButton, row, col++);
 
     DoubleSpinBox *positionSpinbox = new DoubleSpinBox();
+    positionSpinboxList.append(positionSpinbox);
     positionSpinbox->setDecimals(4);
+    positionSpinbox->setRange(0, 1e9);
     grid->addWidget(positionSpinbox, row, col++);
 
     QPushButton *minusPushButton = new QPushButton("-");
@@ -77,11 +94,15 @@ void PIPositionControlWidget::appendRow(
     grid->addWidget(line, row, col++);
 
     QDoubleSpinBox *stepSpinBox = new QDoubleSpinBox();
+    stepSpinBoxList.append(stepSpinBox);
+    stepSpinBox->setRange(0, 1e9);
     stepSpinBox->setValue(0.1);
     stepSpinBox->setDecimals(4);
     grid->addWidget(stepSpinBox, row, col++);
 
     DoubleSpinBox *velocitySpinBox = new DoubleSpinBox();
+    velocitySpinBoxList.append(velocitySpinBox);
+    velocitySpinBox->setRange(0, 1e9);
     velocitySpinBox->setValue(1);
     velocitySpinBox->setDecimals(4);
     grid->addWidget(velocitySpinBox, row, col++);
@@ -192,10 +213,6 @@ void PIPositionControlWidget::appendRow(
         double max = device->getTravelRangeHighEnd(axis).at(0);
 
         positionSpinbox->setRange(min, max);
-//        positionSpinbox->setValue(pos);
-//        stepSpinBox->setRange(0, max);
-//        velocitySpinBox->setValue(velocity);
-//        stepSpinBox->setValue(stepSize);
 
         updateTimer->start();
     });

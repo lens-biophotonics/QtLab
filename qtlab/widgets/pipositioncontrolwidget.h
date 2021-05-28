@@ -4,8 +4,10 @@
 #include <QWidget>
 #include <QGridLayout>
 #include <QGroupBox>
+#include <QDoubleSpinBox>
 
 class PIDevice;
+class DoubleSpinBox;
 
 class PIPositionControlWidget : public QWidget
 {
@@ -17,6 +19,10 @@ public:
 
     void setTitle(const QString &title);
 
+    DoubleSpinBox *getPositionSpinbox(int i) const;
+    DoubleSpinBox *getVelocitySpinBox(int i) const;
+    QDoubleSpinBox *getStepSpinBox(int i) const;
+
 private:
     void setupUI();
 
@@ -25,6 +31,10 @@ private:
 
     QGridLayout *grid;
     QGroupBox *gb;
+
+    QList<DoubleSpinBox*> positionSpinboxList;
+    QList<DoubleSpinBox*> velocitySpinBoxList;
+    QList<QDoubleSpinBox*> stepSpinBoxList;
 };
 
 #endif // PIPOSITIONCONTROLWIDGET_H
