@@ -71,10 +71,11 @@ void PIPositionControlWidget::appendRow(
     int col = 0;
     grid->addWidget(new QLabel(axisName), row, col++);
     QLabel *currentPos = new QLabel("0.000");
+    currentPos->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     grid->addWidget(currentPos, row, col++);
-    QString s = "QPushButton {color: red;}";
+
     QPushButton *haltPushButton = new QPushButton("HALT");
-    haltPushButton->setStyleSheet(s);
+    haltPushButton->setStyleSheet("QPushButton {color: red;}");
     grid->addWidget(haltPushButton, row, col++);
 
     QPushButton *negEndPushButton = new QPushButton("|<");
@@ -177,6 +178,10 @@ void PIPositionControlWidget::appendRow(
         try {
             device->setVelocities(axis, &vel);
 
+            if (a != MOVE) {
+                currentPos->setStyleSheet("");
+            }
+
             switch (a) {
             case MOVE:
                 device->move(axis, &pos);
@@ -242,6 +247,11 @@ void PIPositionControlWidget::appendRow(
         try {
             double pos = device->getCurrentPosition(axis).at(0);
             currentPos->setText(QString("%1").arg(pos, 0, 'f', 4));
+            if (device->isOnTarget(axis)) {
+                currentPos->setStyleSheet("QLabel {background-color: #c0fec0}");
+            } else {
+                currentPos->setStyleSheet("");
+            }
         }
         catch (std::runtime_error e) {
             QMessageBox::critical(nullptr, "Error", e.what());
