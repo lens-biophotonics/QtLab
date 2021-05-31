@@ -214,7 +214,7 @@ void PIPositionControlWidget::appendRow(
         catch (std::runtime_error e) {
             QMessageBox::critical(nullptr, "Error", e.what());
         }
-        };
+    };
 
     connect(positionSpinbox, &DoubleSpinBox::returnPressed, this, [ = ](){
         performAction(MOVE);
@@ -253,9 +253,7 @@ void PIPositionControlWidget::appendRow(
                 currentPos->setStyleSheet("");
             }
         }
-        catch (std::runtime_error e) {
-            QMessageBox::critical(nullptr, "Error", e.what());
-        }
+        catch (std::runtime_error e) {}
     });
 
     connect(device, &PIDevice::connected, this, [ = ](){
@@ -265,7 +263,7 @@ void PIPositionControlWidget::appendRow(
         positionSpinbox->setRange(min, max);
 
         updateTimer->start();
-    });
+    }, Qt::QueuedConnection);
 
     connect(device, &PIDevice::disconnected, updateTimer, &QTimer::stop);
 }

@@ -157,7 +157,6 @@ void PIControllerSettingsWidget::configureStages()
     catch (std::runtime_error e) {
         QMessageBox::critical(this, "Error", e.what());
     }
-    refreshValues();
 }
 
 void PIControllerSettingsWidget::setupUI()
@@ -197,7 +196,7 @@ void PIControllerSettingsWidget::setupUI()
     grid->addWidget(baudComboBox, row++, 1, 1, 1);
 
     deviceNumberSpinBox = new QSpinBox();
-    deviceNumberSpinBox->setMinimum(1);
+    deviceNumberSpinBox->setMinimum(-1);
     deviceNumberSpinBox->setMaximum(17);
     deviceNumberSpinBox->setValue(device->getDeviceNumber());
     grid->addWidget(new QLabel("Device number"), row, 0, 1, 1);
@@ -258,7 +257,7 @@ void PIControllerSettingsWidget::setupUI()
             device, &PIDevice::close);
 
     connect(device, &PIDevice::connected, this,
-            &PIControllerSettingsWidget::refreshValues);
+            &PIControllerSettingsWidget::refreshValues, Qt::QueuedConnection);
 
     QState *cs = device->getConnectedState();
     QState *ds = device->getDisconnectedState();
