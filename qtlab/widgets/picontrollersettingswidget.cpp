@@ -35,6 +35,7 @@ PIControllerSettingsWidget::PIControllerSettingsWidget(
 void PIControllerSettingsWidget::configureStages()
 {
     QDialog *dialog = new QDialog();
+    dialog->deleteLater();
 
     dialog->setWindowTitle("Configure stages");
 
@@ -43,9 +44,15 @@ void PIControllerSettingsWidget::configureStages()
     QStringList availStages;
     try {
         availStages = device->getAvailableStageTypes();
+        if (availStages.isEmpty()) {
+            throw std::runtime_error("Cannot find stages");
+        }
     }
-    catch (std::runtime_error) {
+    catch (std::runtime_error e) {
+        QMessageBox::critical(this, "Error", e.what());
+        return;
     }
+
     QStringList stages = device->getStages("", true);
 
     QFormLayout *formLayout = new QFormLayout();

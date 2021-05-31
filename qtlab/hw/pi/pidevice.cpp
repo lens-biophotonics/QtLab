@@ -282,9 +282,10 @@ QStringList PIDevice::getStages(const QString &axes, bool stripAxes)
 
 QStringList PIDevice::getAvailableStageTypes()
 {
-    std::unique_ptr<char[]> buf(new char[4096]);
+    std::unique_ptr<char[]> buf(new char[65536]);
+    memset(buf.get(), 0, 65536);
 #ifdef WITH_HARDWARE
-    CALL_THROW(PI_qVST(id, buf.get(), 4096));
+    CALL_THROW(PI_qVST(id, buf.get(), 65536));
 #endif
     QStringList sl = QString(buf.get()).replace(" ", "").split("\n");
     sl.removeAll(QString(""));
