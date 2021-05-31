@@ -28,9 +28,11 @@ void PIPositionControlWidget::setupUI()
     int col = 1;
     grid->addWidget(new QLabel("Curr. Pos."), row, col);
     col += 2;
+    grid->addWidget(new QLabel("|<"), row, col++);
+    grid->addWidget(new QLabel("<"), row, col++);
     grid->addWidget(new QLabel("Set Pos."), row, col++);
-    grid->addWidget(new QLabel("Step down"), row, col++);
-    grid->addWidget(new QLabel("Step up"), row, col++);
+    grid->addWidget(new QLabel(">"), row, col++);
+    grid->addWidget(new QLabel(">|"), row, col++);
 
     QFrame *line;
     line = new QFrame();
@@ -75,17 +77,31 @@ void PIPositionControlWidget::appendRow(
     haltPushButton->setStyleSheet(s);
     grid->addWidget(haltPushButton, row, col++);
 
+    QPushButton *negEndPushButton = new QPushButton("|<");
+    negEndPushButton->setFixedWidth(30);
+    negEndPushButton->setToolTip("Go to negative end");
+    grid->addWidget(negEndPushButton, row, col++);
+
+    QPushButton *stepDownPushButton = new QPushButton("<");
+    stepDownPushButton->setFixedWidth(30);
+    stepDownPushButton->setToolTip("Step down");
+    grid->addWidget(stepDownPushButton, row, col++);
+
     DoubleSpinBox *positionSpinbox = new DoubleSpinBox();
     positionSpinboxList.append(positionSpinbox);
     positionSpinbox->setDecimals(4);
     positionSpinbox->setRange(0, 1e9);
     grid->addWidget(positionSpinbox, row, col++);
 
-    QPushButton *minusPushButton = new QPushButton("-");
-    grid->addWidget(minusPushButton, row, col++);
+    QPushButton *stepUpPushButton = new QPushButton(">");
+    stepUpPushButton->setFixedWidth(30);
+    stepUpPushButton->setToolTip("Step up");
+    grid->addWidget(stepUpPushButton, row, col++);
 
-    QPushButton *plusPushButton = new QPushButton("+");
-    grid->addWidget(plusPushButton, row, col++);
+    QPushButton *posEndPushButton = new QPushButton(">|");
+    posEndPushButton->setFixedWidth(30);
+    posEndPushButton->setToolTip("Go to positive end");
+    grid->addWidget(posEndPushButton, row, col++);
 
     QFrame *line;
     line = new QFrame();
@@ -118,8 +134,10 @@ void PIPositionControlWidget::appendRow(
     wList = {
         haltPushButton,
         positionSpinbox,
-        minusPushButton,
-        plusPushButton,
+        negEndPushButton,
+        stepDownPushButton,
+        stepUpPushButton,
+        posEndPushButton,
         stepSpinBox,
         velocitySpinBox,
     };
@@ -141,8 +159,10 @@ void PIPositionControlWidget::appendRow(
 
     enum ACTION {
         MOVE,
-        STEPUP,
+        NEGEND,
         STEPDOWN,
+        STEPUP,
+        POSEND,
         SETVELOCITY,
     };
 
@@ -152,6 +172,8 @@ void PIPositionControlWidget::appendRow(
         double vel = velocitySpinBox->value();
         double stepSize = stepSpinBox->value();
 
+        double min, max;
+
         try {
             device->setVelocities(axis, &vel);
 
@@ -160,14 +182,24 @@ void PIPositionControlWidget::appendRow(
                 device->move(axis, &pos);
                 break;
 
-            case STEPUP:
-                device->setStepSize(axis, stepSize);
-                device->stepUp(axis);
+            case NEGEND:
+                min = device->getTravelRangeLowEnd(axis).at(0);
+                device->move(axis, &min);
                 break;
 
             case STEPDOWN:
                 device->setStepSize(axis, stepSize);
                 device->stepDown(axis);
+                break;
+
+            case STEPUP:
+                device->setStepSize(axis, stepSize);
+                device->stepUp(axis);
+                break;
+
+            case POSEND:
+                max = device->getTravelRangeHighEnd(axis).at(0);
+                device->move(axis, &max);
                 break;
 
             case SETVELOCITY:
@@ -183,12 +215,20 @@ void PIPositionControlWidget::appendRow(
         performAction(MOVE);
     });
 
-    connect(plusPushButton, &QPushButton::clicked, this, [ = ](){
+    connect(negEndPushButton, &QPushButton::clicked, this, [ = ](){
+        performAction(NEGEND);
+    });
+
+    connect(stepDownPushButton, &QPushButton::clicked, this, [ = ](){
+        performAction(STEPDOWN);
+    });
+
+    connect(stepUpPushButton, &QPushButton::clicked, this, [ = ](){
         performAction(STEPUP);
     });
 
-    connect(minusPushButton, &QPushButton::clicked, this, [ = ](){
-        performAction(STEPDOWN);
+    connect(posEndPushButton, &QPushButton::clicked, this, [ = ](){
+        performAction(POSEND);
     });
 
     connect(velocitySpinBox, &DoubleSpinBox::returnPressed, this, [ = ](){
