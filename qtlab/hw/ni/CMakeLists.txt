@@ -75,4 +75,5 @@ add_custom_command(
 
 set_property(SOURCE ${WRAPPER_COMMAND_OUTPUT} PROPERTY SKIP_AUTOMOC ON)
 
+set(${TARGETNAME}_GEN_EXPORT_HEADER TRUE)
 include(install_targets)

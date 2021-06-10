@@ -72,6 +72,7 @@
 
 #include <QObject>
 
+#include "qtlab-hw-ni_export.h"
 #include <qtlab/hw/ni/natinst.h>
 
 using namespace NI;
@@ -82,7 +83,7 @@ using namespace NI;
  * \ingroup NationalInstruments
  */
 
-class NITask : public QObject
+class QTLAB_HW_NI_EXPORT NITask : public QObject
 {
     Q_OBJECT
 public:
