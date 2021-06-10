@@ -73,4 +73,5 @@ target_link_libraries(${TARGETNAME}
         qtlab-core
 )
 
+set(${TARGETNAME}_GEN_EXPORT_HEADER TRUE)
 include(install_targets)

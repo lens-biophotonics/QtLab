@@ -5,7 +5,9 @@
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 
-class SpinBox : public QSpinBox
+#include "qtlab-widgets_export.h"
+
+class QTLAB_WIDGETS_EXPORT SpinBox : public QSpinBox
 {
     Q_OBJECT
 public:
@@ -15,7 +17,7 @@ signals:
     void returnPressed(int value);
 };
 
-class DoubleSpinBox : public QDoubleSpinBox
+class QTLAB_WIDGETS_EXPORT DoubleSpinBox : public QDoubleSpinBox
 {
     Q_OBJECT
 public:
