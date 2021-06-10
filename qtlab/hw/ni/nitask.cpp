@@ -7,23 +7,21 @@ static Logger *logger = getLogger("NI");
 
 #define ERRBUF_SIZE 2048
 
-NITask::NITask(QString taskName, QObject *parent) : QObject(parent),
-    taskName(taskName)
+NITask::NITask(QObject *parent) : QObject(parent)
 {
     errBuff = new char[ERRBUF_SIZE];
 }
 
 NITask::~NITask()
 {
-    if(isInitialized())
+    if (isInitialized())
         clearTask();
     delete[] errBuff;
 }
 
 void NITask::createTask(QString taskName)
 {
-    if (!taskName.isEmpty())
-        this->taskName = taskName;
+    this->taskName = taskName;
     DAQmxErrChk(DAQmxCreateTask(this->taskName.toLatin1(), &task));
 }
 
@@ -105,6 +103,11 @@ void NITask::initializeTask_impl()
     configureChannels();
     configureTiming();
     configureTriggering();
+}
+
+void NITask::setTaskName(const QString &value)
+{
+    taskName = value;
 }
 
 double NITask::getSampleRate() const

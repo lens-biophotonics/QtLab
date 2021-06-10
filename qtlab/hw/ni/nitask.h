@@ -137,7 +137,7 @@ public:
         IdleState_Low = DAQmx_Val_Low,
     };
 
-    explicit NITask(QString taskName, QObject *parent = nullptr);
+    explicit NITask(QObject *parent = nullptr);
     virtual ~NITask();
 
     void createTask(QString taskName = QString());
@@ -161,6 +161,8 @@ public:
 
     uInt64 getSampsPerChan() const;
     void setSampsPerChan(const uInt64 &value);
+
+    void setTaskName(const QString &value);
 
 #include "NIDAQmx_wrapper_methods.h"
 
