@@ -17,10 +17,10 @@ set(SOURCEFILES
 set(HEADERS
     natinst.h
     nitask.h
-    ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_wrapper_methods.h
+    ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_task_wrapper_methods.h
 )
 
-add_library(${TARGETNAME} SHARED ${SOURCEFILES} ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_wrapper_methods.h)
+add_library(${TARGETNAME} SHARED ${SOURCEFILES} ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_task_wrapper_methods.h)
 
 target_link_libraries(${TARGETNAME} PUBLIC
     qtlab-core
@@ -46,8 +46,8 @@ endif()
 find_program(docker_EXECUTABLE docker)
 find_program(spatch_EXECUTABLE spatch)
 
-set(WRAPPER_COMMAND_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_dummy.cpp ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_wrapper_methods.cpp ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_wrapper_methods.h)
-set(WRAPPER_COMMAND_DEPENDS generate_wrappers.sh wrapper.cocci)
+set(WRAPPER_COMMAND_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_dummy.cpp ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_task_wrapper_methods.cpp ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_task_wrapper_methods.h)
+set(WRAPPER_COMMAND_DEPENDS generate_wrappers.sh wrapper_task.cocci)
 
 if(spatch_EXECUTABLE)
     message(STATUS "Found coccinelle: ${spatch_EXECUTABLE}")
@@ -59,7 +59,7 @@ else()
         set(WRAPPER_COMMAND_DEPENDS qtlab_wrappers_builder ${WRAPPER_COMMAND_DEPENDS})
     else()
         message(WARNING "Neither docker nor spatch found. You need to copy generated wrappers in ${CMAKE_CURRENT_LIST_DIR}")
-        set(FILES_TO_BE_COPIED ${CMAKE_CURRENT_LIST_DIR}/NIDAQmx_dummy.cpp ${CMAKE_CURRENT_LIST_DIR}/NIDAQmx_wrapper_methods.cpp ${CMAKE_CURRENT_LIST_DIR}/NIDAQmx_wrapper_methods.h)
+        set(FILES_TO_BE_COPIED ${CMAKE_CURRENT_LIST_DIR}/NIDAQmx_dummy.cpp ${CMAKE_CURRENT_LIST_DIR}/NIDAQmx_task_wrapper_methods.cpp ${CMAKE_CURRENT_LIST_DIR}/NIDAQmx_task_wrapper_methods.h)
         set(WRAPPER_COMMAND COMMAND ${CMAKE_COMMAND} -E copy ${FILES_TO_BE_COPIED} ${CMAKE_CURRENT_BINARY_DIR})
         set(WRAPPER_COMMAND_DEPENDS ${FILES_TO_BE_COPIED})
     endif()

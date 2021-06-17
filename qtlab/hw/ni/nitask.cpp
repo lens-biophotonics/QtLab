@@ -135,4 +135,4 @@ int NITask::nOfChannels()
     return physicalChannels.count();
 }
 
-#include "NIDAQmx_wrapper_methods.cpp"
+#include "NIDAQmx_task_wrapper_methods.cpp"

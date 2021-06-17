@@ -165,7 +165,7 @@ public:
 
     void setTaskName(const QString &value);
 
-#include "NIDAQmx_wrapper_methods.h"
+#include "NIDAQmx_task_wrapper_methods.h"
 
 public slots:
     void initializeTask();
