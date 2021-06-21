@@ -17,6 +17,7 @@ set(SOURCEFILES
 set(HEADERS
     natinst.h
     nitask.h
+    ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_ni_wrapper_methods.h
     ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_task_wrapper_methods.h
 )
 
@@ -46,8 +47,15 @@ endif()
 find_program(docker_EXECUTABLE docker)
 find_program(spatch_EXECUTABLE spatch)
 
-set(WRAPPER_COMMAND_OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_task_dummy.cpp ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_task_wrapper_methods.cpp ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_task_wrapper_methods.h)
-set(WRAPPER_COMMAND_DEPENDS generate_wrappers.sh wrapper_task.cocci)
+set(WRAPPER_COMMAND_OUTPUT
+    ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_ni_dummy.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_task_dummy.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_ni_wrapper_methods.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_ni_wrapper_methods.h
+    ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_task_wrapper_methods.h
+    ${CMAKE_CURRENT_BINARY_DIR}/NIDAQmx_task_wrapper_methods.cpp
+)
+set(WRAPPER_COMMAND_DEPENDS generate_wrappers.sh wrapper_task.cocci wrapper_ni.cocci)
 
 if(spatch_EXECUTABLE)
     message(STATUS "Found coccinelle: ${spatch_EXECUTABLE}")

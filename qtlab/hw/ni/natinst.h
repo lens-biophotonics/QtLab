@@ -4,21 +4,12 @@
 #include <QStringList>
 
 namespace NI {
-
 #include <NIDAQmx.h>
 
 QStringList getDevicesInSystem();
-QStringList getAOPhysicalChans();
-QStringList getAIPhysicalChans();
-QStringList getCOPhysicalChans();
-QStringList getCIPhysicalChans();
-QStringList getDILines();
-QStringList getDIPorts();
-QStringList getDOLines();
-QStringList getDOPorts();
-QStringList getTerminals();
-
 QString PFI2Line(QString term);
+
+#include "NIDAQmx_ni_wrapper_methods.h"
 }
 
 #endif // NATINST_H

@@ -1,6 +1,17 @@
 #include <qtlab/hw/ni/natinst.h>
 #include <qtlab/core/logger.h>
 
+#ifdef WITH_HARDWARE
+#define DAQmxErrChk(functionCall) {                                         \
+        int ret = functionCall;                                             \
+        if (DAQmxFailed(ret)) {                                             \
+            logger->critical(QString("Error %1").arg(ret));                 \
+        }                                                                   \
+}
+#else
+#define DAQmxErrChk
+#endif
+
 using namespace NI;
 
 static Logger *logger = getLogger("NI");
@@ -20,7 +31,6 @@ QStringList NI::getDevicesInSystem()
     return list;
 }
 
-#ifdef WITH_HARDWARE
 typedef int32 (*daqmx_f_ptr)(const char*, char*, uInt32);
 
 static QStringList getList(daqmx_f_ptr myfp)
@@ -41,34 +51,17 @@ static QStringList getList(daqmx_f_ptr myfp)
     }
     return list;
 }
-#endif
 
-#ifdef WITH_HARDWARE
-#define DEF_NI_GET_FUNCTION(funcName, DAQmxFuncName)                        \
-    QStringList NI::funcName() {                                            \
-        return getList(&DAQmxFuncName);                                     \
-    }
-#else
-#define DEF_NI_GET_FUNCTION(funcName, DAQmxFuncNAme)                        \
-    QStringList NI::funcName() {                                            \
-        return QStringList();                                               \
-    }
+#ifndef WITH_HARDWARE
 extern "C" {
 int32 __CFUNC     DAQmxLoadTask (const char taskName[], TaskHandle *taskHandle) {return 0;};
 int32 __CFUNC     DAQmxCreateTask (const char taskName[], TaskHandle *taskHandle) {return 0;};
 #include "NIDAQmx_task_dummy.cpp"
+#include "NIDAQmx_ni_dummy.cpp"
 }
 #endif
 
-DEF_NI_GET_FUNCTION(getAOPhysicalChans, DAQmxGetDevAOPhysicalChans)
-DEF_NI_GET_FUNCTION(getAIPhysicalChans, DAQmxGetDevAIPhysicalChans)
-DEF_NI_GET_FUNCTION(getCOPhysicalChans, DAQmxGetDevCOPhysicalChans)
-DEF_NI_GET_FUNCTION(getCIPhysicalChans, DAQmxGetDevCIPhysicalChans)
-DEF_NI_GET_FUNCTION(getDILines, DAQmxGetDevDILines)
-DEF_NI_GET_FUNCTION(getDIPorts, DAQmxGetDevDIPorts)
-DEF_NI_GET_FUNCTION(getDOLines, DAQmxGetDevDOLines)
-DEF_NI_GET_FUNCTION(getDOPorts, DAQmxGetDevDOPorts)
-DEF_NI_GET_FUNCTION(getTerminals, DAQmxGetDevTerminals)
+#include "NIDAQmx_ni_wrapper_methods.cpp"
 
 /**
  * @brief Transform a PFI terminal to a port/line string.
