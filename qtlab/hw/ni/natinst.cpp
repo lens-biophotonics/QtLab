@@ -16,28 +16,17 @@ using namespace NI;
 
 static Logger *logger = getLogger("NI");
 
-QStringList NI::getDevicesInSystem()
-{
-    QStringList list;
-#ifdef WITH_HARDWARE
-    char buf[2048];
-    if (DAQmxFailed(DAQmxGetSysDevNames(buf, 2048))) {
-        DAQmxGetExtendedErrorInfo(buf, 2048);
-        logger->critical(buf);
-        return list;
-    }
-    list = QString(buf).split(", ");
-#endif
-    return list;
-}
-
 typedef int32 (*daqmx_f_ptr)(const char*, char*, uInt32);
 
+// used by coccinelle wrappers
 static QStringList getList(daqmx_f_ptr myfp)
 {
     QStringList list;
+#ifndef WITH_HARDWARE
+    return list;
+#endif
     char buf[2048];
-    QStringList devList = NI::getDevicesInSystem();
+    QStringList devList = NI::getSysDevNames().split(", ");
     QStringListIterator devIt(devList);
     while (devIt.hasNext()) {
         QString dev = devIt.next();
