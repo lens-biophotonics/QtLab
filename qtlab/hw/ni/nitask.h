@@ -36,40 +36,6 @@
 #define DAQmxErrChk
 #endif
 
-#define TYPE_ISENUM(b) TYPE_ISENUM_ ## b
-#define TYPE_ISENUM_true int32
-#define TYPE_ISENUM_false type
-
-#define DEF_PROP_GETTER(propName, type)                                     \
-    type get ## propName() {                                                \
-        type temp;                                                          \
-        DAQmxErrChk (DAQmxGet ## propName(task, &temp));                    \
-        return temp;                                                        \
-    }
-
-#define DEF_PROP_GETTER_ENUM(propName, type)                                \
-    type get ## propName() {                                                \
-        int32 temp;                                                         \
-        DAQmxErrChk (DAQmxGet ## propName(task, &temp));                    \
-        return (type)temp;                                                  \
-    }
-
-#define DEF_PROP_SETTER(propName, type)                                     \
-    Q_SLOT void set ## propName(type value) {DAQmxErrChk(DAQmxSet ## propName(task, value));}
-
-#define DEF_PROP_RESETTER(propName)                                         \
-    Q_SLOT void reset ## propName() {DAQmxErrChk(DAQmxReset ## propName(task));}
-
-#define DEF_PROP_FUNCS(propName, type)                                      \
-    DEF_PROP_GETTER(propName, type)                                         \
-    DEF_PROP_SETTER(propName, type)                                         \
-    DEF_PROP_RESETTER(propName)
-
-#define DEF_PROP_FUNCE(propName, type)                                      \
-    DEF_PROP_GETTER_ENUM(propName, type)                                    \
-    DEF_PROP_SETTER(propName, type)                                         \
-    DEF_PROP_RESETTER(propName)
-
 #include <QObject>
 
 #include "qtlab-hw-ni_export.h"
