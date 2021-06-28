@@ -94,7 +94,9 @@ expression list EL;
 +t1 bufferSize=2048;
 ...
 +QString s;
++#ifdef WITH_HARDWARE
 +s+=data;
++#endif
 +return s;
 }
 
