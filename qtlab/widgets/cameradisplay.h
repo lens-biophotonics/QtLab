@@ -32,7 +32,7 @@ public slots:
 protected:
     virtual void contextMenuEvent(QContextMenuEvent *event);
 
-private:
+protected:
     CameraPlot *plot;
     QMenu *menu;
     QMenu *LUTMenu;
