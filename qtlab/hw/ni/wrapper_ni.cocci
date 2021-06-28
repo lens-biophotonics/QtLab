@@ -30,34 +30,6 @@ typedef NITask;
 +DAQmxErrChk(fn(EL));
 }
 
-@rule3@
-typedef uInt32;
-identifier fn =~ "getDev..PhysicalChans|getDev..Lines|getDevTerminals";
-typedef QStringList;
-parameter list[n] PL;
-expression list EL;
-@@
-void fn(PL@EL) {
-...
-}
-
-@ script:python foo3 @
-fn_original;
-fn << rule3.fn;
-@@
-coccinelle.fn_original = 'DAQmx' + fn[0].upper() + fn[1:]
-
-@@
-identifier foo3.fn_original, rule3.fn;
-identifier device =~ "device", data =~ "data", bufferSize =~ "bufferSize";
-@@
--void fn(const char device[], char *data, uInt32 bufferSize)
-+QStringList fn()
-{
--...
-+return getList(fn_original);
-}
-
 @@
 identifier fn, fn2;
 identifier i1;
@@ -81,6 +53,7 @@ fn2(
 
 @@
 type t1;
+typedef QStringList;
 identifier data =~ "data";
 identifier bufferSize =~ "bufferSize";
 identifier fn =~ "get*";
@@ -101,8 +74,7 @@ expression list EL;
 }
 
 @@
-typedef Qstring;
-identifier fn =~ "getSysTasks|getSysScales|getSysGlobalChans|get.*List|get.*Names";
+identifier fn =~ "getSysTasks|getSysScales|getSysGlobalChans|get.*List|get.*Names|getDev..PhysicalChans|getDev..Lines|getDev..Ports|getDevTerminals";
 identifier s =~ "s";
 parameter list[n] PL;
 @@
@@ -113,6 +85,37 @@ parameter list[n] PL;
 -return s;
 +return s.split(", ");
 }
+
+@rule3@
+typedef uInt32;
+identifier fn =~ "getDev..PhysicalChans|getDev..Lines|getDev..Ports|getDevTerminals";
+parameter list[n] PL;
+expression list EL;
+@@
+QStringList fn(PL@EL) {
+...
+}
+
+@ script:python foo3 @
+fn_original;
+fn_new;
+fn << rule3.fn;
+@@
+coccinelle.fn_original = 'DAQmx' + fn[0].upper() + fn[1:]
+coccinelle.fn_new = 'get' + fn[6:]
+
+@@
+identifier foo3.fn_original, foo3.fn_new, rule3.fn;
+identifier device =~ "device";
+@@
+QStringList fn(QString device)
+{
+...
+}
++QStringList fn_new()
++{
++return getList(fn_original);
++}
 
 @@
 type t1;
