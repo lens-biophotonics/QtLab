@@ -99,6 +99,20 @@ expression list EL;
 }
 
 @@
+typedef Qstring;
+identifier fn =~ "getSysTasks|getSysScales|getSysGlobalChans|get.*List|get.*Names";
+identifier s =~ "s";
+parameter list[n] PL;
+@@
+-QString fn(PL)
++QStringList fn(PL)
+{
+...
+-return s;
++return s.split(", ");
+}
+
+@@
 type t1;
 identifier i1;
 identifier fn =~ "get.*|.*Supports.*";

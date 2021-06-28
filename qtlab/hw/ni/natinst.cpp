@@ -26,7 +26,7 @@ static QStringList getList(daqmx_f_ptr myfp)
     return list;
 #endif
     char buf[2048];
-    QStringList devList = NI::getSysDevNames().split(", ");
+    QStringList devList = NI::getSysDevNames();
     QStringListIterator devIt(devList);
     while (devIt.hasNext()) {
         QString dev = devIt.next();
