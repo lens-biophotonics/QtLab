@@ -122,9 +122,8 @@ type t1;
 identifier i1;
 identifier fn =~ "get.*|.*Supports.*";
 parameter list[n] PL;
-expression list EL;
 @@
--void fn(PL@EL, t1 *i1)
+-void fn(PL, t1 *i1)
 +t1 fn(PL)
 {
 +t1 i1[1];
