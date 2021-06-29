@@ -56,9 +56,10 @@ void clearTask() {
 identifier fn =~ "get.*|isTaskDone";
 type t1;
 identifier i1;
+parameter list[n] PL;
 @@
--void fn(t1 *i1)
-+t1 fn()
+-void fn(PL, t1 *i1)
++t1 fn(PL)
 {
 +t1 i1[1];
 ...
