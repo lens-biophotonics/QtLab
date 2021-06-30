@@ -2,6 +2,7 @@
 
 #include <QSerialPortInfo>
 #include <QStateMachine>
+#include <QTime>
 
 #include <qtlab/core/logger.h>
 
@@ -44,6 +45,16 @@ bool SerialPort::open(OpenMode mode)
 bool SerialPort::open_impl()
 {
     return true;
+}
+
+int SerialPort::getTransceiveTimeout() const
+{
+    return transceiveTimeout;
+}
+
+void SerialPort::setTransceiveTimeout(int ms)
+{
+    transceiveTimeout = ms;
 }
 
 QState *SerialPort::getDisconnectedState() const
@@ -93,6 +104,8 @@ void SerialPort::sendMsg(QString msg)
 QString SerialPort::receive(QString until)
 {
     QString receivedLines;
+    QTime time;
+    time.start();
     while (true) {
         waitForReadyRead(_serialTimeout);
 
@@ -105,6 +118,11 @@ QString SerialPort::receive(QString until)
         receivedLines.append(msg);
 
         if (bytesAvailable() <= 0) {
+            if(transceiveTimeout >= 0 && time.elapsed() > transceiveTimeout) {
+                logger->warning("Transceive timeout");
+                break;
+            }
+
             if (!until.isNull()) {
                 if (!receivedLines.endsWith(until)) {
                     continue;

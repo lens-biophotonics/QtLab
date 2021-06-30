@@ -36,6 +36,9 @@ public:
     QState *getConnectedState() const;
     QState *getDisconnectedState() const;
 
+    int getTransceiveTimeout() const;
+    void setTransceiveTimeout(int ms);
+
 signals:
     void opened();
     void closed();
@@ -48,6 +51,7 @@ private:
     QString rxLineEndTermination;
     bool loggingEnabled = false;
     int _serialTimeout;
+    int transceiveTimeout = -1;
 
     QState *connectedState;
     QState *disconnectedState;
