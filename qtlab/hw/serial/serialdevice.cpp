@@ -4,7 +4,7 @@
 
 SerialDevice::SerialDevice(QObject *parent) : QObject(parent)
 {
-    serial = new SerialPort();
+    serial = new SerialPort(this);
 }
 
 SerialDevice::~SerialDevice()
