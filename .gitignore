@@ -1,3 +1,4 @@
 *.*.user
 *.autosave
 .directory
+CMakeLists.txt.user*
