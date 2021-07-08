@@ -90,8 +90,8 @@ void PIPositionControlWidget::appendRow(
 
     DoubleSpinBox *positionSpinbox = new DoubleSpinBox();
     positionSpinboxList.append(positionSpinbox);
-    positionSpinbox->setDecimals(4);
-    positionSpinbox->setRange(0, 1e9);
+    positionSpinbox->setDecimals(3);
+    positionSpinbox->setRange(0, 9e3);
     grid->addWidget(positionSpinbox, row, col++);
 
     QPushButton *stepUpPushButton = new QPushButton(">");
@@ -112,16 +112,16 @@ void PIPositionControlWidget::appendRow(
 
     QDoubleSpinBox *stepSpinBox = new QDoubleSpinBox();
     stepSpinBoxList.append(stepSpinBox);
-    stepSpinBox->setRange(0, 1e9);
+    stepSpinBox->setRange(0, 9e3);
     stepSpinBox->setValue(0.1);
-    stepSpinBox->setDecimals(4);
+    stepSpinBox->setDecimals(3);
     grid->addWidget(stepSpinBox, row, col++);
 
     DoubleSpinBox *velocitySpinBox = new DoubleSpinBox();
     velocitySpinBoxList.append(velocitySpinBox);
-    velocitySpinBox->setRange(0, 1e9);
+    velocitySpinBox->setRange(0, 9e3);
     velocitySpinBox->setValue(1);
-    velocitySpinBox->setDecimals(4);
+    velocitySpinBox->setDecimals(3);
     grid->addWidget(velocitySpinBox, row, col++);
 
     row++;
@@ -246,7 +246,7 @@ void PIPositionControlWidget::appendRow(
     connect(updateTimer, &QTimer::timeout, this, [ = ]() {
         try {
             double pos = device->getCurrentPosition(axis).at(0);
-            currentPos->setText(QString("%1").arg(pos, 0, 'f', 4));
+            currentPos->setText(QString("%1").arg(pos, 0, 'f', 3));
             if (device->isOnTarget(axis)) {
                 currentPos->setStyleSheet("QLabel {background-color: #c0fec0}");
             } else {
