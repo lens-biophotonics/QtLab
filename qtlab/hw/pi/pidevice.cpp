@@ -206,30 +206,29 @@ void PIDevice::setVelocity(const double vel)
 
 QVector<double> PIDevice::getVelocities(const QString &axes)
 {
-    return *getVectorOfDoubles(&PI_qVEL, axes).get();
+    return getVectorOfDoubles(&PI_qVEL, axes);
 }
 
 QVector<double> PIDevice::getTravelRangeLowEnd(const QString &axes)
 {
-    return *getVectorOfDoubles(&PI_qTMN, axes).get();
+    return getVectorOfDoubles(&PI_qTMN, axes);
 }
 
 QVector<double> PIDevice::getTravelRangeHighEnd(const QString &axes)
 {
-    return *getVectorOfDoubles(&PI_qTMX, axes).get();
+    return getVectorOfDoubles(&PI_qTMX, axes);
 }
 
 QVector<double> PIDevice::getCurrentPosition(const QString &axes)
 {
     auto ret = getVectorOfDoubles(&PI_qPOS, axes);
-    emit newPositions(axes.isEmpty() ? getAxisIdentifiers() : axes, *ret.get());
-    return *ret.get();
+    return ret;
 }
 
 QVector<double> PIDevice::getCommandedPosition(const QString &axes)
 {
     auto ret = getVectorOfDoubles(&PI_qMOV, axes);
-    return *ret.get();
+    return ret;
 }
 
 void PIDevice::fastMoveToPositiveLimit(const QString &axes)
@@ -362,13 +361,12 @@ void PIDevice::setupStateMachine()
     sm->start();
 }
 
-std::unique_ptr<QVector<double>> PIDevice::getVectorOfDoubles(
-    const PI_qVectorOfDoubles fp, const QString &axes)
+QVector<double> PIDevice::getVectorOfDoubles(const PI_qVectorOfDoubles fp, const QString &axes)
 {
 #ifndef WITH_HARDWARE
     Q_UNUSED(fp)
 #endif
-    auto vecup = std::make_unique<QVector<double>>();
+    auto vec = QVector<double>();
     const QString *myAxes = &axes;
     QString temp;
     if (axes.isEmpty()) {
@@ -376,9 +374,9 @@ std::unique_ptr<QVector<double>> PIDevice::getVectorOfDoubles(
         myAxes = &temp;
     }
     int nOfAxes = myAxes->length();
-    vecup.get()->resize(nOfAxes);
-    CALL_THROW(fp(id, myAxes->toLatin1(), vecup.get()->data()));
-    return vecup;
+    vec.resize(nOfAxes);
+    CALL_THROW(fp(id, myAxes->toLatin1(), vec.data()));
+    return vec;
 }
 
 void PIDevice::callFunctionWithVectorOfDoubles(

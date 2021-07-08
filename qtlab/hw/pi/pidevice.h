@@ -126,7 +126,6 @@ public:
 signals:
     void connected();
     void disconnected();
-    void newPositions(const QString &axes, const QVector<double> &pos);
     void onTarget(const QString &axis);
 
 public slots:
@@ -134,7 +133,7 @@ public slots:
 
 private:
     void setupStateMachine();
-    std::unique_ptr<QVector<double>> getVectorOfDoubles(
+    QVector<double> getVectorOfDoubles(
         const PI_qVectorOfDoubles fp, const QString &axes);
     void callFunctionWithVectorOfDoubles(
         PI_vectorOfDoubles fp, const QString &axes, const double values[]);
