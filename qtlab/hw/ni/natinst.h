@@ -7,6 +7,7 @@ namespace NI {
 #include <NIDAQmx.h>
 
 QString PFI2Line(QString term);
+QString getVersion();
 
 #include "NIDAQmx_ni_wrapper_methods.h"
 }

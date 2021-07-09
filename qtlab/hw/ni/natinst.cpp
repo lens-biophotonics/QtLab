@@ -75,3 +75,11 @@ QString NI::PFI2Line(QString term)
     term.truncate(idx);
     return term.mid(1).append(QString("port%1/line%2").arg(port).arg(line));
 }
+
+QString NI::getVersion()
+{
+    return QString("%1.%2.%3")
+           .arg(getSysNIDAQMajorVersion())
+           .arg(getSysNIDAQMinorVersion())
+           .arg(getSysNIDAQUpdateVersion());
+}
