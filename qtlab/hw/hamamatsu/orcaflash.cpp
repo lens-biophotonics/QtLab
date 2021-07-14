@@ -227,11 +227,17 @@ int OrcaFlash::nOfLines() const
 
 int32_t OrcaFlash::getImageWidth()
 {
+#ifdef QTLAB_DCAM_DEMO
+    return 2048;
+#endif
     return static_cast<int32_t>(getPropertyValue(DCAM_IDPROP_IMAGE_WIDTH));
 }
 
 int32_t OrcaFlash::getImageHeight()
 {
+#ifdef QTLAB_DCAM_DEMO
+    return 2048;
+#endif
     return static_cast<int32_t>(getPropertyValue(DCAM_IDPROP_IMAGE_HEIGHT));
 }
 
@@ -308,6 +314,10 @@ void OrcaFlash::lockFrame(const int32_t frame, void **buf, int32_t *frameStamp,
     dcamframe.left = 0;
     dcamframe.top = 0;
 
+#ifdef QTLAB_DCAM_DEMO
+    dcamframe.buf = *buf;
+#endif
+
     lockFrame(&dcamframe);
 
     *buf = dcamframe.buf;
@@ -326,8 +336,25 @@ void OrcaFlash::lockFrame(const int32_t frame, void **buf, int32_t *frameStamp,
 void OrcaFlash::lockFrame(DCAMBUF_FRAME *dcambufFrame)
 {
 #ifdef QTLAB_DCAM_DEMO
-    Q_UNUSED(dcambufFrame)
+    int rowBytes = 2048 * 2;
+    int n = rowBytes * dcambufFrame->height;
+
+    int k = n / (sizeof (int) * 64);
+
+    char *p = (char *)dcambufFrame->buf;
+
+    size_t b = n / k;
+    size_t tot = 0;
+
+    for (int i = 0; i < k; ++i) {
+        memset(p, rand(), b);
+        p += b;
+        tot += b;
+    }
+    memset(p, rand(), n - tot);
+    return;
 #endif
+
     CALL_THROW(dcambuf_lockframe(h, dcambufFrame));
 }
 
