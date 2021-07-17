@@ -26,13 +26,26 @@ void PIPositionControlWidget::setupUI()
     gb->setLayout(grid);
 
     int col = 1;
-    grid->addWidget(new QLabel("Curr. Pos."), row, col);
+    QLabel *label;
+    label = new QLabel("Curr. Pos.");
+    label->setAlignment(Qt::AlignCenter);
+    grid->addWidget(label, row, col);
     col += 2;
-    grid->addWidget(new QLabel("|<"), row, col++);
-    grid->addWidget(new QLabel("<"), row, col++);
-    grid->addWidget(new QLabel("Set Pos."), row, col++);
-    grid->addWidget(new QLabel(">"), row, col++);
-    grid->addWidget(new QLabel(">|"), row, col++);
+    label = new QLabel("|<");
+    label->setAlignment(Qt::AlignCenter);
+    grid->addWidget(label, row, col++);
+    label = new QLabel("<");
+    label->setAlignment(Qt::AlignCenter);
+    grid->addWidget(label, row, col++);
+    label = new QLabel("Set Pos.");
+    label->setAlignment(Qt::AlignCenter);
+    grid->addWidget(label, row, col++);
+    label = new QLabel(">");
+    label->setAlignment(Qt::AlignCenter);
+    grid->addWidget(label, row, col++);
+    label = new QLabel(">|");
+    label->setAlignment(Qt::AlignCenter);
+    grid->addWidget(label, row, col++);
 
     QFrame *line;
     line = new QFrame();
@@ -40,8 +53,12 @@ void PIPositionControlWidget::setupUI()
     line->setFrameShadow(QFrame::Sunken);
     grid->addWidget(line, row, col++);
 
-    grid->addWidget(new QLabel("Step size"), row, col++);
-    grid->addWidget(new QLabel("Velocity"), row, col++);
+    label = new QLabel("Step size");
+    label->setAlignment(Qt::AlignCenter);
+    grid->addWidget(label, row, col++);
+    label = new QLabel("Velocity");
+    label->setAlignment(Qt::AlignCenter);
+    grid->addWidget(label, row, col++);
 
     row++;
 
