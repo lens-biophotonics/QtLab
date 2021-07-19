@@ -9,6 +9,13 @@
 Cobolt::Cobolt(QObject *parent) : SerialDevice(parent)
 {
     serial->setLineEndTermination("\r\n", "\r\n");
+
+    QState *cs = serial->getConnectedState();
+    laserOnState = new QState(cs);
+    laserOffState = new QState(cs);
+    laserOnState->addTransition(this, &Cobolt::laserOff, laserOffState);
+    laserOffState->addTransition(this, &Cobolt::laserOn, laserOnState);
+    cs->setInitialState(laserOffState);
 }
 
 void Cobolt::postConnect_impl()
@@ -17,12 +24,23 @@ void Cobolt::postConnect_impl()
         try {
             ping();
             getSerialNumber();
+            isLaserOn();
             break;
         }
         catch (std::runtime_error) {
             continue;
         }
     }
+}
+
+QState *Cobolt::getLaserOffState() const
+{
+    return laserOffState;
+}
+
+QState *Cobolt::getLaserOnState() const
+{
+    return laserOnState;
 }
 
 QString Cobolt::getSerialNumber()
@@ -135,10 +153,18 @@ bool Cobolt::isAnalogLowImpedanceEnabled()
     return serial->getInt("galis?");
 }
 
-Cobolt::ON_OFF_STATE Cobolt::getOnOffState()
+bool Cobolt::isLaserOn()
 {
     int state = serial->getInt("l?");
-    return static_cast<ON_OFF_STATE>(state);
+    switch (state) {
+    case STATE_ON:
+        emit laserOn();
+        return true;
+    case STATE_OFF:
+        emit laserOff();
+        return false;
+    }
+    return false;
 }
 
 Cobolt::OPERATING_MODE Cobolt::getOperatingMode()
@@ -195,11 +221,13 @@ void Cobolt::restart()
 void Cobolt::setLaserOn()
 {
     transceiveChkOK("l1");
+    emit laserOn();
 }
 
 void Cobolt::setLaserOff()
 {
     transceiveChkOK("l0");
+    emit laserOff();
 }
 
 void Cobolt::enterConstantPowerMode()

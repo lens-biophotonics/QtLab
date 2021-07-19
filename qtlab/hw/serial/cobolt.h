@@ -50,11 +50,18 @@ public:
     bool isAnalogModulationEnabled();
     bool isDigitalModulationEnabled();
     bool isAnalogLowImpedanceEnabled();
-    ON_OFF_STATE getOnOffState();
+    bool isLaserOn();
     OPERATING_MODE getOperatingMode();
 
     QString getVerboseName() const;
     void setVerboseName(const QString &value);
+
+    QState *getLaserOnState() const;
+    QState *getLaserOffState() const;
+
+signals:
+    void laserOn();
+    void laserOff();
 
 public slots:
     void setOutputPower(double W);
@@ -80,6 +87,9 @@ protected:
 
 private:
     QString verboseName;
+
+    QState *laserOnState;
+    QState *laserOffState;
 
     QString transceiveChkOK(QString cmd);
     QString transceiveChkSyntaxError(QString cmd);
