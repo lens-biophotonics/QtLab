@@ -81,6 +81,20 @@ expression list EL;
 }
 
 @@
+identifier i1 =~ "sampsPerChanWritten";
+identifier fn;
+parameter list[n] PL;
+expression list EL;
+@@
+-void fn(PL@EL, int32 *i1)
++int32 fn(PL)
+{
++int32 i1[1];
+...
++return i1[0];
+}
+
+@@
 type t1;
 identifier i1;
 identifier bufferSize =~ "bufferSize";
