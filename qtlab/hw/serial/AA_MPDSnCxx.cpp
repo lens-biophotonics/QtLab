@@ -212,7 +212,7 @@ void AA_MPDSnCxx::setExternalModeEnabled(bool enable)
 
 void AA_MPDSnCxx::setExternalModeEnabled(int line, bool enable)
 {
-    parseLResponse(serial->transceive(QString("L%1I%2").arg(line).arg(enable), "\n\r"));
+    parseLResponse(serial->transceive(QString("L%1I%2").arg(line).arg(!enable), "\n\r"));
     status.at(line)->externalMode = enable;
 }
 
