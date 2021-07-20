@@ -133,17 +133,6 @@ expression E1;
 }
 
 @@
-type t1;
-identifier i1, fn =~ "set.*TrigEdge";
-@@
--fn(t1 i1)
-+fn(NITask::Edge edge)
-{
-+t1 i1=edge;
-...
-}
-
-@@
 identifier i1 =~ "data", fn =~ "set.*";
 identifier fn2;
 @@

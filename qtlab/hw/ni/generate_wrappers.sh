@@ -15,7 +15,7 @@ grep 'int32 __CFUNC .*(TaskHandle task\(Handle\)\?.*);' ${NIDAQmx_file} > ${OUTF
 perl -pe 's/;.*$/ {}/' $OUTFILE_TASK_H > $OUTFILE_TASK_CPP
 spatch --in-place --c++ wrapper_task.cocci "$OUTFILE_TASK_CPP" > /dev/null || exit 1
 
-perl -i -pe 's/int32 (activeEdge)/NITask::Edge \1/' $OUTFILE_TASK_CPP
+perl -i -pe 's/int32 (activeEdge|triggerEdge|edge)/NITask::Edge \1/' $OUTFILE_TASK_CPP
 perl -i -pe 's/int32 (sampleMode)/NITask::SampleMode \1/' $OUTFILE_TASK_CPP
 perl -i -pe 's/int32 (lineGrouping)/NITask::LineGrouping \1/' $OUTFILE_TASK_CPP
 perl -i -pe 's/bool32 (dataLayout)/NITask::DataLayout \1/' $OUTFILE_TASK_CPP
