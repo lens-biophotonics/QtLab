@@ -44,7 +44,7 @@ void NITask::onError(int32 ret) const
         logger->critical(QString("Error %1").arg(ret));
         logger->critical(errBuff);
     }
-    throw std::runtime_error(errBuff);
+    throw NITaskError(ret, errBuff);
 }
 
 uInt64 NITask::getSampsPerChan() const

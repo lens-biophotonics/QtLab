@@ -28,7 +28,7 @@
             onError(ret);                                                   \
         }                                                                   \
         if (!task) {                                                        \
-            throw std::runtime_error("Task not initialized");               \
+            throw NITaskError(-1, "Task not initialized");                  \
         }                                                                   \
 }
 #else
@@ -41,6 +41,23 @@
 #include <qtlab/hw/ni/natinst.h>
 
 using namespace NI;
+
+class NITaskError : public std::runtime_error
+{
+public:
+    explicit NITaskError(int32 errCode, std::string err) : std::runtime_error(err)
+    {
+        _errCode = errCode;
+    };
+
+    int32 errCode() const
+    {
+        return _errCode;
+    }
+
+private:
+    int32 _errCode;
+};
 
 /**
  * @brief The NIAbstractTask class is an abstract wrapper for a DAQmx Task.
