@@ -25,8 +25,7 @@
 #define DAQmxErrChk(functionCall) {                                         \
         int ret = functionCall;                                             \
         if (DAQmxFailed(ret)) {                                             \
-            logger->critical(QString("Error %1").arg(ret));                    \
-            onError();                                                      \
+            onError(ret);                                                   \
         }                                                                   \
         if (!task) {                                                        \
             throw std::runtime_error("Task not initialized");               \
@@ -131,6 +130,9 @@ public:
 
     void setTaskName(const QString &value);
 
+    bool isLogErrorsEnabled() const;
+    void setLogErrorsEnabled(bool enable);
+
 #include "NIDAQmx_task_wrapper_methods.h"
 
 public slots:
@@ -144,7 +146,7 @@ signals:
     void stopped();
 
 protected:
-    [[ noreturn ]] void onError() const;
+    [[ noreturn ]] void onError(int32 ret) const;
     virtual void initializeTask_impl();
     virtual void configureChannels_impl() {};
     virtual void configureTiming_impl() {};
@@ -157,6 +159,7 @@ protected:
     QString triggerTerm;
     QString sampClkTimingSource;
     QString taskName;
+    bool logErrorsEnabled;
 
 private:
     char *errBuff;

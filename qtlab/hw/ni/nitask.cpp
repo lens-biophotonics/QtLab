@@ -35,12 +35,15 @@ bool NITask::isInitialized()
  * a std::runtime_error exception.
  */
 
-void NITask::onError() const
+void NITask::onError(int32 ret) const
 {
 #ifdef WITH_HARDWARE
     DAQmxGetExtendedErrorInfo(errBuff, ERRBUF_SIZE);
 #endif
-    logger->critical(errBuff);
+    if (logErrorsEnabled) {
+        logger->critical(QString("Error %1").arg(ret));
+        logger->critical(errBuff);
+    }
     throw std::runtime_error(errBuff);
 }
 
@@ -103,6 +106,16 @@ void NITask::initializeTask_impl()
     configureChannels();
     configureTiming();
     configureTriggering();
+}
+
+bool NITask::isLogErrorsEnabled() const
+{
+    return logErrorsEnabled;
+}
+
+void NITask::setLogErrorsEnabled(bool enable)
+{
+    logErrorsEnabled = enable;
 }
 
 void NITask::setTaskName(const QString &value)
