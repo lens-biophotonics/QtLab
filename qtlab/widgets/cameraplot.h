@@ -16,8 +16,9 @@ public:
     void setInterval(const Qt::Axis axis, const double min, const double max);
 
     void setColorMap(QwtLinearColorMap *value);
-    void setPlotSize(uint nRows, uint nCols);
+    void setPlotSize(uint nCols, uint nRows);
     void setPlotSize(QSize size);
+    QSize getPlotSize();
 
     void setData(const QVector<double> &data);
     void setData(const double *data, const size_t size);

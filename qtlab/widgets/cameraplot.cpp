@@ -44,7 +44,7 @@ void CameraPlot::setup()
     setInterval(Qt::ZAxis, 0, 65535);
 }
 
-void CameraPlot::setPlotSize(uint nRows, uint nCols)
+void CameraPlot::setPlotSize(uint nCols, uint nRows)
 {
     this->nCols = nCols;
     this->nRows = nRows;
@@ -58,7 +58,12 @@ void CameraPlot::setPlotSize(uint nRows, uint nCols)
 
 void CameraPlot::setPlotSize(QSize size)
 {
-    setPlotSize(size.height(), size.width());
+    setPlotSize(size.width(), size.height());
+}
+
+QSize CameraPlot::getPlotSize()
+{
+    return QSize(nCols, nRows);
 }
 
 void CameraPlot::setData(const QVector<double> &data)
