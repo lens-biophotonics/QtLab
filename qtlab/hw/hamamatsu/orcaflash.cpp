@@ -111,6 +111,64 @@ int OrcaFlash::getCameraIndex() const
     return cameraIndex;
 }
 
+/**
+ * @brief Writes various info to the logger.
+ */
+
+void OrcaFlash::logInfo()
+{
+    QString msg;
+    int32 timestampProducer = static_cast<int32_t>(getPropertyValue(DCAM_IDPROP_TIMESTAMP_PRODUCER));
+    msg = "TIMESTAMP is produced from ";
+    switch (timestampProducer) {
+    case DCAMPROP_TIMESTAMP_PRODUCER__NONE:
+        msg = "TIMESTAMP is not supported in the camera or under the current condition.";
+        break;
+
+    case DCAMPROP_TIMESTAMP_PRODUCER__DCAMMODULE:
+        msg += "DCAM";
+        break;
+
+    case DCAMPROP_TIMESTAMP_PRODUCER__KERNELDRIVER:
+        msg += "kernel driver";
+        break;
+
+    case DCAMPROP_TIMESTAMP_PRODUCER__CAPTUREDEVICE:
+        msg += "Frame Grabber";
+        break;
+
+    case DCAMPROP_TIMESTAMP_PRODUCER__IMAGINGDEVICE:
+        msg += "Camera";
+        break;
+    }
+    logger->info(msg);
+
+    int32 framestampProducer = static_cast<int32_t>(getPropertyValue(DCAM_IDPROP_FRAMESTAMP_PRODUCER));
+    msg = "FRAMESTAMP is produced from ";
+    switch (framestampProducer) {
+    case DCAMPROP_FRAMESTAMP_PRODUCER__NONE:
+        msg = "FRAMESTAMP is not supported in the camera or under the current condition.";
+        break;
+
+    case DCAMPROP_FRAMESTAMP_PRODUCER__DCAMMODULE:
+        msg += "DCAM";
+        break;
+
+    case DCAMPROP_FRAMESTAMP_PRODUCER__KERNELDRIVER:
+        msg += "kernel driver";
+        break;
+
+    case DCAMPROP_FRAMESTAMP_PRODUCER__CAPTUREDEVICE:
+        msg += "Frame Grabber";
+        break;
+
+    case DCAMPROP_FRAMESTAMP_PRODUCER__IMAGINGDEVICE:
+        msg += "Camera";
+        break;
+    }
+    logger->info(msg);
+}
+
 void OrcaFlash::open(const int index)
 {
     if (_isOpen) {

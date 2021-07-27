@@ -146,6 +146,8 @@ public:
 
     int getCameraIndex() const;
 
+    void logInfo();
+
 signals:
     void opened();
     void closed();
