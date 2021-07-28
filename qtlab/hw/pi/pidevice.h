@@ -126,7 +126,6 @@ public:
 signals:
     void connected();
     void disconnected();
-    void onTarget(const QString &axis);
 
 public slots:
     void close();

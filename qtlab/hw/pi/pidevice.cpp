@@ -459,9 +459,6 @@ bool PIDevice::isOnTarget(const QString &axis)
     ont = 1;
 #endif
     CALL_THROW(PI_qONT(id, temp.toLatin1(), &ont));
-    if (ont) {
-        emit onTarget(axis);
-    }
     return ont;
 }
 
