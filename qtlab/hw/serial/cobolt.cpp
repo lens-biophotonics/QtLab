@@ -22,15 +22,53 @@ void Cobolt::postConnect_impl()
 {
     for (int i = 0; i < 10; ++i) {
         try {
-            ping();
-            getSerialNumber();
-            isLaserOn();
+            init();
             break;
         }
         catch (std::runtime_error) {
             continue;
         }
     }
+}
+
+void Cobolt::init()
+{
+    ping();
+
+    QString sn, fv;
+
+    fv = getFirmwareVersion();
+    sn = getSerialNumber();
+
+    if (fv.contains('.')) {
+        modelNumber = transceiveChkSyntaxError("glm?");
+    } else if (sn.contains('0')) {
+        modelNumber = QString("0%1-04-XX-XXXX-XXX").arg(sn.section('0', 0, 0));
+    }
+    _setCoboltClass();
+    isLaserOn();
+}
+
+void Cobolt::_setCoboltClass()
+{
+    coboltClass = COBOLT_LASER;
+    if (modelNumber.contains("-71-")) {
+        return;
+    }
+    if (!modelNumber.contains("-06-")) {
+        return;
+    }
+    QString mod = modelNumber.left(4);
+    if (mod.contains("-91-") || mod.contains("-93-")) {
+        coboltClass = COBOLT_06DPL;
+    } else {
+        coboltClass = COBOLT_06MLD;
+    }
+}
+
+QString Cobolt::getModelNumber() const
+{
+    return modelNumber;
 }
 
 QState *Cobolt::getLaserOffState() const
@@ -48,9 +86,9 @@ QString Cobolt::getSerialNumber()
     return transceiveChkSyntaxError("sn?");
 }
 
-QString Cobolt::getLaserModel()
+QString Cobolt::getFirmwareVersion()
 {
-    return transceiveChkSyntaxError("glm?");
+    return transceiveChkSyntaxError("gfv?");
 }
 
 QString Cobolt::getFullName()
@@ -66,27 +104,36 @@ int Cobolt::getWavelength()
         return match.captured(1).toInt();
     }
 
-    QStringList sl = getLaserModel().split("-");
+    bool ok;
+    int wl;
+
+    QStringList sl = modelNumber.split("-");
     if (sl.size() > 0) {
-        bool ok = false;
-        int wl = sl.at(0).toInt(&ok);
+        ok = false;
+        wl = sl.at(0).toInt(&ok);
         if (ok) {
             return wl;
         }
     }
 
+    ok = false;
+    wl = modelNumber.left(4).toUInt(&ok);
+    if (ok) {
+        return wl;
+    }
+
     return -1;
+}
+
+double Cobolt::getOutputPower()
+{
+    return serial->getDouble("pa?");
 }
 
 /**
  * @brief Get output power set point.
  * @return Output power in W.
  */
-
-double Cobolt::getOutputPower()
-{
-    return serial->getDouble("pa?");
-}
 
 double Cobolt::getOutputPowerSetPoint()
 {

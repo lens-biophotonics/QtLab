@@ -8,6 +8,12 @@ class Cobolt : public SerialDevice
 {
     Q_OBJECT
 
+    enum COBOLT_CLASS {
+        COBOLT_LASER,
+        COBOLT_06DPL,
+        COBOLT_06MLD,
+    };
+
     enum ON_OFF_STATE {
         STATE_OFF = 0,
         STATE_ON = 1,
@@ -34,7 +40,7 @@ public:
     Cobolt(QObject *parent = nullptr);
 
     QString getSerialNumber();
-    QString getLaserModel();
+    QString getFirmwareVersion();
     QString getFullName();
     int getWavelength();
     double getOutputPower();
@@ -58,6 +64,8 @@ public:
 
     QState *getLaserOnState() const;
     QState *getLaserOffState() const;
+
+    QString getModelNumber() const;
 
 signals:
     void laserOn();
@@ -87,12 +95,17 @@ protected:
 
 private:
     QString verboseName;
+    QString modelNumber;
+
+    enum COBOLT_CLASS coboltClass;
 
     QState *laserOnState;
     QState *laserOffState;
 
     QString transceiveChkOK(QString cmd);
     QString transceiveChkSyntaxError(QString cmd);
+    void init();
+    void _setCoboltClass();
 };
 
 #endif // COBOLT_H
