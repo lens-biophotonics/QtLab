@@ -86,7 +86,7 @@ void PIPositionControlWidget::appendRow(
     PIDevice *device, const QString &axis, const QString &axisName)
 {
     int col = 0;
-    grid->addWidget(new QLabel(axisName), row, col++);
+    grid->addWidget(new QLabel(axisName.isNull() ? device->getVerboseName() : axisName), row, col++);
     QLabel *currentPos = new QLabel("0.000");
     currentPos->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     grid->addWidget(currentPos, row, col++);
@@ -231,7 +231,7 @@ void PIPositionControlWidget::appendRow(
         catch (std::runtime_error e) {
             QMessageBox::critical(nullptr, "Error", e.what());
         }
-    };
+        };
 
     connect(positionSpinbox, &DoubleSpinBox::returnPressed, this, [ = ](){
         performAction(MOVE);

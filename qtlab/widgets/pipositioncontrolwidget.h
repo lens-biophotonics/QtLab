@@ -14,8 +14,7 @@ class PIPositionControlWidget : public QWidget
     Q_OBJECT
 public:
     explicit PIPositionControlWidget(QWidget *parent = nullptr);
-    void appendRow(PIDevice *device, const QString &axis,
-                   const QString &axisName);
+    void appendRow(PIDevice *device, const QString &axis, const QString &axisName = QString());
 
     void setTitle(const QString &title);
 
