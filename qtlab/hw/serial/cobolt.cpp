@@ -11,11 +11,18 @@ Cobolt::Cobolt(QObject *parent) : SerialDevice(parent)
     serial->setLineEndTermination("\r\n", "\r\n");
 
     QState *cs = serial->getConnectedState();
-    laserOnState = new QState(cs);
-    laserOffState = new QState(cs);
+    QState *classUninitialized = new QState(cs);
+    classInitializedState = new QState(cs);
+
+    classUninitialized->addTransition(this, &Cobolt::connected, classInitializedState);
+    classInitializedState->addTransition(this, &Cobolt::disconnected, classUninitialized);
+    cs->setInitialState(classUninitialized);
+
+    laserOnState = new QState(classInitializedState);
+    laserOffState = new QState(classInitializedState);
+
     laserOnState->addTransition(this, &Cobolt::laserOff, laserOffState);
     laserOffState->addTransition(this, &Cobolt::laserOn, laserOnState);
-    cs->setInitialState(laserOffState);
 }
 
 void Cobolt::postConnect_impl()
@@ -46,7 +53,7 @@ void Cobolt::init()
         modelNumber = QString("0%1-04-XX-XXXX-XXX").arg(sn.section('0', 0, 0));
     }
     _setCoboltClass();
-    isLaserOn();
+    classInitializedState->setInitialState(isLaserOn() ? laserOnState : laserOffState);
 }
 
 void Cobolt::_setCoboltClass()

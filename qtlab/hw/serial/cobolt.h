@@ -101,6 +101,7 @@ private:
 
     QState *laserOnState;
     QState *laserOffState;
+    QState *classInitializedState;
 
     QString transceiveChkOK(QString cmd);
     QString transceiveChkSyntaxError(QString cmd);
