@@ -86,13 +86,13 @@ void SerialPort::setupStateMachine()
 }
 
 
-void SerialPort::sendMsg(QString msg)
+void SerialPort::sendMsg(QByteArray msg)
 {
-    msg.append(txLineEndTermination);
+    msg.append(txLineEndTermination.toUtf8());
     if (!isOpen()) {
         RUNTIME_ERROR("Device not open")
     }
-    qint64 ret = write(msg.toLatin1());
+    qint64 ret = write(msg);
     if (ret < 0) {
         RUNTIME_ERROR("QSerialPort::write");
     }
@@ -101,15 +101,28 @@ void SerialPort::sendMsg(QString msg)
     }
 }
 
+void SerialPort::sendMsg(QString msg)
+{
+    sendMsg(msg.toUtf8());
+}
+
 QString SerialPort::receive(QString until)
 {
-    QString receivedLines;
+    return receiveBytes(until.toUtf8());
+}
+
+QByteArray SerialPort::receiveBytes(QByteArray until)
+{
+    QByteArray receivedLines;
     QTime time;
     time.start();
+
+    QByteArray rxLineEndTermination_b = rxLineEndTermination.toUtf8();
+
     while (true) {
         waitForReadyRead(_serialTimeout);
 
-        QString msg = readAll();
+        QByteArray msg = readAll();
 
         if (loggingEnabled) {
             logger->info("<<< " + msg);
@@ -118,7 +131,7 @@ QString SerialPort::receive(QString until)
         receivedLines.append(msg);
 
         if (bytesAvailable() <= 0) {
-            if(transceiveTimeout >= 0 && time.elapsed() > transceiveTimeout) {
+            if (transceiveTimeout >= 0 && time.elapsed() > transceiveTimeout) {
                 logger->warning("Transceive timeout");
                 break;
             }
@@ -133,12 +146,17 @@ QString SerialPort::receive(QString until)
         }
     }
 
-    if (receivedLines.endsWith(rxLineEndTermination)) {
-        int n = rxLineEndTermination.size();
-        receivedLines.remove(receivedLines.size() - n, n);
+    if (receivedLines.endsWith(rxLineEndTermination_b)) {
+        receivedLines = receivedLines.left(receivedLines.size() - rxLineEndTermination_b.size());
     }
 
     return receivedLines;
+}
+
+QByteArray SerialPort::transceiveBytes(QByteArray command, QByteArray until)
+{
+    sendMsg(command);
+    return receiveBytes(until);
 }
 
 QString SerialPort::transceive(QString command, QString until)

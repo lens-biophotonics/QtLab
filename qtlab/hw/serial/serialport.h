@@ -12,8 +12,11 @@ public:
     bool open(OpenMode mode = QIODevice::ReadWrite);
     void close();
 
+    void sendMsg(QByteArray msg);
     void sendMsg(QString msg);
+    QByteArray receiveBytes(QByteArray until = QByteArray());
     QString receive(QString until = QString());
+    virtual QByteArray transceiveBytes(QByteArray command, QByteArray until = QByteArray());
     virtual QString transceive(QString command, QString until = QString());
     double getDouble(const QString &cmd);
     int getInt(const QString &cmd);
