@@ -96,6 +96,7 @@ protected:
 private:
     QString verboseName;
     QString modelNumber;
+    int wl;  /**< @brief wavelength */
 
     enum COBOLT_CLASS coboltClass;
 
@@ -105,8 +106,10 @@ private:
 
     QString transceiveChkOK(QString cmd);
     QString transceiveChkSyntaxError(QString cmd);
+
     void init();
     void _setCoboltClass();
+    int _getWavelength();
 };
 
 #endif // COBOLT_H

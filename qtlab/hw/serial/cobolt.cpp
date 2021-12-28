@@ -53,6 +53,7 @@ void Cobolt::init()
         modelNumber = QString("0%1-04-XX-XXXX-XXX").arg(sn.section('0', 0, 0));
     }
     _setCoboltClass();
+    wl = _getWavelength();
     classInitializedState->setInitialState(isLaserOn() ? laserOnState : laserOffState);
 }
 
@@ -104,6 +105,11 @@ QString Cobolt::getFullName()
 }
 
 int Cobolt::getWavelength()
+{
+    return wl;
+}
+
+int Cobolt::_getWavelength()
 {
     QRegularExpression re("(\\d+)nm");
     QRegularExpressionMatch match = re.match(getFullName());
