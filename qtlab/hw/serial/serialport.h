@@ -3,6 +3,7 @@
 
 #include <QSerialPort>
 #include <QState>
+#include <QMutex>
 
 class SerialPort : public QSerialPort
 {
@@ -55,6 +56,8 @@ private:
     bool loggingEnabled = false;
     int _serialTimeout;
     int transceiveTimeout = -1;
+
+    QMutex transceiveMutex;
 
     QState *connectedState;
     QState *disconnectedState;

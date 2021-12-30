@@ -161,6 +161,7 @@ QByteArray SerialPort::transceiveBytes(QByteArray command, QByteArray until)
 
 QString SerialPort::transceive(QString command, QString until)
 {
+    QMutexLocker locker(&transceiveMutex);
     sendMsg(command);
     return receive(until);
 }
