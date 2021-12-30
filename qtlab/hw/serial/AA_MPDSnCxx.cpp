@@ -8,24 +8,51 @@
 
 AA_MPDSnCxx::AA_MPDSnCxx(QObject *parent) : SerialDevice(parent)
 {
-    serial->setLineEndTermination("\r");
     serial->setBaudRate(57600);
     serial->setTimeout(200);
+    serial->setTransceiveTimeout(400);
 }
 
 void AA_MPDSnCxx::postConnect_impl()
 {
-    nChannels = 0;
-    QStringList sl = _getStatus();
-    for (QString s : sl) {
-        if (s.startsWith("l")) {
-            nChannels++;
-        }
-    }
-    for (QString s : sl) {
+    nChannels = 8 + 1;
+    mpdsVersion = MPDS_VERSION_UNKNOWN;
+    for (int i = 0; i < nChannels; ++i) {
         status.append(new LineStatus());
     }
+
+    parseHelp();
+
+    switch (mpdsVersion) {
+    case MPDS_VERSION_4:
+        altTerminator = "\n";
+        break;
+    case MPDS_VERSION_8:
+        altTerminator = "\r";
+    default:
+        break;
+    }
+
     refresh();
+}
+
+bool AA_MPDSnCxx::hasBlanking() const
+{
+    return _hasBlanking;
+}
+
+QString AA_MPDSnCxx::_transceive(QString msg, QString until)
+{
+    switch (mpdsVersion) {
+    case MPDS_VERSION_8:
+        return serial->transceive(msg, until);
+        break;
+
+    case MPDS_VERSION_4:
+    default:
+        return serial->transceiveBytes(msg.toUtf8(), until.toUtf8() + '\0').replace('\0', "");
+        break;
+    }
 }
 
 bool AA_MPDSnCxx::isBlankingExternal() const
@@ -52,13 +79,14 @@ bool AA_MPDSnCxx::isVMode10V() const
 
 QString AA_MPDSnCxx::getProductID()
 {
-    return serial->transceive("q", "?").remove("\n\r?").trimmed();
+    return serial->transceive("q\r", "?").remove("\n\r?").trimmed();
 }
 
 QStringList AA_MPDSnCxx::_getStatus()
 {
     QStringList list;
-    QString reply = serial->transceive("S", "?").remove("?");
+    QString terminator;
+    QString reply = _transceive("S" + altTerminator, "?").remove("?");
     list = reply.split("\n\r");
     return list;
 }
@@ -110,9 +138,9 @@ AA_MPDSnCxx::LineStatus *AA_MPDSnCxx::selectedChanelStatus()
 
 int AA_MPDSnCxx::getSelectedChannel()
 {
-    QString s = serial->transceive("X", "?");
+    QString s = _transceive("X\r", "?");
     bool ok = false;
-    int c = s.remove("Line number>").remove("\n\r?").toInt(&ok);
+    int c = s.remove("\n\r?").split("Line number>").last().toInt(&ok);
     if (!ok) {
         throw std::runtime_error(("Invalid response: " + s).toStdString());
     }
@@ -126,7 +154,7 @@ void AA_MPDSnCxx::selectChannel(int n)
         throw std::runtime_error(QString("Invalid channel %1").arg(n).toStdString());
     }
 
-    QString s = serial->transceive(QString("X%1").arg(n), "?");
+    QString s = _transceive(QString("X%1\r").arg(n), "?");
 
     bool ok;
     s.split("Line number>").last().remove("\n\r?").toInt(&ok);
@@ -138,7 +166,7 @@ void AA_MPDSnCxx::selectChannel(int n)
 
 double AA_MPDSnCxx::setFrequency(double freq)
 {
-    QString s = serial->transceive(QString("F%1").arg(freq, 0, 'f', 2), "?");
+    QString s = _transceive(QString("F%1\r").arg(freq, 0, 'f', 2), "?");
     bool ok;
     double d = s.split("Frequency>").last().remove("\n\r?").trimmed().toDouble(&ok);
     if (!ok) {
@@ -150,7 +178,7 @@ double AA_MPDSnCxx::setFrequency(double freq)
 
 int AA_MPDSnCxx::setPower(int p)
 {
-    QString s = serial->transceive(QString("P%1").arg(p), "?");
+    QString s = _transceive(QString("P%1\r").arg(p), "?");
     bool ok;
     double i = s.split("Power>").last().remove("\n\r?").trimmed().toInt(&ok);
     if (!ok || i != p) {
@@ -161,7 +189,7 @@ int AA_MPDSnCxx::setPower(int p)
 
 double AA_MPDSnCxx::setPowerFineAdjustment(int line, int p)
 {
-    QString s = serial->transceive(QString("L%1P%2").arg(line).arg(p, 4), "\n\r");
+    QString s = _transceive(QString("L%1P%2\r").arg(line).arg(p, 4), "\n\r");
 
     parseLResponse(s);
 
@@ -170,7 +198,7 @@ double AA_MPDSnCxx::setPowerFineAdjustment(int line, int p)
 
 double AA_MPDSnCxx::setPower_dBm(double dBm)
 {
-    QString s = serial->transceive(QString("D%1").arg(dBm), "?");
+    QString s = _transceive(QString("D%1\r").arg(dBm), "?");
     bool ok;
     double d = s.split("Power (dBm)>").last().remove("dBm\n\r?").trimmed().toDouble(&ok);
     if (!ok) {
@@ -182,7 +210,7 @@ double AA_MPDSnCxx::setPower_dBm(double dBm)
 
 void AA_MPDSnCxx::reset()
 {
-    serial->transceive("M");
+    serial->transceive("M\r");
     thread()->msleep(200);
     getStatus();
 }
@@ -192,7 +220,7 @@ void AA_MPDSnCxx::reset()
  */
 void AA_MPDSnCxx::storeParams()
 {
-    serial->transceive("E", "?");
+    _transceive("E\r", "?");
 }
 
 int AA_MPDSnCxx::getNChannels() const
@@ -202,43 +230,45 @@ int AA_MPDSnCxx::getNChannels() const
 
 void AA_MPDSnCxx::setExternalModeEnabled(bool enable)
 {
-    if (enable) {
-        serial->transceive("i1", "?");  // sic
+    _transceive(QString("i%1\r").arg(enable ? "1" : "0"), "?");  // sic
+    if (mpdsVersion == MPDS_VERSION_8) {
+        getStatus();
     } else {
-        serial->transceive("i0", "?");  // sic
+        for (auto st : status) {
+            st->externalMode = enable;
+        }
     }
-    getStatus();
 }
 
 void AA_MPDSnCxx::setExternalModeEnabled(int line, bool enable)
 {
-    parseLResponse(serial->transceive(QString("L%1I%2").arg(line).arg(!enable), "\n\r"));
+    parseLResponse(_transceive(QString("L%1I%2\r").arg(line).arg(!enable), "\n\r"));
     status.at(line)->externalMode = enable;
 }
 
 void AA_MPDSnCxx::setOutputEnabled(bool enable)
 {
-    serial->transceive(QString("o%1").arg(enable ? "1" : "0"), "?");
+    _transceive(QString("o%1\r").arg(enable ? "1" : "0"), "?");
 }
 
 void AA_MPDSnCxx::setOutputEnabled(int line, bool enable)
 {
-    parseLResponse(serial->transceive(QString("L%1O%2").arg(line).arg(enable), "\n\r"));
+    parseLResponse(_transceive(QString("L%1O%2\r").arg(line).arg(enable), "\n\r"));
 }
 
 void AA_MPDSnCxx::setVMode5V()
 {
-    serial->transceive("v0", "?");
+    serial->transceive("v0\r");
 }
 
 void AA_MPDSnCxx::setVMode10V()
 {
-    serial->transceive("v1", "?");
+    serial->transceive("v1\r");
 }
 
 double AA_MPDSnCxx::_stepFrequency(bool up)
 {
-    QString r = serial->transceive(up ? "6" : "4", "?");
+    QString r = _transceive((up ? "6" : "4") + altTerminator, "?");
     QRegularExpression rx("Frequency> ([0-9.]+) MHz");
     QRegularExpressionMatch match = rx.match(r);
     if (!match.hasMatch()) {
@@ -252,7 +282,9 @@ double AA_MPDSnCxx::_stepFrequency(bool up)
 
 int AA_MPDSnCxx::_stepPower(bool up)
 {
-    QString r = serial->transceive(up ? "8" : "2", "?");
+    QString terminator;
+
+    QString r = _transceive((up ? "8" : "2") + altTerminator, "?");
     QRegularExpression rx("P=(\\d+)[(]([0-9.]+)dBm[)]");
     QRegularExpressionMatch match = rx.match(r);
     if (!match.hasMatch()) {
@@ -265,7 +297,7 @@ int AA_MPDSnCxx::_stepPower(bool up)
 
 int AA_MPDSnCxx::_stepProfile(bool up)
 {
-    QString r = serial->transceive(up ? "3" : "1", "\n\n\r> ");
+    QString r = _transceive((up ? "3" : "1") + altTerminator, "\n\n\r> ");
     QRegularExpression rx("Selected profile: (\\d)\n\r");
     QRegularExpressionMatch match = rx.match(r);
     if (!match.hasMatch()) {
@@ -334,7 +366,7 @@ int AA_MPDSnCxx::stepProfileDown()
 
 void AA_MPDSnCxx::setBlanking(bool enableOutput, bool enableExternal, bool store)
 {
-    QString s = QString("L0I%1O%2").arg((int)(!enableExternal)).arg((int)enableOutput);
+    QString s = QString("L0I%1O%2\r").arg((int)(!enableExternal)).arg((int)enableOutput);
     if (store) {
         s += "E";
     }
@@ -362,7 +394,15 @@ void AA_MPDSnCxx::setBlanking(bool enableOutput, bool enableExternal, bool store
 
 void AA_MPDSnCxx::parseStatusLine(const QString &s)
 {
-    QRegularExpression rx("^l(\\d) F=([0-9.]+) P=(-?[0-9.]+) (ON|OFF) (INT|EXT)ERNAL$");
+    QRegularExpression rx;
+    QString pattern = "^l(\\d) F=([0-9.]+) P=\\s?(-?[0-9.]+) (ON|OFF)";
+    if (mpdsVersion == MPDS_VERSION_8) {
+        pattern += " (INT|EXT)ERNAL";
+    }
+    pattern += "$";
+
+    rx.setPattern(pattern);
+
     QRegularExpressionMatch match = rx.match(s);
     if (!match.hasMatch()) {
         throw std::runtime_error(("Cannot parse string: " + s).toStdString());
@@ -371,6 +411,11 @@ void AA_MPDSnCxx::parseStatusLine(const QString &s)
     int count = 0;
     int c = 1;
     int line = match.captured(c++).toInt(&ok); count += ok;
+
+    if (line >= nChannels) {
+        return;
+    }
+
     double freq = match.captured(c++).toDouble(&ok); count += ok;
     double pow_dBm = match.captured(c++).toDouble(&ok); count += ok;
     if (count != 3) {
@@ -385,11 +430,12 @@ void AA_MPDSnCxx::parseStatusLine(const QString &s)
     } else {
         st->outputEnabled = false;
     }
-    if (match.captured(c++) == "EXT") {
-        st->externalMode = true;
-    } else {
-        st->externalMode = false;
+
+    if (mpdsVersion != MPDS_VERSION_8) {
+        return;
     }
+
+    st->externalMode = (match.captured(c++) == "EXT");
 }
 
 void AA_MPDSnCxx::parseLResponse(const QString &s)
@@ -432,16 +478,53 @@ void AA_MPDSnCxx::parseLResponse(const QString &s)
 
 void AA_MPDSnCxx::parseHelp()
 {
-    QString s = serial->transceive(".", "\n\n\r> ");
-    QRegularExpression rx("VMode: ([510]+)V");
+    QString s;
+    switch (mpdsVersion) {
+    case MPDS_VERSION_UNKNOWN:
+        s = serial->transceiveBytes("?\r").replace('\0', "");
+        break;
+    case MPDS_VERSION_4:
+        s = _transceive("?\r", "\n\r?");
+        break;
+
+    case MPDS_VERSION_8:
+        s = _transceive("?\r", "\n\n\r> ");
+        break;
+    }
+    QRegularExpression rx("\\*.*V([0-9]+)");
     QRegularExpressionMatch match = rx.match(s);
+
+    if (!match.hasMatch()) {
+        throw std::runtime_error("Cannot parse version");
+    }
+
+    rx.setPattern("blanking");
+    _hasBlanking = rx.match(s).hasMatch();
+
+    bool ok;
+    int version = match.captured(1).toInt(&ok);
+    switch (version) {
+    case 4:
+        mpdsVersion = MPDS_VERSION_4;
+        break;
+
+    case 8:
+    default:
+        mpdsVersion = MPDS_VERSION_8;
+        break;
+    }
+
+    if (mpdsVersion != MPDS_VERSION_8) {
+        return;
+    }
+
+    rx.setPattern("VMode: ([510]+)V");
+    match = rx.match(s);
 
     auto errMsg = QString("Invalid response: " + s).toStdString();
     if (!match.hasMatch()) {
-        throw std::runtime_error(errMsg);
+        return;
     }
-
-    bool ok;
 
     int i = match.captured(1).toUInt(&ok);
     if (!ok) {
