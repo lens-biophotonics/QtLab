@@ -130,18 +130,18 @@ QByteArray SerialPort::receiveBytes(QByteArray until)
 
         receivedLines.append(msg);
 
-        if (bytesAvailable() <= 0) {
-            if (transceiveTimeout >= 0 && time.elapsed() > transceiveTimeout) {
+        if (!until.isEmpty()) {
+            if (receivedLines.endsWith(until)) {
+                break;
+            }
+        }
+
+        if (transceiveTimeout >= 0) {
+            if (time.elapsed() > transceiveTimeout) {
                 logger->warning("Transceive timeout");
                 break;
             }
-
-            if (!until.isNull()) {
-                if (!receivedLines.endsWith(until)) {
-                    continue;
-                }
-            }
-
+        } else if (bytesAvailable() <= 0) {
             break;
         }
     }
