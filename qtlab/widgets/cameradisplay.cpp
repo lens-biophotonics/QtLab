@@ -252,7 +252,7 @@ void CameraDisplay::setupLUTmenu()
 
     LUTMenu->addSeparator();
 
-    if(LUTPath.isEmpty())
+    if (LUTPath.isEmpty())
         return;
     QDirIterator it(LUTPath,
                     QStringList() << "*.lut",
