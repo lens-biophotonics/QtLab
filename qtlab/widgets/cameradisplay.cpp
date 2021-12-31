@@ -17,6 +17,21 @@
 #include <qtlab/widgets/cameraplot.h>
 #include <qtlab/widgets/cameradisplay.h>
 
+class Zoomer : public QwtPlotZoomer
+{
+public:
+    using QwtPlotZoomer::zoom;
+
+    Zoomer(QWidget *parent, bool doReplot = true) : QwtPlotZoomer(parent, doReplot) {}
+
+    void zoom(const QRectF& rect) override
+    {
+        // bound the zooming rect to the zoomBase dimensions
+        QRectF boundedRect = rect & zoomBase();
+        QwtPlotZoomer::zoom(boundedRect);
+    }
+};
+
 CameraDisplay::CameraDisplay(QWidget *parent) :
     QWidget(parent)
 {
@@ -57,7 +72,9 @@ void CameraDisplay::setPlotSize(QSize size)
     plot->setPlotSize(size);
     plot->fillGradient();
     cursorMarker->setValue(size.width() / 2, size.height() / 2);
-    zoomer->setZoomBase(QRectF(QPointF(0, 0), size));
+    QStack<QRectF> stack;
+    stack.push(QRectF(QPointF(0, 0), size));
+    zoomer->setZoomStack(stack);
 }
 
 QString CameraDisplay::getTitle() const
@@ -78,7 +95,8 @@ void CameraDisplay::setupUi()
     setContextMenuPolicy(Qt::DefaultContextMenu);
 
     plot = new CameraPlot(512, 512);
-    zoomer = new QwtPlotZoomer(plot->canvas());
+
+    zoomer = new Zoomer(plot->canvas());
     zoomer->setRubberBandPen(QPen(Qt::green));
     zoomer->setTrackerPen(QPen(Qt::green));
 
