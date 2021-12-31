@@ -6,6 +6,7 @@
 #include <QDialog>
 #include <QContextMenuEvent>
 #include <QPair>
+#include <QPen>
 
 #include <qwt_slider.h>
 
@@ -78,8 +79,8 @@ void CameraDisplay::setupUi()
 
     plot = new CameraPlot(512, 512);
     zoomer = new QwtPlotZoomer(plot->canvas());
-    zoomer->setRubberBandPen(QColor(Qt::green));
-    zoomer->setTrackerPen(QColor(Qt::green));
+    zoomer->setRubberBandPen(QPen(Qt::green));
+    zoomer->setTrackerPen(QPen(Qt::green));
 
     cursorMarker = new QwtPlotMarker();
     cursorMarker->setLineStyle(static_cast<QwtPlotMarker::LineStyle>(QwtPlotMarker::VLine | QwtPlotMarker::HLine));

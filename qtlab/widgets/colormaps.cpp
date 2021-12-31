@@ -1,6 +1,10 @@
 #include <QFile>
 #include <QDataStream>
 #include <QRegularExpression>
+#include <QVector>
+#include <QTextStream>
+
+#include <qwt_interval.h>
 
 #include "colormaps.h"
 
