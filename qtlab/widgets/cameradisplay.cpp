@@ -8,7 +8,6 @@
 #include <QPair>
 
 #include <qwt_slider.h>
-#include <qwt_plot_zoomer.h>
 
 #include <qtlab/widgets/aspectratiowidget.h>
 #include <qtlab/widgets/colormaps.h>
@@ -51,8 +50,13 @@ CameraPlot *CameraDisplay::getPlot() const
 
 void CameraDisplay::setPlotSize(QSize size)
 {
+    if (plot->getPlotSize() == size) {
+        return;
+    }
     plot->setPlotSize(size);
+    plot->fillGradient();
     cursorMarker->setValue(size.width() / 2, size.height() / 2);
+    zoomer->setZoomBase(QRectF(QPointF(0, 0), size));
 }
 
 QString CameraDisplay::getTitle() const
@@ -73,7 +77,7 @@ void CameraDisplay::setupUi()
     setContextMenuPolicy(Qt::DefaultContextMenu);
 
     plot = new CameraPlot(512, 512);
-    QwtPlotZoomer *zoomer = new QwtPlotZoomer(plot->canvas());
+    zoomer = new QwtPlotZoomer(plot->canvas());
     zoomer->setRubberBandPen(QColor(Qt::green));
     zoomer->setTrackerPen(QColor(Qt::green));
 

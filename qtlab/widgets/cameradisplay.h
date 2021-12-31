@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QMenu>
 #include <qwt_plot_marker.h>
+#include <qwt_plot_zoomer.h>
 
 class CameraPlot;
 
@@ -41,6 +42,7 @@ protected:
     QString title;
 
     QwtPlotMarker *cursorMarker;
+    QwtPlotZoomer *zoomer;
 
     void setupUi();
     void setupLUTmenu();
