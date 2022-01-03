@@ -4,6 +4,8 @@ find_package(Qt5 COMPONENTS SerialPort REQUIRED)
 set(TARGETNAME qtlab-hw-pi)
 set(EXPORT_NAME PI)
 
+CMAKE_DEPENDENT_OPTION(QTLAB_PI_DEMO "PI DEMO" ON "QTLAB_DEMO" OFF)
+
 if(NOT PIGCS_INCLUDE_DIR)
     message("Could not find ${PIGCS_LIBNAME_STR} headers. "
             "Library ${TARGETNAME} will not be built.")
@@ -36,7 +38,9 @@ endif()
 if(PIGCS_FOUND)
     set(QTLAB_HW_PI TRUE PARENT_SCOPE)
     target_link_libraries(${TARGETNAME} PUBLIC ${PIGCS_LIBRARY})
-    target_compile_definitions(${TARGETNAME} PRIVATE WITH_HARDWARE)
+    if(NOT QTLAB_PI_DEMO)
+        target_compile_definitions(${TARGETNAME} PRIVATE WITH_HARDWARE)
+    endif()
 else()
     message("Could not find ${PIGCS_LIBNAME_STR}. "
             "Library ${TARGETNAME} will be built in demo mode.")
