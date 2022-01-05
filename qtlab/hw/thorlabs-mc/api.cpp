@@ -1,4 +1,25 @@
-#include "api.hpp"
+/***************************************************************************
+**                                                                        **
+**  This file is part of TMC, Thorlabs motor controller                   **
+**  Copyright (C) 2016-2019 wido.tomas@gmail.com https://github.com/tWido **
+**                                                                        **
+**  This program is free software: you can redistribute it and/or modify  **
+**  it under the terms of the GNU General Public License as published by  **
+**  the Free Software Foundation, either version 3 of the License, or     **
+**  (at your option) any later version.                                   **
+**                                                                        **
+**  This program is distributed in the hope that it will be useful,       **
+**  but WITHOUT ANY WARRANTY; without even the implied warranty of        **
+**  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         **
+**  GNU General Public License for more details.                          **
+**                                                                        **
+**  You should have received a copy of the GNU General Public License     **
+**  along with this program.  If not, see http://www.gnu.org/licenses/.   **
+**                                                                        **
+****************************************************************************/
+
+
+#include "api.h"
 #include <sys/signalfd.h>
 #include <signal.h>
 #include <unistd.h>
@@ -470,17 +491,17 @@ functions_set all_set{
 
 int SendMessage(Message &message)
 {
-    FT_STATUS wrStatus;
-    unsigned int wrote;
-    wrStatus = FT_Write(opened_device.handle, message.data(), message.msize(), &wrote);
-    if (wrStatus == FT_OK && wrote == message.msize()) {
-        return 0;
-    }
-    else {
-        fprintf(stderr, "Sending message failed, error code : %u \n", wrStatus);
-        fprintf(stderr, "wrote : %u should write: %u \n", wrote, message.msize());
-    }
-    return FT_ERROR;
+//    FT_STATUS wrStatus;
+//    unsigned int wrote;
+//    wrStatus = FT_Write(opened_device.handle, message.data(), message.msize(), &wrote);
+//    if (wrStatus == FT_OK && wrote == message.msize()) {
+//        return 0;
+//    }
+//    else {
+//        fprintf(stderr, "Sending message failed, error code : %u \n", wrStatus);
+//        fprintf(stderr, "wrote : %u should write: %u \n", wrote, message.msize());
+//    }
+//    return FT_ERROR;
 }
 
 int CheckParams(uint8_t dest, int chanID)
@@ -507,103 +528,103 @@ int CheckParams(uint8_t dest, int chanID)
 
 int CheckIncomingQueue(uint16_t &ret_msgID)
 {
-    FT_STATUS ftStatus;
-    unsigned int bytes;
-    ftStatus = FT_GetQueueStatus(opened_device.handle, &bytes);
-    if (ftStatus != FT_OK) {
-        fprintf(stderr, "FT_Error occurred, error code :%u\n", ftStatus);
-        return FT_ERROR;
-    }
-    if (bytes == 0) return EMPTY;
-    uint8_t *buff = (uint8_t *) malloc(MAX_RESPONSE_SIZE);
-    unsigned int red;
-    ftStatus = FT_Read(opened_device.handle, buff, 2, &red);
-    if (ftStatus != FT_OK) {
-        fprintf(stderr, "FT_Error occurred, error code :%u\n", ftStatus);
-        free(buff);
-        return FT_ERROR;
-    }
-    uint16_t msgID = le16toh(*((uint16_t*) &buff[0]));
-    switch (msgID) {
-    case HW_DISCONNECT: {
-        READ_REST(4)
-        HwDisconnect response(buff);
-        printf("Device with serial %s disconnecting\n", opened_device.SN);
-        free(buff);
-        return FATAL_ERROR;
-    }
-    case HW_RESPONSE: {
-        READ_REST(4)
-        HwResponse response(buff);
-        fprintf(stderr, "Device with serial %s encountered error\n", opened_device.SN);
-        free(buff);
-        return DEVICE_ERROR;
-    }
-    case RICHRESPONSE: {
-        READ_REST(72)
-        HwResponseInfo response(buff);
-        fprintf(stderr, "Device with serial %s encountered error\n", opened_device.SN);
-        fprintf(stderr, "Detailed description of error \n ");
-        uint16_t error_cause = response.GetMsgID();
-        if (error_cause != 0) printf("\tMessage causing error: %hu\n ", error_cause);
-        fprintf(stderr, "\tThorlabs error code: %hu \n", response.GetCode());
-        fprintf(stderr, "\tDescription: %s\n", response.GetDescription());
-        free(buff);
-        return DEVICE_ERROR;
-    }
-    case MOVE_HOMED: {
-        READ_REST(4)
-        MovedHome response(buff);
-        assert (response.GetMotorID() < 3);
-        opened_device.motor[response.GetMotorID()].homing = false;
-        printf("Motor with id %hhu moved to home position\n", response.GetMotorID() + 1);
-        free(buff);
-        return MOVED_HOME_STATUS;
-    }
-    case MOVE_COMPLETED: {
-        READ_REST(18)     // 14 bytes for status updates
-        MoveCompleted response(buff);
-        assert (response.GetMotorID() < 3);
-        opened_device.motor[response.GetMotorID()].homing = false;
-        printf("Motor with id %hhu completed move\n", response.GetMotorID() + 1);
-        free(buff);
-        return MOVE_COMPLETED_STATUS;
-    }
-    case MOVE_STOPPED: {
-        READ_REST(18)     // 14 bytes for status updates
-        MoveStopped response(buff);
-        assert (response.GetMotorID() < 3);
-        opened_device.motor[response.GetMotorID()].homing = false;
-        printf("Motor with id %hhu stopped \n", response.GetMotorID() + 1);
-        free(buff);
-        return MOVE_STOPPED_STATUS;
-    }
-    case GET_STATUSUPDATE: {
-        READ_REST(18)
-        GetStatusUpdate response(buff);
-        assert (response.GetMotorID() < 3);
-        opened_device.motor[response.GetMotorID()].status_enc_count = response.GetEncCount();
-        opened_device.motor[response.GetMotorID()].status_position = response.GetPosition();
-        opened_device.motor[response.GetMotorID()].status_status_bits = response.GetStatusBits();
-        free(buff);
-        return 0;
-    }
-    case GET_DCSTATUSUPDATE: {
-        READ_REST(18)
-        GetMotChanStatusUpdate response(buff);
-        assert (response.GetMotorID() < 3);
-        opened_device.motor[response.GetMotorID()].status_velocity = response.GetVelocity();
-        opened_device.motor[response.GetMotorID()].status_position = response.GetPosition();
-        opened_device.motor[response.GetMotorID()].status_status_bits = response.GetStatusBits();
-        free(buff);
-        return 0;
-    }
-    default: {
-        ret_msgID = msgID;
-        free(buff);
-        return OTHER_MESSAGE;
-    }
-    };
+//    FT_STATUS ftStatus;
+//    unsigned int bytes;
+//    ftStatus = FT_GetQueueStatus(opened_device.handle, &bytes);
+//    if (ftStatus != FT_OK) {
+//        fprintf(stderr, "FT_Error occurred, error code :%u\n", ftStatus);
+//        return FT_ERROR;
+//    }
+//    if (bytes == 0) return EMPTY;
+//    uint8_t *buff = (uint8_t *) malloc(MAX_RESPONSE_SIZE);
+//    unsigned int red;
+//    ftStatus = FT_Read(opened_device.handle, buff, 2, &red);
+//    if (ftStatus != FT_OK) {
+//        fprintf(stderr, "FT_Error occurred, error code :%u\n", ftStatus);
+//        free(buff);
+//        return FT_ERROR;
+//    }
+//    uint16_t msgID = le16toh(*((uint16_t*) &buff[0]));
+//    switch (msgID) {
+//    case HW_DISCONNECT: {
+//        READ_REST(4)
+//        HwDisconnect response(buff);
+//        printf("Device with serial %s disconnecting\n", opened_device.SN);
+//        free(buff);
+//        return FATAL_ERROR;
+//    }
+//    case HW_RESPONSE: {
+//        READ_REST(4)
+//        HwResponse response(buff);
+//        fprintf(stderr, "Device with serial %s encountered error\n", opened_device.SN);
+//        free(buff);
+//        return DEVICE_ERROR;
+//    }
+//    case RICHRESPONSE: {
+//        READ_REST(72)
+//        HwResponseInfo response(buff);
+//        fprintf(stderr, "Device with serial %s encountered error\n", opened_device.SN);
+//        fprintf(stderr, "Detailed description of error \n ");
+//        uint16_t error_cause = response.GetMsgID();
+//        if (error_cause != 0) printf("\tMessage causing error: %hu\n ", error_cause);
+//        fprintf(stderr, "\tThorlabs error code: %hu \n", response.GetCode());
+//        fprintf(stderr, "\tDescription: %s\n", response.GetDescription());
+//        free(buff);
+//        return DEVICE_ERROR;
+//    }
+//    case MOVE_HOMED: {
+//        READ_REST(4)
+//        MovedHome response(buff);
+//        assert (response.GetMotorID() < 3);
+//        opened_device.motor[response.GetMotorID()].homing = false;
+//        printf("Motor with id %hhu moved to home position\n", response.GetMotorID() + 1);
+//        free(buff);
+//        return MOVED_HOME_STATUS;
+//    }
+//    case MOVE_COMPLETED: {
+//        READ_REST(18)     // 14 bytes for status updates
+//        MoveCompleted response(buff);
+//        assert (response.GetMotorID() < 3);
+//        opened_device.motor[response.GetMotorID()].homing = false;
+//        printf("Motor with id %hhu completed move\n", response.GetMotorID() + 1);
+//        free(buff);
+//        return MOVE_COMPLETED_STATUS;
+//    }
+//    case MOVE_STOPPED: {
+//        READ_REST(18)     // 14 bytes for status updates
+//        MoveStopped response(buff);
+//        assert (response.GetMotorID() < 3);
+//        opened_device.motor[response.GetMotorID()].homing = false;
+//        printf("Motor with id %hhu stopped \n", response.GetMotorID() + 1);
+//        free(buff);
+//        return MOVE_STOPPED_STATUS;
+//    }
+//    case GET_STATUSUPDATE: {
+//        READ_REST(18)
+//        GetStatusUpdate response(buff);
+//        assert (response.GetMotorID() < 3);
+//        opened_device.motor[response.GetMotorID()].status_enc_count = response.GetEncCount();
+//        opened_device.motor[response.GetMotorID()].status_position = response.GetPosition();
+//        opened_device.motor[response.GetMotorID()].status_status_bits = response.GetStatusBits();
+//        free(buff);
+//        return 0;
+//    }
+//    case GET_DCSTATUSUPDATE: {
+//        READ_REST(18)
+//        GetMotChanStatusUpdate response(buff);
+//        assert (response.GetMotorID() < 3);
+//        opened_device.motor[response.GetMotorID()].status_velocity = response.GetVelocity();
+//        opened_device.motor[response.GetMotorID()].status_position = response.GetPosition();
+//        opened_device.motor[response.GetMotorID()].status_status_bits = response.GetStatusBits();
+//        free(buff);
+//        return 0;
+//    }
+//    default: {
+//        ret_msgID = msgID;
+//        free(buff);
+//        return OTHER_MESSAGE;
+//    }
+//    };
 }
 
 int EmptyIncomingQueue()
@@ -627,30 +648,30 @@ int EmptyIncomingQueue()
 
 int GetResponseMess(uint16_t expected_msg, int size, uint8_t *mess)
 {
-    int ret;
-    uint16_t msgID;
-    while (true) {
-        ret = CheckIncomingQueue(msgID);
-        if (ret == OTHER_MESSAGE) {
-            if (msgID == expected_msg) {
-                *((int16_t *) &mess[0]) =  htole16(msgID);
-                unsigned int red;
-                FT_STATUS read_status = FT_Read(opened_device.handle, &mess[2], size - 2, &red);
-                if (read_status != FT_OK) {
-                    fprintf(stderr, "FT_Error occurred, error code :%u\n", read_status);
-                    return FT_ERROR;
-                }
-                return 0;
-            }
-            else return FATAL_ERROR;
-        }
-        if (ret == MOVED_HOME_STATUS || ret == MOVE_COMPLETED_STATUS || ret == MOVE_STOPPED_STATUS || ret == 0) continue;
-        switch (ret) {
-        case FATAL_ERROR: return FATAL_ERROR;
-        case FT_ERROR: return FT_ERROR;
-        case DEVICE_ERROR: return DEVICE_ERROR;
-        }
-    }
+//    int ret;
+//    uint16_t msgID;
+//    while (true) {
+//        ret = CheckIncomingQueue(msgID);
+//        if (ret == OTHER_MESSAGE) {
+//            if (msgID == expected_msg) {
+//                *((int16_t *) &mess[0]) =  htole16(msgID);
+//                unsigned int red;
+//                FT_STATUS read_status = FT_Read(opened_device.handle, &mess[2], size - 2, &red);
+//                if (read_status != FT_OK) {
+//                    fprintf(stderr, "FT_Error occurred, error code :%u\n", read_status);
+//                    return FT_ERROR;
+//                }
+//                return 0;
+//            }
+//            else return FATAL_ERROR;
+//        }
+//        if (ret == MOVED_HOME_STATUS || ret == MOVE_COMPLETED_STATUS || ret == MOVE_STOPPED_STATUS || ret == 0) continue;
+//        switch (ret) {
+//        case FATAL_ERROR: return FATAL_ERROR;
+//        case FT_ERROR: return FT_ERROR;
+//        case DEVICE_ERROR: return DEVICE_ERROR;
+//        }
+//    }
     return 0;
 }
 
@@ -1190,28 +1211,28 @@ int device_calls::GetMotorTrigger(GetTrigger &message, uint8_t dest, uint8_t cha
 
 int OpenDevice(int index)
 {
-    if (index >= devices_connected) return INVALID_PARAM_1;
-    if (opened_device_index != -1) {
-        device_calls::StopUpdateMess();
-        FT_Close(opened_device.handle);
-    }
-    opened_device = connected_device[index];
-    FT_HANDLE handle;
-    FT_STATUS ft_status;
-    ft_status = FT_OpenEx(opened_device.SN, FT_OPEN_BY_SERIAL_NUMBER, &handle);
-    if (ft_status != FT_OK) { fprintf(stderr, "Error opening device: %d\n", ft_status); return FT_ERROR; }
-    opened_device.handle = handle;
-    opened_device_index = index;
-    if (ft_status != FT_OK) { fprintf(stderr, "Error opening device: %d\n", ft_status); return FT_ERROR; }
-    if (FT_SetBaudRate(opened_device.handle, 115200) != FT_OK) return FT_ERROR;
-    if (FT_SetDataCharacteristics(opened_device.handle, FT_BITS_8, FT_STOP_BITS_1, FT_PARITY_NONE) != FT_OK) return FT_ERROR;
-    usleep(50);
-    if (FT_Purge(opened_device.handle, FT_PURGE_RX | FT_PURGE_TX) != FT_OK) return FT_ERROR;
-    usleep(50);
-    if (FT_SetFlowControl(opened_device.handle, FT_FLOW_RTS_CTS, 0, 0) != FT_OK) return FT_ERROR;
-    if (FT_SetRts(opened_device.handle) != FT_OK) return FT_ERROR;
-    usleep(100);
+//    if (index >= devices_connected) return INVALID_PARAM_1;
+//    if (opened_device_index != -1) {
+//        device_calls::StopUpdateMess();
+//        FT_Close(opened_device.handle);
+//    }
+//    opened_device = connected_device[index];
+//    FT_HANDLE handle;
+//    FT_STATUS ft_status;
+//    ft_status = FT_OpenEx(opened_device.SN, FT_OPEN_BY_SERIAL_NUMBER, &handle);
+//    if (ft_status != FT_OK) { fprintf(stderr, "Error opening device: %d\n", ft_status); return FT_ERROR; }
+//    opened_device.handle = handle;
+//    opened_device_index = index;
+//    if (ft_status != FT_OK) { fprintf(stderr, "Error opening device: %d\n", ft_status); return FT_ERROR; }
+//    if (FT_SetBaudRate(opened_device.handle, 115200) != FT_OK) return FT_ERROR;
+//    if (FT_SetDataCharacteristics(opened_device.handle, FT_BITS_8, FT_STOP_BITS_1, FT_PARITY_NONE) != FT_OK) return FT_ERROR;
+//    usleep(50);
+//    if (FT_Purge(opened_device.handle, FT_PURGE_RX | FT_PURGE_TX) != FT_OK) return FT_ERROR;
+//    usleep(50);
+//    if (FT_SetFlowControl(opened_device.handle, FT_FLOW_RTS_CTS, 0, 0) != FT_OK) return FT_ERROR;
+//    if (FT_SetRts(opened_device.handle) != FT_OK) return FT_ERROR;
+//    usleep(100);
 
-    device_calls::StartUpdateMess();
-    return 0;
+//    device_calls::StartUpdateMess();
+//    return 0;
 };

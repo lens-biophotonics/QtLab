@@ -40,6 +40,7 @@ add_subdirectory(qtlab/hw/hamamatsu)
 add_subdirectory(qtlab/hw/ni)
 add_subdirectory(qtlab/hw/pi)
 add_subdirectory(qtlab/hw/serial)
+add_subdirectory(qtlab/hw/thorlabs-mc)
 
 if(BUILD_WIDGETS)
     add_subdirectory(qtlab/widgets)
