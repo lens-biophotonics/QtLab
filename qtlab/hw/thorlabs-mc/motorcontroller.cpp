@@ -1,6 +1,7 @@
 /***************************************************************************
 **                                                                        **
-**  This file is part of TMC, Thorlabs motor controller                   **
+**  This file is part of QtLab-Thorlabs-MC                                **
+**  Copyright (C) 2022 giacomo.mazzamuto@cnr.it                           **
 **  Copyright (C) 2016-2019 wido.tomas@gmail.com https://github.com/tWido **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
@@ -19,18 +20,13 @@
 ****************************************************************************/
 
 
-#include "api.h"
 #include <sys/signalfd.h>
 #include <signal.h>
 #include <unistd.h>
 #include <errno.h>
 #include <assert.h>
 
-//------------------ device globals definitions --------------------------------
-int devices_connected = 0;
-controller_device *connected_device = NULL;
-controller_device opened_device;
-int opened_device_index  = -1;
+#include "motorcontroller.h"
 
 functions_set tdc_set{
     IDENTIFY,
@@ -460,6 +456,11 @@ functions_set all_set{
     GET_TRIGGER
 };
 
+MotorController::MotorController(QObject *parent) : SerialDevice(parent)
+{
+    serial->setBaudRate(SerialPort::Baud115200);
+}
+
 
 //----------------- Device communication functions ---------------------------------
 
@@ -489,7 +490,7 @@ functions_set all_set{
     EMPTY_IN_QUEUE
 
 
-int SendMessage(Message &message)
+int MotorController::SendMessage(Message &message)
 {
 //    FT_STATUS wrStatus;
 //    unsigned int wrote;
@@ -504,7 +505,7 @@ int SendMessage(Message &message)
 //    return FT_ERROR;
 }
 
-int CheckParams(uint8_t dest, int chanID)
+int MotorController::CheckParams(uint8_t dest, int chanID)
 {
     if (chanID > opened_device.channels && chanID != -1) return INVALID_CHANNEL;
     if (dest == 0x11 || dest == 0x50) return 0;
@@ -526,7 +527,7 @@ int CheckParams(uint8_t dest, int chanID)
     return 0;
 };
 
-int CheckIncomingQueue(uint16_t &ret_msgID)
+int MotorController::CheckIncomingQueue(uint16_t &ret_msgID)
 {
 //    FT_STATUS ftStatus;
 //    unsigned int bytes;
@@ -627,7 +628,7 @@ int CheckIncomingQueue(uint16_t &ret_msgID)
 //    };
 }
 
-int EmptyIncomingQueue()
+int MotorController::EmptyIncomingQueue()
 {
     while (true) {
         uint16_t messID = 0;
@@ -646,7 +647,7 @@ int EmptyIncomingQueue()
     }
 }
 
-int GetResponseMess(uint16_t expected_msg, int size, uint8_t *mess)
+int MotorController::GetResponseMess(uint16_t expected_msg, int size, uint8_t *mess)
 {
 //    int ret;
 //    uint16_t msgID;
@@ -676,7 +677,7 @@ int GetResponseMess(uint16_t expected_msg, int size, uint8_t *mess)
 }
 
 
-int device_calls::Identify(uint8_t dest)
+int MotorController::Identify(uint8_t dest)
 {
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
@@ -686,7 +687,7 @@ int device_calls::Identify(uint8_t dest)
     return 0;
 }
 
-int device_calls::EnableChannel(uint8_t dest, uint8_t chanel)
+int MotorController::EnableChannel(uint8_t dest, uint8_t chanel)
 {
     CHECK_ADDR_PARAMS(dest, chanel)
     EMPTY_IN_QUEUE
@@ -696,7 +697,7 @@ int device_calls::EnableChannel(uint8_t dest, uint8_t chanel)
     return 0;
 }
 
-int device_calls::DisableChannel(uint8_t dest, uint8_t chanel)
+int MotorController::DisableChannel(uint8_t dest, uint8_t chanel)
 {
     CHECK_ADDR_PARAMS(dest, chanel)
     EMPTY_IN_QUEUE
@@ -706,7 +707,7 @@ int device_calls::DisableChannel(uint8_t dest, uint8_t chanel)
     return 0;
 }
 
-int device_calls::ChannelState(GetChannelState &info, uint8_t dest, uint8_t chanel)
+int MotorController::ChannelState(GetChannelState &info, uint8_t dest, uint8_t chanel)
 {
     CHECK_ADDR_PARAMS(dest, chanel)
     EMPTY_IN_QUEUE
@@ -721,7 +722,7 @@ int device_calls::ChannelState(GetChannelState &info, uint8_t dest, uint8_t chan
     return 0;
 }
 
-int device_calls::DisconnectHW(uint8_t dest)
+int MotorController::DisconnectHW(uint8_t dest)
 {
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
@@ -731,7 +732,7 @@ int device_calls::DisconnectHW(uint8_t dest)
     return 0;
 }
 
-int device_calls::StartUpdateMess(uint8_t rate, uint8_t dest)
+int MotorController::StartUpdateMess(uint8_t rate, uint8_t dest)
 {
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
@@ -743,7 +744,7 @@ int device_calls::StartUpdateMess(uint8_t rate, uint8_t dest)
     return 0;
 }
 
-int device_calls::StopUpdateMess(uint8_t dest)
+int MotorController::StopUpdateMess(uint8_t dest)
 {
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
@@ -754,7 +755,7 @@ int device_calls::StopUpdateMess(uint8_t dest)
     return 0;
 }
 
-int device_calls::GetHwInfo(HwInfo &message, uint8_t dest)
+int MotorController::GetHwInfo(HwInfo &message, uint8_t dest)
 {
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
@@ -769,7 +770,7 @@ int device_calls::GetHwInfo(HwInfo &message, uint8_t dest)
     return 0;
 }
 
-int device_calls::GetBayUsed(GetRackBayUsed &message, uint8_t bayID, uint8_t dest)
+int MotorController::GetBayUsed(GetRackBayUsed &message, uint8_t bayID, uint8_t dest)
 {
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
@@ -785,7 +786,7 @@ int device_calls::GetBayUsed(GetRackBayUsed &message, uint8_t bayID, uint8_t des
     return 0;
 }
 
-int device_calls::FlashProgYes(uint8_t dest)
+int MotorController::FlashProgYes(uint8_t dest)
 {
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
@@ -795,7 +796,7 @@ int device_calls::FlashProgYes(uint8_t dest)
     return 0;
 };
 
-int device_calls::FlashProgNo(uint8_t dest)
+int MotorController::FlashProgNo(uint8_t dest)
 {
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
@@ -805,7 +806,7 @@ int device_calls::FlashProgNo(uint8_t dest)
     return 0;
 };
 
-int device_calls::SetPositionCounter(int32_t pos, uint8_t dest, uint16_t channel)
+int MotorController::SetPositionCounter(int32_t pos, uint8_t dest, uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -816,13 +817,13 @@ int device_calls::SetPositionCounter(int32_t pos, uint8_t dest, uint16_t channel
     return ret; //return WARNING
 };
 
-int device_calls::GetPositionCounter(GetPosCounter &message, uint8_t dest, uint8_t channel)
+int MotorController::GetPositionCounter(GetPosCounter &message, uint8_t dest, uint8_t channel)
 {
     GET_MESS(ReqPosCounter, 12, GET_POSCOUNTER, GetPosCounter)
     return 0;
 };
 
-int device_calls::SetEncoderCounter(int32_t count, uint8_t dest, uint16_t channel)
+int MotorController::SetEncoderCounter(int32_t count, uint8_t dest, uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -833,13 +834,13 @@ int device_calls::SetEncoderCounter(int32_t count, uint8_t dest, uint16_t channe
     return ret; //return WARNING
 };
 
-int device_calls::GetEncoderCounter(GetEncCount &message, uint8_t dest, uint8_t channel)
+int MotorController::GetEncoderCounter(GetEncCount &message, uint8_t dest, uint8_t channel)
 {
     GET_MESS(ReqEncCount, 12, GET_ENCCOUNTER, GetEncCount)
     return 0;
 };
 
-int device_calls::SetVelocityP(int32_t acc, int32_t maxVel, uint8_t dest, uint16_t channel)
+int MotorController::SetVelocityP(int32_t acc, int32_t maxVel, uint8_t dest, uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -851,13 +852,13 @@ int device_calls::SetVelocityP(int32_t acc, int32_t maxVel, uint8_t dest, uint16
     return 0;
 };
 
-int device_calls::GetVelocityP(GetVelocityParams &message, uint8_t dest, uint8_t channel)
+int MotorController::GetVelocityP(GetVelocityParams &message, uint8_t dest, uint8_t channel)
 {
     GET_MESS(ReqVelocityParams, 20, GET_VELPARAMS, GetVelocityParams)
     return 0;
 };
 
-int device_calls::SetJogP(uint16_t mode, int32_t stepSize, int32_t vel, int32_t acc, uint16_t stopMode, int8_t dest, uint16_t channel)
+int MotorController::SetJogP(uint16_t mode, int32_t stepSize, int32_t vel, int32_t acc, uint16_t stopMode, int8_t dest, uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -872,13 +873,13 @@ int device_calls::SetJogP(uint16_t mode, int32_t stepSize, int32_t vel, int32_t 
     return 0;
 };
 
-int device_calls::GetJogP(GetJogParams &message, uint8_t dest, uint8_t channel)
+int MotorController::GetJogP(GetJogParams &message, uint8_t dest, uint8_t channel)
 {
     GET_MESS(ReqJogParams, 28, GET_JOGPARAMS, GetJogParams)
     return 0;
 };
 
-int device_calls::SetPowerUsed(uint16_t rest_power, uint16_t move_power, int8_t dest, uint16_t channel)
+int MotorController::SetPowerUsed(uint16_t rest_power, uint16_t move_power, int8_t dest, uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -890,13 +891,13 @@ int device_calls::SetPowerUsed(uint16_t rest_power, uint16_t move_power, int8_t 
     return 0;
 };
 
-int device_calls::GetPowerUsed(GetPowerParams &message, uint8_t dest, uint8_t channel)
+int MotorController::GetPowerUsed(GetPowerParams &message, uint8_t dest, uint8_t channel)
 {
     GET_MESS(ReqPowerParams, 12, GET_POWERPARAMS, GetPowerParams)
     return 0;
 };
 
-int device_calls::SetBacklashDist(uint32_t dist, int8_t dest, uint16_t channel)
+int MotorController::SetBacklashDist(uint32_t dist, int8_t dest, uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -907,13 +908,13 @@ int device_calls::SetBacklashDist(uint32_t dist, int8_t dest, uint16_t channel)
     return 0;
 };
 
-int device_calls::GetBacklashDist(GetGeneralMoveParams &message, uint8_t dest, uint8_t channel)
+int MotorController::GetBacklashDist(GetGeneralMoveParams &message, uint8_t dest, uint8_t channel)
 {
     GET_MESS(ReqGeneralMoveParams, 12, GET_GENMOVEPARAMS, GetGeneralMoveParams)
     return 0;
 };
 
-int device_calls::SetRelativeMoveP(uint32_t dist, int8_t dest, uint16_t channel)
+int MotorController::SetRelativeMoveP(uint32_t dist, int8_t dest, uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -924,13 +925,13 @@ int device_calls::SetRelativeMoveP(uint32_t dist, int8_t dest, uint16_t channel)
     return 0;
 };
 
-int device_calls::GetRelativeMoveP(GetRelativeMoveParams &message, uint8_t dest, uint8_t channel)
+int MotorController::GetRelativeMoveP(GetRelativeMoveParams &message, uint8_t dest, uint8_t channel)
 {
     GET_MESS(ReqRelativeMoveParams, 12, GET_MOVERELPARAMS, GetRelativeMoveParams)
     return 0;
 };
 
-int device_calls::SetAbsoluteMoveP(uint32_t pos, int8_t dest, uint16_t channel)
+int MotorController::SetAbsoluteMoveP(uint32_t pos, int8_t dest, uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -941,13 +942,13 @@ int device_calls::SetAbsoluteMoveP(uint32_t pos, int8_t dest, uint16_t channel)
     return 0;
 };
 
-int device_calls::GetAbsoluteMoveP(GetAbsoluteMoveParams &message, uint8_t dest, uint8_t channel)
+int MotorController::GetAbsoluteMoveP(GetAbsoluteMoveParams &message, uint8_t dest, uint8_t channel)
 {
     GET_MESS(ReqAbsoluteMoveParams, 12, GET_MOVEABSPARAMS, GetAbsoluteMoveParams)
     return 0;
 };
 
-int device_calls::SetHomingVel(uint32_t vel, int8_t dest,  uint16_t channel)
+int MotorController::SetHomingVel(uint32_t vel, int8_t dest,  uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -958,13 +959,13 @@ int device_calls::SetHomingVel(uint32_t vel, int8_t dest,  uint16_t channel)
     return 0;
 };
 
-int device_calls::GetHomingVel(GetHomeParams &message, uint8_t dest, uint8_t channel)
+int MotorController::GetHomingVel(GetHomeParams &message, uint8_t dest, uint8_t channel)
 {
     GET_MESS(ReqHomeParams, 20, GET_HOMEPARAMS, GetHomeParams)
     return 0;
 };
 
-int device_calls::SetLimitSwitchConfig(uint16_t CwHwLim, uint16_t CCwHwLim, uint16_t CwSwLim, uint16_t CCwSwLim, uint16_t mode, int8_t dest, uint16_t channel)
+int MotorController::SetLimitSwitchConfig(uint16_t CwHwLim, uint16_t CCwHwLim, uint16_t CwSwLim, uint16_t CCwSwLim, uint16_t mode, int8_t dest, uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -981,13 +982,13 @@ int device_calls::SetLimitSwitchConfig(uint16_t CwHwLim, uint16_t CCwHwLim, uint
     return 0;
 };
 
-int device_calls::GetLimitSwitchConfig(GetLimitSwitchParams &message, uint8_t dest, uint8_t channel)
+int MotorController::GetLimitSwitchConfig(GetLimitSwitchParams &message, uint8_t dest, uint8_t channel)
 {
     GET_MESS(ReqLimitSwitchParams, 22, GET_LIMSWITCHPARAMS, GetLimitSwitchParams)
     return 0;
 };
 
-int device_calls::MoveToHome(uint8_t dest, uint8_t channel)
+int MotorController::MoveToHome(uint8_t dest, uint8_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -998,7 +999,7 @@ int device_calls::MoveToHome(uint8_t dest, uint8_t channel)
     return 0;
 };
 
-int device_calls::StartSetRelativeMove(uint8_t dest, uint8_t channel)
+int MotorController::StartSetRelativeMove(uint8_t dest, uint8_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -1009,7 +1010,7 @@ int device_calls::StartSetRelativeMove(uint8_t dest, uint8_t channel)
     return 0;
 };
 
-int device_calls::StartRelativeMove(int32_t dist, uint8_t dest, uint16_t channel)
+int MotorController::StartRelativeMove(int32_t dist, uint8_t dest, uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -1021,7 +1022,7 @@ int device_calls::StartRelativeMove(int32_t dist, uint8_t dest, uint16_t channel
     return 0;
 };
 
-int device_calls::StartSetAbsoluteMove(uint8_t dest, uint8_t channel)
+int MotorController::StartSetAbsoluteMove(uint8_t dest, uint8_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -1032,7 +1033,7 @@ int device_calls::StartSetAbsoluteMove(uint8_t dest, uint8_t channel)
     return 0;
 };
 
-int device_calls::StartAbsoluteMove(int32_t pos, uint8_t dest, uint16_t channel)
+int MotorController::StartAbsoluteMove(int32_t pos, uint8_t dest, uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -1044,7 +1045,7 @@ int device_calls::StartAbsoluteMove(int32_t pos, uint8_t dest, uint16_t channel)
     return 0;
 };
 
-int device_calls::StartJogMove(uint8_t direction, uint8_t dest, uint8_t channel)
+int MotorController::StartJogMove(uint8_t direction, uint8_t dest, uint8_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -1056,7 +1057,7 @@ int device_calls::StartJogMove(uint8_t direction, uint8_t dest, uint8_t channel)
     return 0;
 };
 
-int device_calls::StartSetVelocityMove(uint8_t direction, uint8_t dest, uint8_t channel)
+int MotorController::StartSetVelocityMove(uint8_t direction, uint8_t dest, uint8_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -1068,7 +1069,7 @@ int device_calls::StartSetVelocityMove(uint8_t direction, uint8_t dest, uint8_t 
     return 0;
 }
 
-int device_calls::StopMovement(uint8_t stopMode, uint8_t dest, uint8_t channel)
+int MotorController::StopMovement(uint8_t stopMode, uint8_t dest, uint8_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -1080,7 +1081,7 @@ int device_calls::StopMovement(uint8_t stopMode, uint8_t dest, uint8_t channel)
     return 0;
 }
 
-int device_calls::SetAccelerationProfile(uint16_t index, int8_t dest, uint16_t channel)
+int MotorController::SetAccelerationProfile(uint16_t index, int8_t dest, uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -1091,13 +1092,13 @@ int device_calls::SetAccelerationProfile(uint16_t index, int8_t dest, uint16_t c
     return 0;
 };
 
-int device_calls::GetAccelerationProfile(GetBowIndex &message, uint8_t dest, uint8_t channel)
+int MotorController::GetAccelerationProfile(GetBowIndex &message, uint8_t dest, uint8_t channel)
 {
     GET_MESS(ReqBowIndex, 10, GET_BOWINDEX, GetBowIndex)
     return 0;
 };
 
-int device_calls::SetLedP(uint16_t mode, int8_t dest, uint16_t channel)
+int MotorController::SetLedP(uint16_t mode, int8_t dest, uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -1108,13 +1109,13 @@ int device_calls::SetLedP(uint16_t mode, int8_t dest, uint16_t channel)
     return 0;
 };
 
-int device_calls::GetLedP(GetLedMode &message, uint8_t dest, uint8_t channel)
+int MotorController::GetLedP(GetLedMode &message, uint8_t dest, uint8_t channel)
 {
     GET_MESS(ReqLedMode, 10, GET_AVMODES, GetLedMode)
     return 0;
 };
 
-int device_calls::SetButtons(uint16_t mode, int32_t pos1, int32_t pos2, uint16_t timeout, int8_t dest, uint16_t channel)
+int MotorController::SetButtons(uint16_t mode, int32_t pos1, int32_t pos2, uint16_t timeout, int8_t dest, uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -1128,13 +1129,13 @@ int device_calls::SetButtons(uint16_t mode, int32_t pos1, int32_t pos2, uint16_t
     return 0;
 };
 
-int device_calls::GetButtonsInfo(GetButtonParams &message, uint8_t dest, uint8_t channel)
+int MotorController::GetButtonsInfo(GetButtonParams &message, uint8_t dest, uint8_t channel)
 {
     GET_MESS(ReqButtonParams, 22, GET_BUTTONPARAMS, GetButtonParams)
     return 0;
 };
 
-int device_calls::ReqStatus(uint8_t dest, uint8_t channel)
+int MotorController::ReqStatus(uint8_t dest, uint8_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -1144,7 +1145,7 @@ int device_calls::ReqStatus(uint8_t dest, uint8_t channel)
     return 0;
 };
 
-int device_calls::ReqDcStatus(uint8_t dest, uint8_t channel)
+int MotorController::ReqDcStatus(uint8_t dest, uint8_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -1154,7 +1155,7 @@ int device_calls::ReqDcStatus(uint8_t dest, uint8_t channel)
     return 0;
 };
 
-int device_calls::SendServerAlive(uint8_t dest)
+int MotorController::SendServerAlive(uint8_t dest)
 {
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
@@ -1164,13 +1165,13 @@ int device_calls::SendServerAlive(uint8_t dest)
     return 0;
 };
 
-int device_calls::GetStatBits(GetStatusBits &message, uint8_t dest, uint8_t channel)
+int MotorController::GetStatBits(GetStatusBits &message, uint8_t dest, uint8_t channel)
 {
     GET_MESS(ReqStatusBits, 12, GET_STATUSBITS, GetStatusBits)
     return 0;
 };
 
-int device_calls::DisableEomMessages(uint8_t dest)
+int MotorController::DisableEomMessages(uint8_t dest)
 {
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
@@ -1181,7 +1182,7 @@ int device_calls::DisableEomMessages(uint8_t dest)
     return 0;
 };
 
-int device_calls::EnableEomMessages(uint8_t dest)
+int MotorController::EnableEomMessages(uint8_t dest)
 {
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
@@ -1192,7 +1193,7 @@ int device_calls::EnableEomMessages(uint8_t dest)
     return 0;
 };
 
-int device_calls::CreateTrigger(uint8_t mode, uint8_t dest, uint8_t channel)
+int MotorController::CreateTrigger(uint8_t mode, uint8_t dest, uint8_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
@@ -1203,13 +1204,13 @@ int device_calls::CreateTrigger(uint8_t mode, uint8_t dest, uint8_t channel)
     return 0;
 };
 
-int device_calls::GetMotorTrigger(GetTrigger &message, uint8_t dest, uint8_t channel)
+int MotorController::GetMotorTrigger(GetTrigger &message, uint8_t dest, uint8_t channel)
 {
     GET_MESS(ReqTrigger, HEADER_SIZE, GET_TRIGGER, GetTrigger)
     return 0;
 };
 
-int OpenDevice(int index)
+int MotorController::OpenDevice(int index)
 {
 //    if (index >= devices_connected) return INVALID_PARAM_1;
 //    if (opened_device_index != -1) {

@@ -1,6 +1,7 @@
 /***************************************************************************
 **                                                                        **
-**  This file is part of TMC, Thorlabs motor controller                   **
+**  This file is part of QtLab-Thorlabs-MC                                **
+**  Copyright (C) 2022 giacomo.mazzamuto@cnr.it                           **
 **  Copyright (C) 2016-2019 wido.tomas@gmail.com https://github.com/tWido **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
@@ -85,6 +86,7 @@ public:
 protected:
     unsigned int length;
     uint8_t *bytes;
+    controller_device opened_device;
 };
 
 /*

@@ -2,11 +2,11 @@ set(TARGETNAME qtlab-hw-thorlabs-mc)
 set(EXPORT_NAME ThorlabsMC)
 
 set(SOURCEFILES
-    api.cpp
+    motorcontroller.cpp
 )
 
 set(HEADERS
-    api.h
+    motorcontroller.h
     device.h
     messages.h
     message_codes.h

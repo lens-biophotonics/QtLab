@@ -1,6 +1,7 @@
 /***************************************************************************
 **                                                                        **
-**  This file is part of TMC, Thorlabs motor controller                   **
+**  This file is part of QtLab-Thorlabs-MC                                **
+**  Copyright (C) 2022 giacomo.mazzamuto@cnr.it                           **
 **  Copyright (C) 2016-2019 wido.tomas@gmail.com https://github.com/tWido **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
@@ -18,15 +19,22 @@
 **                                                                        **
 ****************************************************************************/
 
-#ifndef API
-#define API
+#ifndef MOTORCONTROLLER_H
+#define MOTORCONTROLLER_H
 
 #include <endian.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <pthread.h>
+
+#include <QObject>
+
+#include <qtlab/hw/serial/serialdevice.h>
+
+#include "device.h"
 #include "messages.h"
+
 
 #define MAX_RESPONSE_SIZE 128
 #define SOURCE 0x01
@@ -56,132 +64,143 @@
 #define DEFAULTCHANNEL8 0x01
 #define DEFAULTCHANNEL16 0x01
 
-extern int OpenDevice(int index);
 
-//----------------- Device communication functions ---------------------------------
+class MotorController : public SerialDevice
+{
+public:
 
-extern int CheckParams(uint8_t dest, int chanID);
+    MotorController(QObject *parent = nullptr);
 
-extern int SendMessage(Message &message);
+    int OpenDevice(int index);
 
-extern int CheckIncomingQueue(uint16_t &ret_msgID);
+    //----------------- Device communication functions ---------------------------------
 
-extern int EmptyIncomingQueue();
+    int CheckParams(uint8_t dest, int chanID);
 
-extern int GetResponseMess(uint16_t expected_msg, int size, uint8_t *mess);
+    void SendMessage(Message &message);
+
+    int CheckIncomingQueue(uint16_t &ret_msgID);
+
+    int EmptyIncomingQueue();
+
+    int GetResponseMess(uint16_t expected_msg, int size, uint8_t *mess);
 
 
-
-namespace device_calls {
 // ------------------------- Generic device calls ------------------------------
 
-extern int Identify(uint8_t dest = DEFAULTDEST);
+    int Identify(uint8_t dest = DEFAULTDEST);
 
-extern int EnableChannel(uint8_t dest = DEFAULTDEST, uint8_t chanel = DEFAULTCHANNEL8);
+    int EnableChannel(uint8_t dest = DEFAULTDEST, uint8_t chanel = DEFAULTCHANNEL8);
 
-extern int DisableChannel(uint8_t dest = DEFAULTDEST, uint8_t chanel = DEFAULTCHANNEL8);
+    int DisableChannel(uint8_t dest = DEFAULTDEST, uint8_t chanel = DEFAULTCHANNEL8);
 
-extern int ChannelState(GetChannelState &info, uint8_t dest = DEFAULTDEST, uint8_t chanel = DEFAULTCHANNEL8);
+    int ChannelState(GetChannelState &info, uint8_t dest = DEFAULTDEST, uint8_t chanel = DEFAULTCHANNEL8);
 
-extern int DisconnectHW(uint8_t dest = DEFAULTDEST);
+    int DisconnectHW(uint8_t dest = DEFAULTDEST);
 
-extern int StartUpdateMess(uint8_t rate = 1, uint8_t dest = DEFAULTDEST);
+    int StartUpdateMess(uint8_t rate = 1, uint8_t dest = DEFAULTDEST);
 
-extern int StopUpdateMess(uint8_t dest = DEFAULTDEST);
+    int StopUpdateMess(uint8_t dest = DEFAULTDEST);
 
-extern int GetHwInfo(HwInfo &message, uint8_t dest = DEFAULTDEST);
+    int GetHwInfo(HwInfo &message, uint8_t dest = DEFAULTDEST);
 
-extern int GetBayUsed(GetRackBayUsed &message, uint8_t bayID, uint8_t dest = DEFAULTDEST);
+    int GetBayUsed(GetRackBayUsed &message, uint8_t bayID, uint8_t dest = DEFAULTDEST);
 
 //-------------------------- Motor control calls ------------------------------
 
-extern int FlashProgYes(uint8_t dest = DEFAULTDEST);
+    int FlashProgYes(uint8_t dest = DEFAULTDEST);
 
-extern int FlashProgNo(uint8_t dest = DEFAULTDEST);
+    int FlashProgNo(uint8_t dest = DEFAULTDEST);
 
-extern int SetPositionCounter(int32_t pos, uint8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    int SetPositionCounter(int32_t pos, uint8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
 
-extern int GetPositionCounter(GetPosCounter &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int GetPositionCounter(GetPosCounter &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int SetEncoderCounter(int32_t count, uint8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    int SetEncoderCounter(int32_t count, uint8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
 
-extern int GetEncoderCounter(GetEncCount &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int GetEncoderCounter(GetEncCount &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int SetVelocityP(int32_t acc, int32_t maxVel, uint8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    int SetVelocityP(int32_t acc, int32_t maxVel, uint8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
 
-extern int GetVelocityP(GetVelocityParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int GetVelocityP(GetVelocityParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int SetJogP(uint16_t mode, int32_t stepSize, int32_t vel, int32_t acc, uint16_t stopMode, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    int SetJogP(uint16_t mode, int32_t stepSize, int32_t vel, int32_t acc, uint16_t stopMode, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
 
-extern int GetJogP(GetJogParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int GetJogP(GetJogParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int SetPowerUsed(uint16_t rest_power, uint16_t move_power, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    int SetPowerUsed(uint16_t rest_power, uint16_t move_power, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
 
-extern int GetPowerUsed(GetPowerParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int GetPowerUsed(GetPowerParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int SetBacklashDist(uint32_t dist, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    int SetBacklashDist(uint32_t dist, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
 
-extern int GetBacklashDist(GetGeneralMoveParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int GetBacklashDist(GetGeneralMoveParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int SetRelativeMoveP(uint32_t dist, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    int SetRelativeMoveP(uint32_t dist, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
 
-extern int GetRelativeMoveP(GetRelativeMoveParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int GetRelativeMoveP(GetRelativeMoveParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int SetAbsoluteMoveP(uint32_t pos, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    int SetAbsoluteMoveP(uint32_t pos, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
 
-extern int GetAbsoluteMoveP(GetAbsoluteMoveParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int GetAbsoluteMoveP(GetAbsoluteMoveParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int SetHomingVel(uint32_t vel, int8_t dest = DEFAULTDEST,  uint16_t channel = DEFAULTCHANNEL16);
+    int SetHomingVel(uint32_t vel, int8_t dest = DEFAULTDEST,  uint16_t channel = DEFAULTCHANNEL16);
 
-extern int GetHomingVel(GetHomeParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int GetHomingVel(GetHomeParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int SetLimitSwitchConfig(uint16_t CwHwLim, uint16_t CCwHwLim, uint16_t CwSwLim, uint16_t CCwSwLim, uint16_t mode, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    int SetLimitSwitchConfig(uint16_t CwHwLim, uint16_t CCwHwLim, uint16_t CwSwLim, uint16_t CCwSwLim, uint16_t mode, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
 
-extern int GetLimitSwitchConfig(GetLimitSwitchParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int GetLimitSwitchConfig(GetLimitSwitchParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int MoveToHome(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int MoveToHome(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int StartSetRelativeMove(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int StartSetRelativeMove(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int StartRelativeMove(int32_t dist, uint8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    int StartRelativeMove(int32_t dist, uint8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
 
-extern int StartSetAbsoluteMove(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int StartSetAbsoluteMove(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int StartAbsoluteMove(int32_t pos, uint8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    int StartAbsoluteMove(int32_t pos, uint8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
 
-extern int StartJogMove(uint8_t direction, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int StartJogMove(uint8_t direction, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int StartSetVelocityMove(uint8_t direction, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int StartSetVelocityMove(uint8_t direction, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int StopMovement(uint8_t stopMode = 0x02, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int StopMovement(uint8_t stopMode = 0x02, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int SetAccelerationProfile(uint16_t index, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    int SetAccelerationProfile(uint16_t index, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
 
-extern int GetAccelerationProfile(GetBowIndex &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int GetAccelerationProfile(GetBowIndex &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int SetLedP(uint16_t mode, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    int SetLedP(uint16_t mode, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
 
-extern int GetLedP(GetLedMode &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int GetLedP(GetLedMode &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int SetButtons(uint16_t mode, int32_t pos1, int32_t pos2, uint16_t timeout, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    int SetButtons(uint16_t mode, int32_t pos1, int32_t pos2, uint16_t timeout, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
 
-extern int GetButtonsInfo(GetButtonParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int GetButtonsInfo(GetButtonParams &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int ReqStatus(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int ReqStatus(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int ReqDcStatus(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int ReqDcStatus(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int SendServerAlive(uint8_t dest = DEFAULTDEST);
+    int SendServerAlive(uint8_t dest = DEFAULTDEST);
 
-extern int GetStatBits(GetStatusBits &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int GetStatBits(GetStatusBits &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int DisableEomMessages(uint8_t dest = DEFAULTDEST);
+    int DisableEomMessages(uint8_t dest = DEFAULTDEST);
 
-extern int EnableEomMessages(uint8_t dest = DEFAULTDEST);
+    int EnableEomMessages(uint8_t dest = DEFAULTDEST);
 
-extern int CreateTrigger(uint8_t mode, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    int CreateTrigger(uint8_t mode, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-extern int GetMotorTrigger(GetTrigger &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
-} // namespace device_calls
+    int GetMotorTrigger(GetTrigger &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-#endif
+private:
+
+    int devices_connected;
+    controller_device opened_device;
+    int opened_device_index;
+};
+
+#endif // MOTORCONTROLLER_H

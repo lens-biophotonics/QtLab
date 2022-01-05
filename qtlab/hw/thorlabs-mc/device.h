@@ -1,6 +1,7 @@
 /***************************************************************************
 **                                                                        **
-**  This file is part of TMC, Thorlabs motor controller                   **
+**  This file is part of QtLab-Thorlabs-MC                                **
+**  Copyright (C) 2022 giacomo.mazzamuto@cnr.it                           **
 **  Copyright (C) 2016-2019 wido.tomas@gmail.com https://github.com/tWido **
 **                                                                        **
 **  This program is free software: you can redistribute it and/or modify  **
@@ -56,16 +57,10 @@ typedef struct {
     functions_set functions;
 } controller_device;
 
-extern int devices_connected;
-extern controller_device *connected_device;
-extern controller_device opened_device;
-extern int opened_device_index;
-
-extern functions_set tdc_set;
-extern functions_set tst_set;
-extern functions_set bsc_set;
-extern functions_set bbd_set;
-extern functions_set all_set;
+int devices_connected;
+controller_device *connected_device;
+controller_device opened_device;
+int opened_device_index;
 
 // enum for device types
 enum {
