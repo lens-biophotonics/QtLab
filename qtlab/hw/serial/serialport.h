@@ -28,6 +28,7 @@ public:
 
     void setPortBySerialNumber(const QString &serialNumber);
     void setTimeout(int ms);
+    int getTimeout() const;
 
     QStringList getLineEndTermination();
     void setLineEndTermination(const QString &tx, const QString &rx = QString());

@@ -242,6 +242,11 @@ void SerialPort::setTimeout(int ms)
     _serialTimeout = ms;
 }
 
+int SerialPort::getTimeout() const
+{
+    return _serialTimeout;
+}
+
 QSerialPortInfo SerialPort::portInfo() const
 {
     return QSerialPortInfo(*this);
