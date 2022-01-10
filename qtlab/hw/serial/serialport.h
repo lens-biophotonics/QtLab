@@ -13,7 +13,7 @@ public:
     bool open(OpenMode mode = QIODevice::ReadWrite);
     void close();
 
-    void sendMsg(QByteArray msg);
+    qint64 sendMsg(QByteArray msg);
     void sendMsg(QString msg);
     QByteArray receiveBytes(QByteArray until = QByteArray());
     QString receive(QString until = QString());

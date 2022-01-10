@@ -85,8 +85,7 @@ void SerialPort::setupStateMachine()
     sm->start();
 }
 
-
-void SerialPort::sendMsg(QByteArray msg)
+qint64 SerialPort::sendMsg(QByteArray msg)
 {
     msg.append(txLineEndTermination.toUtf8());
     if (!isOpen()) {
@@ -99,6 +98,8 @@ void SerialPort::sendMsg(QByteArray msg)
     if (loggingEnabled) {
         logger->info(">>> " + msg);
     }
+
+    return ret;
 }
 
 void SerialPort::sendMsg(QString msg)
