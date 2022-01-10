@@ -26,6 +26,10 @@
 #include <errno.h>
 #include <assert.h>
 
+#include <qtlab/core/logger.h>
+
+Logger *logger = getLogger("MotorController");
+
 #include "motorcontroller.h"
 
 functions_set tdc_set{
@@ -464,12 +468,6 @@ MotorController::MotorController(QObject *parent) : SerialDevice(parent)
 
 //----------------- Device communication functions ---------------------------------
 
-#define READ_REST(x)  unsigned int bytes_red; ftStatus = FT_Read(opened_device.handle, &buff[2], x, &bytes_red); \
-    if (ftStatus != FT_OK) {                                    \
-        fprintf(stderr, "FT_Error occured, error code :%u\n", ftStatus);    \
-        return FT_ERROR;                                            \
-    }
-
 #define EMPTY_IN_QUEUE ret = EmptyIncomingQueue();    \
     if (ret != 0) return ret;
 
@@ -490,19 +488,10 @@ MotorController::MotorController(QObject *parent) : SerialDevice(parent)
     EMPTY_IN_QUEUE
 
 
-int MotorController::SendMessage(Message &message)
+void MotorController::SendMessage(Message &message)
 {
-//    FT_STATUS wrStatus;
-//    unsigned int wrote;
-//    wrStatus = FT_Write(opened_device.handle, message.data(), message.msize(), &wrote);
-//    if (wrStatus == FT_OK && wrote == message.msize()) {
-//        return 0;
-//    }
-//    else {
-//        fprintf(stderr, "Sending message failed, error code : %u \n", wrStatus);
-//        fprintf(stderr, "wrote : %u should write: %u \n", wrote, message.msize());
-//    }
-//    return FT_ERROR;
+    QByteArray ba((char *)message.data(), message.msize());
+    serial->sendMsg(ba);
 }
 
 int MotorController::CheckParams(uint8_t dest, int chanID)
@@ -529,103 +518,86 @@ int MotorController::CheckParams(uint8_t dest, int chanID)
 
 int MotorController::CheckIncomingQueue(uint16_t &ret_msgID)
 {
-//    FT_STATUS ftStatus;
-//    unsigned int bytes;
-//    ftStatus = FT_GetQueueStatus(opened_device.handle, &bytes);
-//    if (ftStatus != FT_OK) {
-//        fprintf(stderr, "FT_Error occurred, error code :%u\n", ftStatus);
-//        return FT_ERROR;
-//    }
-//    if (bytes == 0) return EMPTY;
-//    uint8_t *buff = (uint8_t *) malloc(MAX_RESPONSE_SIZE);
-//    unsigned int red;
-//    ftStatus = FT_Read(opened_device.handle, buff, 2, &red);
-//    if (ftStatus != FT_OK) {
-//        fprintf(stderr, "FT_Error occurred, error code :%u\n", ftStatus);
-//        free(buff);
-//        return FT_ERROR;
-//    }
-//    uint16_t msgID = le16toh(*((uint16_t*) &buff[0]));
-//    switch (msgID) {
-//    case HW_DISCONNECT: {
-//        READ_REST(4)
-//        HwDisconnect response(buff);
-//        printf("Device with serial %s disconnecting\n", opened_device.SN);
-//        free(buff);
-//        return FATAL_ERROR;
-//    }
-//    case HW_RESPONSE: {
-//        READ_REST(4)
-//        HwResponse response(buff);
-//        fprintf(stderr, "Device with serial %s encountered error\n", opened_device.SN);
-//        free(buff);
-//        return DEVICE_ERROR;
-//    }
-//    case RICHRESPONSE: {
-//        READ_REST(72)
-//        HwResponseInfo response(buff);
-//        fprintf(stderr, "Device with serial %s encountered error\n", opened_device.SN);
-//        fprintf(stderr, "Detailed description of error \n ");
-//        uint16_t error_cause = response.GetMsgID();
-//        if (error_cause != 0) printf("\tMessage causing error: %hu\n ", error_cause);
-//        fprintf(stderr, "\tThorlabs error code: %hu \n", response.GetCode());
-//        fprintf(stderr, "\tDescription: %s\n", response.GetDescription());
-//        free(buff);
-//        return DEVICE_ERROR;
-//    }
-//    case MOVE_HOMED: {
-//        READ_REST(4)
-//        MovedHome response(buff);
-//        assert (response.GetMotorID() < 3);
-//        opened_device.motor[response.GetMotorID()].homing = false;
-//        printf("Motor with id %hhu moved to home position\n", response.GetMotorID() + 1);
-//        free(buff);
-//        return MOVED_HOME_STATUS;
-//    }
-//    case MOVE_COMPLETED: {
-//        READ_REST(18)     // 14 bytes for status updates
-//        MoveCompleted response(buff);
-//        assert (response.GetMotorID() < 3);
-//        opened_device.motor[response.GetMotorID()].homing = false;
-//        printf("Motor with id %hhu completed move\n", response.GetMotorID() + 1);
-//        free(buff);
-//        return MOVE_COMPLETED_STATUS;
-//    }
-//    case MOVE_STOPPED: {
-//        READ_REST(18)     // 14 bytes for status updates
-//        MoveStopped response(buff);
-//        assert (response.GetMotorID() < 3);
-//        opened_device.motor[response.GetMotorID()].homing = false;
-//        printf("Motor with id %hhu stopped \n", response.GetMotorID() + 1);
-//        free(buff);
-//        return MOVE_STOPPED_STATUS;
-//    }
-//    case GET_STATUSUPDATE: {
-//        READ_REST(18)
-//        GetStatusUpdate response(buff);
-//        assert (response.GetMotorID() < 3);
-//        opened_device.motor[response.GetMotorID()].status_enc_count = response.GetEncCount();
-//        opened_device.motor[response.GetMotorID()].status_position = response.GetPosition();
-//        opened_device.motor[response.GetMotorID()].status_status_bits = response.GetStatusBits();
-//        free(buff);
-//        return 0;
-//    }
-//    case GET_DCSTATUSUPDATE: {
-//        READ_REST(18)
-//        GetMotChanStatusUpdate response(buff);
-//        assert (response.GetMotorID() < 3);
-//        opened_device.motor[response.GetMotorID()].status_velocity = response.GetVelocity();
-//        opened_device.motor[response.GetMotorID()].status_position = response.GetPosition();
-//        opened_device.motor[response.GetMotorID()].status_status_bits = response.GetStatusBits();
-//        free(buff);
-//        return 0;
-//    }
-//    default: {
-//        ret_msgID = msgID;
-//        free(buff);
-//        return OTHER_MESSAGE;
-//    }
-//    };
+    serial->waitForReadyRead(serial->getTimeout());
+    unsigned int bytes = serial->bytesAvailable();
+    if (bytes == 0) return EMPTY;
+    uint8_t buff[MAX_RESPONSE_SIZE];
+    if (serial->read((char*)buff, 2) != 2) {
+        throw std::runtime_error("Cannot read from serial");
+    };
+
+    uint16_t msgID = le16toh(*((uint16_t*) &buff[0]));
+    switch (msgID) {
+    case HW_DISCONNECT: {
+        serial->read((char*)buff, 4);
+        HwDisconnect response(buff);
+        printf("Device with serial %s disconnecting\n", opened_device.SN);
+        return FATAL_ERROR;
+    }
+    case HW_RESPONSE: {
+        serial->read((char*)buff, 4);
+        HwResponse response(buff);
+        fprintf(stderr, "Device with serial %s encountered error\n", opened_device.SN);
+        return DEVICE_ERROR;
+    }
+    case RICHRESPONSE: {
+        serial->read((char*)buff, 72);
+        HwResponseInfo response(buff);
+        fprintf(stderr, "Device with serial %s encountered error\n", opened_device.SN);
+        fprintf(stderr, "Detailed description of error \n ");
+        uint16_t error_cause = response.GetMsgID();
+        if (error_cause != 0) printf("\tMessage causing error: %hu\n ", error_cause);
+        fprintf(stderr, "\tThorlabs error code: %hu \n", response.GetCode());
+        fprintf(stderr, "\tDescription: %s\n", response.GetDescription());
+        return DEVICE_ERROR;
+    }
+    case MOVE_HOMED: {
+        serial->read((char*)buff, 4);
+        MovedHome response(buff);
+        assert (response.GetMotorID() < 3);
+        opened_device.motor[response.GetMotorID()].homing = false;
+        printf("Motor with id %i moved to home position\n", response.GetMotorID() + 1);
+        return MOVED_HOME_STATUS;
+    }
+    case MOVE_COMPLETED: {
+        serial->read((char*)buff, 18);     // 14 bytes for status updates
+        MoveCompleted response(buff);
+        assert (response.GetMotorID() < 3);
+        opened_device.motor[response.GetMotorID()].homing = false;
+        printf("Motor with id %i completed move\n", response.GetMotorID() + 1);
+        return MOVE_COMPLETED_STATUS;
+    }
+    case MOVE_STOPPED: {
+        serial->read((char*)buff, 18);    // 14 bytes for status updates
+        MoveStopped response(buff);
+        assert (response.GetMotorID() < 3);
+        opened_device.motor[response.GetMotorID()].homing = false;
+        printf("Motor with id %i stopped \n", response.GetMotorID() + 1);
+        return MOVE_STOPPED_STATUS;
+    }
+    case GET_STATUSUPDATE: {
+        serial->read((char*)buff, 18);
+        GetStatusUpdate response(buff);
+        assert (response.GetMotorID() < 3);
+        opened_device.motor[response.GetMotorID()].status_enc_count = response.GetEncCount();
+        opened_device.motor[response.GetMotorID()].status_position = response.GetPosition();
+        opened_device.motor[response.GetMotorID()].status_status_bits = response.GetStatusBits();
+        return 0;
+    }
+    case GET_DCSTATUSUPDATE: {
+        serial->read((char*)buff, 18);
+        GetMotChanStatusUpdate response(buff);
+        assert (response.GetMotorID() < 3);
+        opened_device.motor[response.GetMotorID()].status_velocity = response.GetVelocity();
+        opened_device.motor[response.GetMotorID()].status_position = response.GetPosition();
+        opened_device.motor[response.GetMotorID()].status_status_bits = response.GetStatusBits();
+        return 0;
+    }
+    default: {
+        ret_msgID = msgID;
+        return OTHER_MESSAGE;
+    }
+    };
 }
 
 int MotorController::EmptyIncomingQueue()
@@ -649,30 +621,27 @@ int MotorController::EmptyIncomingQueue()
 
 int MotorController::GetResponseMess(uint16_t expected_msg, int size, uint8_t *mess)
 {
-//    int ret;
-//    uint16_t msgID;
-//    while (true) {
-//        ret = CheckIncomingQueue(msgID);
-//        if (ret == OTHER_MESSAGE) {
-//            if (msgID == expected_msg) {
-//                *((int16_t *) &mess[0]) =  htole16(msgID);
-//                unsigned int red;
-//                FT_STATUS read_status = FT_Read(opened_device.handle, &mess[2], size - 2, &red);
-//                if (read_status != FT_OK) {
-//                    fprintf(stderr, "FT_Error occurred, error code :%u\n", read_status);
-//                    return FT_ERROR;
-//                }
-//                return 0;
-//            }
-//            else return FATAL_ERROR;
-//        }
-//        if (ret == MOVED_HOME_STATUS || ret == MOVE_COMPLETED_STATUS || ret == MOVE_STOPPED_STATUS || ret == 0) continue;
-//        switch (ret) {
-//        case FATAL_ERROR: return FATAL_ERROR;
-//        case FT_ERROR: return FT_ERROR;
-//        case DEVICE_ERROR: return DEVICE_ERROR;
-//        }
-//    }
+    int ret;
+    uint16_t msgID;
+    while (true) {
+        ret = CheckIncomingQueue(msgID);
+        if (ret == OTHER_MESSAGE) {
+            if (msgID == expected_msg) {
+                *((int16_t *) &mess[0]) =  htole16(msgID);
+                if (serial->read((char*)(&mess[2]), size - 2) != size - 2) {
+                    throw std::runtime_error("Cannot read from serial");
+                }
+                return 0;
+            }
+            else return FATAL_ERROR;
+        }
+        if (ret == MOVED_HOME_STATUS || ret == MOVE_COMPLETED_STATUS || ret == MOVE_STOPPED_STATUS || ret == 0) continue;
+        switch (ret) {
+        case FATAL_ERROR: return FATAL_ERROR;
+        case FT_ERROR: return FT_ERROR;
+        case DEVICE_ERROR: return DEVICE_ERROR;
+        }
+    }
     return 0;
 }
 
@@ -1208,32 +1177,9 @@ int MotorController::GetMotorTrigger(GetTrigger &message, uint8_t dest, uint8_t 
 {
     GET_MESS(ReqTrigger, HEADER_SIZE, GET_TRIGGER, GetTrigger)
     return 0;
-};
+}
 
-int MotorController::OpenDevice(int index)
+void MotorController::postConnect_impl()
 {
-//    if (index >= devices_connected) return INVALID_PARAM_1;
-//    if (opened_device_index != -1) {
-//        device_calls::StopUpdateMess();
-//        FT_Close(opened_device.handle);
-//    }
-//    opened_device = connected_device[index];
-//    FT_HANDLE handle;
-//    FT_STATUS ft_status;
-//    ft_status = FT_OpenEx(opened_device.SN, FT_OPEN_BY_SERIAL_NUMBER, &handle);
-//    if (ft_status != FT_OK) { fprintf(stderr, "Error opening device: %d\n", ft_status); return FT_ERROR; }
-//    opened_device.handle = handle;
-//    opened_device_index = index;
-//    if (ft_status != FT_OK) { fprintf(stderr, "Error opening device: %d\n", ft_status); return FT_ERROR; }
-//    if (FT_SetBaudRate(opened_device.handle, 115200) != FT_OK) return FT_ERROR;
-//    if (FT_SetDataCharacteristics(opened_device.handle, FT_BITS_8, FT_STOP_BITS_1, FT_PARITY_NONE) != FT_OK) return FT_ERROR;
-//    usleep(50);
-//    if (FT_Purge(opened_device.handle, FT_PURGE_RX | FT_PURGE_TX) != FT_OK) return FT_ERROR;
-//    usleep(50);
-//    if (FT_SetFlowControl(opened_device.handle, FT_FLOW_RTS_CTS, 0, 0) != FT_OK) return FT_ERROR;
-//    if (FT_SetRts(opened_device.handle) != FT_OK) return FT_ERROR;
-//    usleep(100);
-
-//    device_calls::StartUpdateMess();
-//    return 0;
+    opened_device.channels = -1;
 };

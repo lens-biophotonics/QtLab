@@ -71,8 +71,6 @@ public:
 
     MotorController(QObject *parent = nullptr);
 
-    int OpenDevice(int index);
-
     //----------------- Device communication functions ---------------------------------
 
     int CheckParams(uint8_t dest, int chanID);
@@ -195,6 +193,9 @@ public:
     int CreateTrigger(uint8_t mode, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
     int GetMotorTrigger(GetTrigger &message, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+
+protected:
+    virtual void postConnect_impl() override;
 
 private:
 
