@@ -380,16 +380,16 @@ public:
 /**
  * Channel info sent from device.
  */
-class GetChannelState : public HeaderMessage
+class ChannelState : public HeaderMessage
 {
 public:
-    GetChannelState() : HeaderMessage(){}
+    ChannelState() : HeaderMessage(){}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetChannelState(uint8_t *mess) : HeaderMessage(mess){}
+    ChannelState(uint8_t *mess) : HeaderMessage(mess){}
 
     /**
      * Saves info in given variables.
@@ -597,16 +597,16 @@ public:
 /**
  * Bay occupation info.
  */
-class GetRackBayUsed : public HeaderMessage
+class RackBayUsed : public HeaderMessage
 {
 public:
-    GetRackBayUsed() : HeaderMessage(){};
+    RackBayUsed() : HeaderMessage(){};
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetRackBayUsed(uint8_t *mess) : HeaderMessage(mess){}
+    RackBayUsed(uint8_t *mess) : HeaderMessage(mess){}
 
     /**
      * Return bay ID from message.
@@ -820,16 +820,16 @@ public:
 /**
  * Contains maximal velocity and acceleration.
  */
-class GetVelocityParams : public LongMessage
+class VelocityParams : public LongMessage
 {
 public:
-    GetVelocityParams() : LongMessage(20){}
+    VelocityParams() : LongMessage(20){}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetVelocityParams(uint8_t *mess) : LongMessage(mess, 20){}
+    VelocityParams(uint8_t *mess) : LongMessage(mess, 20){}
 
     /**
      * @return minimal velocity in Thorlabs specified units.
@@ -927,16 +927,16 @@ public:
 /**
  * Contains parameters of jog move.
  */
-class GetJogParams : public LongMessage
+class JogParams : public LongMessage
 {
 public:
-    GetJogParams() : LongMessage(28){}
+    JogParams() : LongMessage(28){}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetJogParams(uint8_t *mess) : LongMessage(mess, 28){}
+    JogParams(uint8_t *mess) : LongMessage(mess, 28){}
 
     /**
      * @return 1 for continuous jogging, 2 for single step
@@ -1022,16 +1022,16 @@ public:
 /**
  * Contains power percentage used while moving and while resting.
  */
-class GetPowerParams : public LongMessage
+class PowerParams : public LongMessage
 {
 public:
-    GetPowerParams() : LongMessage(12){}
+    PowerParams() : LongMessage(12){}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetPowerParams(uint8_t *mess) : LongMessage(mess, 12){}
+    PowerParams(uint8_t *mess) : LongMessage(mess, 12){}
 
     /**
      * @return phase power used while motor is resting in %
@@ -1080,16 +1080,16 @@ public:
 /**
  * Contains general move parameter, which consists only of backlash distance.
  */
-class GetGeneralMoveParams : public LongMessage
+class GeneralMoveParams : public LongMessage
 {
 public:
-    GetGeneralMoveParams() : LongMessage(12){}
+    GeneralMoveParams() : LongMessage(12){}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetGeneralMoveParams(uint8_t *mess) : LongMessage(mess, 12){};
+    GeneralMoveParams(uint8_t *mess) : LongMessage(mess, 12){};
 
     /**
      * @return backlash distance in Thorlabs specified units
@@ -1130,16 +1130,16 @@ public:
 /**
  * Contains relative distance set in controller, which is used after calling relative move.
  */
-class GetRelativeMoveParams : public LongMessage
+class RelativeMoveParams : public LongMessage
 {
 public:
-    GetRelativeMoveParams() : LongMessage(12){}
+    RelativeMoveParams() : LongMessage(12){}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetRelativeMoveParams(uint8_t *mess) : LongMessage(mess, 12){}
+    RelativeMoveParams(uint8_t *mess) : LongMessage(mess, 12){}
 
     /**
      * @return distance in Thorlabs specified units
@@ -1190,16 +1190,16 @@ public:
 /**
  * Contains absolute position set in controller. Value is used when calling absolute move.
  */
-class GetAbsoluteMoveParams : public LongMessage
+class AbsoluteMoveParams : public LongMessage
 {
 public:
-    GetAbsoluteMoveParams() : LongMessage(12){}
+    AbsoluteMoveParams() : LongMessage(12){}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetAbsoluteMoveParams(uint8_t *mess) : LongMessage(mess, 12){}
+    AbsoluteMoveParams(uint8_t *mess) : LongMessage(mess, 12){}
 
     /**
      * Returns absolute position set in device, which is used when calling absolute move.
@@ -1250,16 +1250,16 @@ public:
 /**
  * Contains homing velocity for specified motor.
  */
-class GetHomeParams : public LongMessage
+class HomeParams : public LongMessage
 {
 public:
-    GetHomeParams() : LongMessage(20){}
+    HomeParams() : LongMessage(20){}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetHomeParams(uint8_t *mess) : LongMessage(mess, 20){}
+    HomeParams(uint8_t *mess) : LongMessage(mess, 20){}
 
     /**
      * Returns homing velocity.
@@ -1378,16 +1378,16 @@ public:
 /**
  * Contains limit switch parameters for specified motor.
  */
-class GetLimitSwitchParams : public LongMessage
+class LimitSwitchParams : public LongMessage
 {
 public:
-    GetLimitSwitchParams() : LongMessage(22){}
+    LimitSwitchParams() : LongMessage(22){}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetLimitSwitchParams(uint8_t *mess) : LongMessage(mess, 22){}
+    LimitSwitchParams(uint8_t *mess) : LongMessage(mess, 22){}
 
     /**
      * Return clockwise hardware limit switch operation.
@@ -1673,22 +1673,22 @@ public:
 /**
  * Contains acceleration and deceleration profile
  */
-class GetBowIndex : public LongMessage
+class BowIndex : public LongMessage
 {
 public:
-    GetBowIndex() : LongMessage(10){}
+    BowIndex() : LongMessage(10){}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetBowIndex(uint8_t *mess) : LongMessage(mess, 10){};
+    BowIndex(uint8_t *mess) : LongMessage(mess, 10){};
 
     /**
      * Return profile.
      * @return 0 means trapezoidal, 1-18 means s-curve profile
      */
-    uint16_t BowIndex(){ return le16toh(*((uint16_t*) &bytes[8])); }
+    uint16_t GetBowIndex(){ return le16toh(*((uint16_t*) &bytes[8])); }
 };
 
 /**
@@ -1736,16 +1736,16 @@ public:
 /**
  * Contains mode of front LEDs.
  */
-class GetLedMode : public LongMessage
+class LedMode : public LongMessage
 {
 public:
-    GetLedMode() : LongMessage(10){}
+    LedMode() : LongMessage(10){}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetLedMode(uint8_t *mess) : LongMessage(mess, 10){}
+    LedMode(uint8_t *mess) : LongMessage(mess, 10){}
 
     /**
      * Returns mode of LED. May contain combination of modes.
@@ -1835,16 +1835,16 @@ public:
  * @param source - source destination
  * @param chanID - channel ID
  */
-class GetButtonParams : public LongMessage
+class ButtonParams : public LongMessage
 {
 public:
-    GetButtonParams() : LongMessage(22){}
+    ButtonParams() : LongMessage(22){}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetButtonParams(uint8_t *mess) : LongMessage(mess, 22){}
+    ButtonParams(uint8_t *mess) : LongMessage(mess, 22){}
 
     /**
      * Return mode of controller device buttons. Upon pressing button motor can either perform jog move or
@@ -1986,16 +1986,16 @@ public:
 /**
  * Contains bits describing status.
  */
-class GetStatusBits : public LongMessage
+class StatusBits : public LongMessage
 {
 public:
-    GetStatusBits() : LongMessage(12){}
+    StatusBits() : LongMessage(12){}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetStatusBits(uint8_t *mess) : LongMessage(mess, 12){}
+    StatusBits(uint8_t *mess) : LongMessage(mess, 12){}
 
     /**
      * Returns word containing status bits.
