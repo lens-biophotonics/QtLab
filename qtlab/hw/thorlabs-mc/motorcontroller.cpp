@@ -1167,5 +1167,124 @@ uint8_t MotorController::getMotorTrigger(uint8_t dest, uint8_t channel)
 
 void MotorController::postConnect_impl()
 {
-    opened_device.channels = 1;
+    HwInfo info = getHwInfo();
+    QMap<QString, dev_type> map;
+
+#define APPEND_TO_MAP(code) map[#code] = code;
+
+    APPEND_TO_MAP(BSC001);
+    APPEND_TO_MAP(BSC002);
+    APPEND_TO_MAP(BMS001);
+    APPEND_TO_MAP(BMS002);
+    APPEND_TO_MAP(MST601);
+    APPEND_TO_MAP(MST602);
+    APPEND_TO_MAP(BSC001);
+    APPEND_TO_MAP(BSC002);
+    APPEND_TO_MAP(BSC101);
+    APPEND_TO_MAP(BSC102);
+    APPEND_TO_MAP(BSC103);
+    APPEND_TO_MAP(BSC201);
+    APPEND_TO_MAP(BSC202);
+    APPEND_TO_MAP(BSC203);
+    APPEND_TO_MAP(BBD101);
+    APPEND_TO_MAP(BBD102);
+    APPEND_TO_MAP(BBD103);
+    APPEND_TO_MAP(BBD201);
+    APPEND_TO_MAP(BBD202);
+    APPEND_TO_MAP(BBD203);
+    APPEND_TO_MAP(KDC101);
+    APPEND_TO_MAP(OST001);
+    APPEND_TO_MAP(ODC001);
+    APPEND_TO_MAP(TST001);
+    APPEND_TO_MAP(TDC001);
+    APPEND_TO_MAP(TBD001);
+
+    dev_type dt = map[QString::fromStdString(info.ModelNumber()).left(6)];
+    int bays, channels;
+    switch (dt) {
+    case BBD101:
+    case BBD201:
+    case BSC001:
+        bays = 1;
+        break;
+
+    case BBD102:
+    case BBD202:
+    case BSC002:
+        bays = 2;
+        break;
+
+    case BSC103:
+    case BBD103:
+    case BSC203:
+        bays = 3;
+        break;
+
+    default:
+        bays = -1;
+        break;
+    }
+
+    switch (dt) {
+    case BSC001:
+    case BSC101:
+    case BMS001:
+    case KDC101:
+    case OST001:
+    case ODC001:
+    case TST001:
+    case TDC001:
+    case TBD001:
+        channels = 1;
+        break;
+
+    case BSC002:
+    case BSC102:
+    case BMS002:
+    case MST601:
+        channels = 2;
+        break;
+    default:
+        channels = -1;
+        break;
+    }
+
+    functions_set fs;
+
+    switch (dt) {
+    case TDC001:
+        fs = tdc_set;
+        break;
+
+    case TST001:
+        fs = tst_set;
+        break;
+
+    case BSC001:
+    case BSC002:
+    case BSC101:
+    case BSC102:
+    case BSC103:
+    case BSC201:
+    case BSC202:
+    case BSC203:
+        fs = bsc_set;
+        break;
+
+    case BBD101:
+    case BBD102:
+    case BBD103:
+    case BBD201:
+    case BBD202:
+    case BBD203:
+        fs = bbd_set;
+
+    default:
+        fs = all_set;
+        break;
+    }
+
+    opened_device.channels = channels;
+    opened_device.bays = bays;
+    opened_device.functions = fs;
 };

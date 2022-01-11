@@ -63,7 +63,7 @@ controller_device opened_device;
 int opened_device_index;
 
 // enum for device types
-enum {
+enum dev_type {
     BSC001,
     BSC002,
     BMS001,
@@ -82,11 +82,12 @@ enum {
     BBD201,
     BBD202,
     BBD203,
+    KDC101,
     OST001,
     ODC001,
     TST001,
     TDC001,
-    TBD001
+    TBD001,
 };
 
 
