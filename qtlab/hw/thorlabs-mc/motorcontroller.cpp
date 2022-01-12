@@ -534,24 +534,24 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
     case HW_DISCONNECT: {
         serial->read((char*)buff, 4);
         HwDisconnect response(buff);
-        printf("Device with serial %s disconnecting\n", opened_device.SN);
+        logger->info(QString("Device with serial %1 disconnecting").arg(opened_device.SN));
         return FATAL_ERROR;
     }
     case HW_RESPONSE: {
         serial->read((char*)buff, 4);
         HwResponse response(buff);
-        fprintf(stderr, "Device with serial %s encountered error\n", opened_device.SN);
+        logger->critical(QString("Device with serial %1 encountered error").arg(opened_device.SN));
         return DEVICE_ERROR;
     }
     case RICHRESPONSE: {
         serial->read((char*)buff, 72);
         HwResponseInfo response(buff);
-        fprintf(stderr, "Device with serial %s encountered error\n", opened_device.SN);
-        fprintf(stderr, "Detailed description of error \n ");
+        logger->critical(QString("Device with serial %1 encountered error").arg(opened_device.SN));
+        logger->critical("Detailed description of error");
         uint16_t error_cause = response.GetMsgID();
-        if (error_cause != 0) printf("\tMessage causing error: %hu\n ", error_cause);
-        fprintf(stderr, "\tThorlabs error code: %hu \n", response.GetCode());
-        fprintf(stderr, "\tDescription: %s\n", response.GetDescription());
+        if (error_cause != 0) logger->critical(QString("\tMessage causing error: %1").arg(error_cause));
+        logger->critical(QString("\tThorlabs error code: %1").arg(response.GetCode()));
+        logger->critical(QString("\t\tDescription: %1").arg(response.GetDescription()));
         return DEVICE_ERROR;
     }
     case MOVE_HOMED: {
@@ -559,7 +559,6 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
         MovedHome response(buff);
         assert (response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].homing = false;
-        printf("Motor with id %i moved to home position\n", response.GetMotorID() + 1);
         return MOVED_HOME_STATUS;
     }
     case MOVE_COMPLETED: {
@@ -567,7 +566,6 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
         MoveCompleted response(buff);
         assert (response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].homing = false;
-        printf("Motor with id %i completed move\n", response.GetMotorID() + 1);
         return MOVE_COMPLETED_STATUS;
     }
     case MOVE_STOPPED: {
@@ -575,7 +573,6 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
         MoveStopped response(buff);
         assert (response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].homing = false;
-        printf("Motor with id %i stopped \n", response.GetMotorID() + 1);
         return MOVE_STOPPED_STATUS;
     }
     case GET_STATUSUPDATE: {
@@ -615,7 +612,7 @@ int MotorController::emptyIncomingQueue()
         case FT_ERROR: return FT_ERROR;
         case DEVICE_ERROR: return DEVICE_ERROR;
         case OTHER_MESSAGE: {
-            fprintf(stderr, "Unknown message received, protocol violated\n");
+            throw std::runtime_error("Protocol error");
             return FATAL_ERROR;
         }
         }
@@ -706,7 +703,9 @@ void MotorController::startUpdateMess(uint8_t rate, uint8_t dest)
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
     StartUpdateMessages mes(dest, SOURCE);
-    if (mes.SetUpdaterate(rate) == IGNORED_PARAM) printf("This parameter is ignored in connected device. Using default.\n");
+    if (mes.SetUpdaterate(rate) == IGNORED_PARAM) {
+        logger->warning("This parameter is ignored in connected device. Using default.");
+    }
     sendMessage(mes);
     opened_device.status_updates = true;
     EMPTY_IN_QUEUE
@@ -940,11 +939,11 @@ void MotorController::setLimitSwitchConfig(uint16_t CwHwLim, uint16_t CCwHwLim, 
     SetLimitSwitchParams mes(dest, SOURCE, channel);
     if (mes.SetClockwiseHardLimit(CwHwLim) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
     if (mes.SetCounterlockwiseHardLimit(CCwHwLim) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(2);
-    if (mes.SetClockwiseSoftLimit(CwSwLim) == IGNORED_PARAM) printf("Software limit ignored in this device");
-    if (mes.SetCounterlockwiseSoftLimit(CCwSwLim) == IGNORED_PARAM) printf("Software limit ignored in this device");
+    if (mes.SetClockwiseSoftLimit(CwSwLim) == IGNORED_PARAM) logger->warning("Software limit ignored in this device");
+    if (mes.SetCounterlockwiseSoftLimit(CCwSwLim) == IGNORED_PARAM) logger->warning("Software limit ignored in this device");
     ret = mes.SetLimitMode(mode);
     if (ret == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(5);
-    if (ret == IGNORED_PARAM) printf("Limit mode ignored in this device");
+    if (ret == IGNORED_PARAM) logger->warning("Limit mode ignored in this device");
     sendMessage(mes);
     EMPTY_IN_QUEUE
 };
