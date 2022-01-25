@@ -704,6 +704,7 @@ void MotorController::startUpdateMess(uint8_t rate, uint8_t dest)
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
     StartUpdateMessages mes(dest, SOURCE);
+    mes.opened_device = &opened_device;
     if (mes.SetUpdaterate(rate) == IGNORED_PARAM) {
         logger->warning("This parameter is ignored in connected device. Using default.");
     }
@@ -814,6 +815,7 @@ void MotorController::setVelocityP(int32_t acc, int32_t maxVel, uint8_t dest, ui
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetVelocityParams mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     if (mes.SetAcceleration(acc) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
     if (mes.SetMaxVel(maxVel) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(2);
     EMPTY_IN_QUEUE
@@ -831,6 +833,7 @@ void MotorController::setJogP(uint16_t mode, int32_t stepSize, int32_t vel, int3
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetJogParams mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     if (mes.SetJogMode(mode) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
     mes.SetStepSize(stepSize);
     if (mes.SetMaxVelocity(vel) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(3);
@@ -904,6 +907,7 @@ void MotorController::setAbsoluteMoveP(uint32_t pos, int8_t dest, uint16_t chann
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetAbsoluteMoveParams mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     mes.SetAbsolutePos(pos);
     sendMessage(mes);
     EMPTY_IN_QUEUE
@@ -921,6 +925,7 @@ void MotorController::setHomingVel(uint32_t vel, int8_t dest,  uint16_t channel)
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetHomeParams mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     if (mes.SetHomingVelocity(vel) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
     sendMessage(mes);
     EMPTY_IN_QUEUE
@@ -938,6 +943,7 @@ void MotorController::setLimitSwitchConfig(uint16_t CwHwLim, uint16_t CCwHwLim, 
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetLimitSwitchParams mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     if (mes.SetClockwiseHardLimit(CwHwLim) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
     if (mes.SetCounterlockwiseHardLimit(CCwHwLim) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(2);
     if (mes.SetClockwiseSoftLimit(CwSwLim) == IGNORED_PARAM) logger->warning("Software limit ignored in this device");
@@ -991,6 +997,7 @@ void MotorController::startSetAbsoluteMove(uint8_t dest, uint8_t channel)
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     MoveAbsolute1 mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     opened_device.motor[mes.GetMotorID()].moving = true;
     EMPTY_IN_QUEUE
@@ -1001,6 +1008,7 @@ void MotorController::startAbsoluteMove(int32_t pos, uint8_t dest, uint16_t chan
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     MoveAbsolute2 mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     if (mes.SetAbsoluteDistance(pos) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
     sendMessage(mes);
     opened_device.motor[mes.GetMotorID()].moving = true;
@@ -1079,6 +1087,7 @@ void MotorController::setButtons(uint16_t mode, int32_t pos1, int32_t pos2, uint
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetButtonParams mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     if (mes.SetMode(mode) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
     if (mes.SetPosition1(pos1) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(2);
     if (mes.SetPosition2(pos2) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(3);
@@ -1153,6 +1162,7 @@ void MotorController::createTrigger(uint8_t mode, uint8_t dest, uint8_t channel)
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetTrigger mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     if (mes.SetMode(mode) == IGNORED_PARAM) logger->warning("trigger ignored in this device");
     sendMessage(mes);
     EMPTY_IN_QUEUE
