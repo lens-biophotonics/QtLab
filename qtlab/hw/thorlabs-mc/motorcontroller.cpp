@@ -630,9 +630,8 @@ int MotorController::getResponseMess(uint16_t expected_msg, int size, uint8_t *m
         if (ret == OTHER_MESSAGE) {
             if (msgID == expected_msg) {
                 *((int16_t *) &mess[0]) =  htole16(msgID);
-                if (serial->read((char*)(&mess[2]), size - 2) != size - 2) {
-                    throw std::runtime_error("Cannot read from serial");
-                }
+                QByteArray ba = serial->readNBytes(size - 2);
+                memcpy(&mess[2], ba.data(), ba.size());
                 return 0;
             }
             else return FATAL_ERROR;
