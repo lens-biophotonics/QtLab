@@ -19,6 +19,7 @@ public:
     QString receive(QString until = QString());
     virtual QByteArray transceiveBytes(QByteArray command, QByteArray until = QByteArray());
     virtual QString transceive(QString command, QString until = QString());
+    QByteArray readNBytes(int n);
     double getDouble(const QString &cmd);
     int getInt(const QString &cmd);
     int getUInt(const QString &cmd);

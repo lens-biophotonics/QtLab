@@ -154,6 +154,27 @@ QByteArray SerialPort::receiveBytes(QByteArray until)
     return receivedLines;
 }
 
+QByteArray SerialPort::readNBytes(int n)
+{
+    QByteArray receivedLines;
+    QTime time;
+    time.start();
+
+    while (receivedLines.length() < n) {
+        waitForReadyRead(_serialTimeout);
+
+        QByteArray msg = readAll();
+
+        if (loggingEnabled) {
+            logger->info("<<< " + msg);
+        }
+
+        receivedLines.append(msg);
+    }
+
+    return receivedLines;
+}
+
 QByteArray SerialPort::transceiveBytes(QByteArray command, QByteArray until)
 {
     sendMsg(command);
