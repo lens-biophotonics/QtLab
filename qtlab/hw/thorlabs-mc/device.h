@@ -19,10 +19,12 @@
 **                                                                        **
 ****************************************************************************/
 
-#ifndef DEVICE
-#define DEVICE
+#ifndef DEVICE_H
+#define DEVICE_H
 
 #include <set>
+#include <limits.h>
+#include <inttypes.h>
 
 namespace QtLab {
 namespace hw {
@@ -31,9 +33,9 @@ typedef std::set<int> functions_set;
 
 typedef struct {
     int motor_type;
-    int max_pos;
-    int max_vel;
-    int max_acc;
+    int max_pos = INT_MAX;
+    int max_vel = INT_MAX;
+    int max_acc = INT_MAX;
     int tick;
     uint8_t dest;
     int32_t status_position = 0;
@@ -93,4 +95,4 @@ enum dev_type {
 
 
 
- #endif
+ #endif  // DEVICE_H
