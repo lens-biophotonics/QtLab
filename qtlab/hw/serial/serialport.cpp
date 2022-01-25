@@ -256,7 +256,7 @@ void SerialPort::setPortBySerialNumber(const QString &serialNumber)
 {
     QSerialPortInfo pi = findPortFromSerialNumber(serialNumber);
     if (pi.isNull()) {
-        logger->warning("Cannot find serial port for serial number" + serialNumber);
+        logger->warning("Cannot find serial port for serial number " + serialNumber);
         return;
     }
     setPort(pi);
