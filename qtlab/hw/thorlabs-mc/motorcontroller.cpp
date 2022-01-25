@@ -534,19 +534,19 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
     uint16_t msgID = le16toh(*((uint16_t*) &buff[0]));
     switch (msgID) {
     case HW_DISCONNECT: {
-        serial->read((char*)buff, 4);
+        serial->read((char*)&buff[2], 4);
         HwDisconnect response(buff);
         logger->info(QString("Device with serial %1 disconnecting").arg(opened_device.SN));
         return FATAL_ERROR;
     }
     case HW_RESPONSE: {
-        serial->read((char*)buff, 4);
+        serial->read((char*)&buff[2], 4);
         HwResponse response(buff);
         logger->critical(QString("Device with serial %1 encountered error").arg(opened_device.SN));
         return DEVICE_ERROR;
     }
     case RICHRESPONSE: {
-        serial->read((char*)buff, 72);
+        serial->read((char*)&buff[2], 72);
         HwResponseInfo response(buff);
         logger->critical(QString("Device with serial %1 encountered error").arg(opened_device.SN));
         logger->critical("Detailed description of error");
@@ -557,28 +557,28 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
         return DEVICE_ERROR;
     }
     case MOVE_HOMED: {
-        serial->read((char*)buff, 4);
+        serial->read((char*)&buff[2], 4);
         MovedHome response(buff);
         assert (response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].homing = false;
         return MOVED_HOME_STATUS;
     }
     case MOVE_COMPLETED: {
-        serial->read((char*)buff, 18);     // 14 bytes for status updates
+        serial->read((char*)&buff[2], 18);     // 14 bytes for status updates
         MoveCompleted response(buff);
         assert (response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].homing = false;
         return MOVE_COMPLETED_STATUS;
     }
     case MOVE_STOPPED: {
-        serial->read((char*)buff, 18);    // 14 bytes for status updates
+        serial->read((char*)&buff[2], 18);    // 14 bytes for status updates
         MoveStopped response(buff);
         assert (response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].homing = false;
         return MOVE_STOPPED_STATUS;
     }
     case GET_STATUSUPDATE: {
-        serial->read((char*)buff, 18);
+        serial->read((char*)&buff[2], 18);
         GetStatusUpdate response(buff);
         assert (response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].status_enc_count = response.GetEncCount();
@@ -587,7 +587,7 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
         return 0;
     }
     case GET_DCSTATUSUPDATE: {
-        serial->read((char*)buff, 18);
+        serial->read((char*)&buff[2], 18);
         GetMotChanStatusUpdate response(buff);
         assert (response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].status_velocity = response.GetVelocity();
