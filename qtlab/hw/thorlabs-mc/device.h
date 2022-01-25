@@ -24,6 +24,9 @@
 
 #include <set>
 
+namespace QtLab {
+namespace hw {
+namespace Thorlabs {
 typedef std::set<int> functions_set;
 
 typedef struct {
@@ -57,11 +60,6 @@ typedef struct {
     functions_set functions;
 } controller_device;
 
-int devices_connected;
-controller_device *connected_device;
-controller_device opened_device;
-int opened_device_index;
-
 // enum for device types
 enum dev_type {
     BSC001,
@@ -89,6 +87,9 @@ enum dev_type {
     TDC001,
     TBD001,
 };
+} // namespace Thorlabs
+} // namespace hw
+} // namespace QtLab
 
 
 

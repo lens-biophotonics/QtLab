@@ -35,6 +35,9 @@
 #define IGNORED_PARAM -4
 #define WARNING -3
 
+namespace QtLab {
+namespace hw {
+namespace Thorlabs {
 /*
  * Base class for messages.
  */
@@ -2057,5 +2060,8 @@ public:
 
     uint8_t GetMode(){return GetSecondParam();}
 };
+} // namespace Thorlabs
+} // namespace hw
+} // namespace QtLab
 
  #endif

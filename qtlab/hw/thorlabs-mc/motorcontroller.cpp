@@ -32,6 +32,8 @@ Logger *logger = getLogger("MotorController");
 
 #include "motorcontroller.h"
 
+using namespace QtLab::hw::Thorlabs;
+
 functions_set tdc_set{
     IDENTIFY,
 

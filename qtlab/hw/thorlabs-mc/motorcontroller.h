@@ -64,7 +64,9 @@
 #define DEFAULTCHANNEL8 0x01
 #define DEFAULTCHANNEL16 0x01
 
-
+namespace QtLab {
+namespace hw {
+namespace Thorlabs {
 class MotorController : public SerialDevice
 {
 public:
@@ -202,5 +204,8 @@ private:
     controller_device opened_device;
     int opened_device_index;
 };
+}
+}
+}
 
 #endif // MOTORCONTROLLER_H
