@@ -484,6 +484,7 @@ MotorController::MotorController(QObject *parent) : SerialDevice(parent)
     CHECK_ADDR_PARAMS(dest, channel)                        \
     EMPTY_IN_QUEUE                                          \
     req_mess_class mes(dest, SOURCE, channel);              \
+    mes.opened_device = &opened_device;                     \
     sendMessage(mes);                                       \
     uint8_t *buff = (uint8_t *) malloc(buff_size);          \
     ret = getResponseMess(get_mess_code, buff_size, buff);  \
@@ -536,18 +537,21 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
     case HW_DISCONNECT: {
         serial->read((char*)&buff[2], 4);
         HwDisconnect response(buff);
+        response.opened_device = &opened_device;
         logger->info(QString("Device with serial %1 disconnecting").arg(opened_device.SN));
         return FATAL_ERROR;
     }
     case HW_RESPONSE: {
         serial->read((char*)&buff[2], 4);
         HwResponse response(buff);
+        response.opened_device = &opened_device;
         logger->critical(QString("Device with serial %1 encountered error").arg(opened_device.SN));
         return DEVICE_ERROR;
     }
     case RICHRESPONSE: {
         serial->read((char*)&buff[2], 72);
         HwResponseInfo response(buff);
+        response.opened_device = &opened_device;
         logger->critical(QString("Device with serial %1 encountered error").arg(opened_device.SN));
         logger->critical("Detailed description of error");
         uint16_t error_cause = response.GetMsgID();
@@ -559,6 +563,7 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
     case MOVE_HOMED: {
         serial->read((char*)&buff[2], 4);
         MovedHome response(buff);
+        response.opened_device = &opened_device;
         assert (response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].homing = false;
         return MOVED_HOME_STATUS;
@@ -566,6 +571,7 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
     case MOVE_COMPLETED: {
         serial->read((char*)&buff[2], 18);     // 14 bytes for status updates
         MoveCompleted response(buff);
+        response.opened_device = &opened_device;
         assert (response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].homing = false;
         return MOVE_COMPLETED_STATUS;
@@ -573,6 +579,7 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
     case MOVE_STOPPED: {
         serial->read((char*)&buff[2], 18);    // 14 bytes for status updates
         MoveStopped response(buff);
+        response.opened_device = &opened_device;
         assert (response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].homing = false;
         return MOVE_STOPPED_STATUS;
@@ -580,6 +587,7 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
     case GET_STATUSUPDATE: {
         serial->read((char*)&buff[2], 18);
         GetStatusUpdate response(buff);
+        response.opened_device = &opened_device;
         assert (response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].status_enc_count = response.GetEncCount();
         opened_device.motor[response.GetMotorID()].status_position = response.GetPosition();
@@ -589,6 +597,7 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
     case GET_DCSTATUSUPDATE: {
         serial->read((char*)&buff[2], 18);
         GetMotChanStatusUpdate response(buff);
+        response.opened_device = &opened_device;
         assert (response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].status_velocity = response.GetVelocity();
         opened_device.motor[response.GetMotorID()].status_position = response.GetPosition();
@@ -652,6 +661,7 @@ void MotorController::identify(uint8_t dest)
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
     IdentifyMs mes(dest, 0x01);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     EMPTY_IN_QUEUE
 }
@@ -661,6 +671,7 @@ void MotorController::enableChannel(uint8_t dest, uint8_t chanel)
     CHECK_ADDR_PARAMS(dest, chanel)
     EMPTY_IN_QUEUE
     SetChannelState mes(chanel, 1, dest, SOURCE);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     EMPTY_IN_QUEUE
 }
@@ -670,6 +681,7 @@ void MotorController::disableChannel(uint8_t dest, uint8_t chanel)
     CHECK_ADDR_PARAMS(dest, chanel)
     EMPTY_IN_QUEUE
     SetChannelState mes(chanel, 2, dest, SOURCE);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     EMPTY_IN_QUEUE
 }
@@ -679,6 +691,7 @@ ChannelState MotorController::getChannelState(uint8_t dest, uint8_t chanel)
     CHECK_ADDR_PARAMS(dest, chanel)
     EMPTY_IN_QUEUE
     ReqChannelState mes(chanel, dest, SOURCE);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     uint8_t *buff = (uint8_t *) malloc(HEADER_SIZE);
     ret = getResponseMess(GET_CHANENABLESTATE, HEADER_SIZE, buff);
@@ -695,6 +708,7 @@ void MotorController::disconnectHW(uint8_t dest)
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
     HwDisconnect mes(dest, SOURCE);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     EMPTY_IN_QUEUE
 }
@@ -718,6 +732,7 @@ void MotorController::stopUpdateMess(uint8_t dest)
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
     StopUpdateMessages mes(dest, SOURCE);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     opened_device.status_updates = false;
     EMPTY_IN_QUEUE
@@ -728,6 +743,7 @@ HwInfo MotorController::getHwInfo(uint8_t dest)
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
     ReqHwInfo mes(dest, SOURCE);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     uint8_t *buff = (uint8_t *) malloc(90);
     ret = getResponseMess(HW_GET_INFO, 90, buff);
@@ -744,11 +760,13 @@ RackBayUsed MotorController::getBayUsed(uint8_t bayID, uint8_t dest)
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
     ReqRackBayUsed mes(dest, SOURCE);
+    mes.opened_device = &opened_device;
     mes.SetBayIdent(bayID);
     sendMessage(mes);
     uint8_t *buff = (uint8_t *) malloc(HEADER_SIZE);
     ret = getResponseMess(RACK_GET_BAYUSED, HEADER_SIZE, buff);
     RackBayUsed message;
+    message.opened_device = &opened_device;
     if (ret != 0) RUNTIME_ERROR;
     message.SetData(buff);
     free(buff);
@@ -761,6 +779,7 @@ void MotorController::flashProgYes(uint8_t dest)
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
     YesFlashProg mes(dest, SOURCE);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     EMPTY_IN_QUEUE
 };
@@ -770,6 +789,7 @@ void MotorController::flashProgNo(uint8_t dest)
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
     NoFlashProg mes(dest, SOURCE);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     EMPTY_IN_QUEUE
 };
@@ -779,6 +799,7 @@ int MotorController::setPositionCounter(int32_t pos, uint8_t dest, uint16_t chan
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetPosCounter mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     mes.SetPosition(pos);
     sendMessage(mes);
     EMPTY_IN_QUEUE
@@ -797,6 +818,7 @@ int MotorController::setEncoderCounter(int32_t count, uint8_t dest, uint16_t cha
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetEncCount mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     mes.SetEncoderCount(count);
     sendMessage(mes);
     EMPTY_IN_QUEUE
@@ -855,6 +877,7 @@ void MotorController::setPowerUsed(uint16_t rest_power, uint16_t move_power, int
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetPowerParams mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     if (mes.SetRestFactor(rest_power) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
     if (mes.SetMoveFactor(move_power) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(2);
     sendMessage(mes);
@@ -873,6 +896,7 @@ void MotorController::setBacklashDist(uint32_t dist, int8_t dest, uint16_t chann
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetGeneralMoveParams mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     mes.SetBacklashDist(dist);
     sendMessage(mes);
     EMPTY_IN_QUEUE
@@ -890,6 +914,7 @@ void MotorController::setRelativeMoveP(uint32_t dist, int8_t dest, uint16_t chan
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetRelativeMoveParams mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     mes.SetRelativeDist(dist);
     sendMessage(mes);
     EMPTY_IN_QUEUE
@@ -966,6 +991,7 @@ void MotorController::moveToHome(uint8_t dest, uint8_t channel)
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     MoveHome mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     opened_device.motor[mes.GetMotorID()].homing = true;
     EMPTY_IN_QUEUE
@@ -976,6 +1002,7 @@ void MotorController::startSetRelativeMove(uint8_t dest, uint8_t channel)
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     MoveRelative1 mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     opened_device.motor[mes.GetMotorID()].moving = true;
     EMPTY_IN_QUEUE
@@ -986,6 +1013,7 @@ void MotorController::startRelativeMove(int32_t dist, uint8_t dest, uint16_t cha
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     MoveRelative2 mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     mes.SetRelativeDistance(dist);
     sendMessage(mes);
     opened_device.motor[mes.GetMotorID()].moving = true;
@@ -1020,6 +1048,7 @@ void MotorController::startJogMove(uint8_t direction, uint8_t dest, uint8_t chan
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     JogMove mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     if (mes.SetDirection(direction) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
     sendMessage(mes);
     opened_device.motor[mes.GetMotorID()].moving = true;
@@ -1031,6 +1060,7 @@ void MotorController::startSetVelocityMove(uint8_t direction, uint8_t dest, uint
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     MovewVelocity mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     if (mes.SetDirection(direction) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
     sendMessage(mes);
     opened_device.motor[mes.GetMotorID()].moving = true;
@@ -1042,6 +1072,7 @@ void MotorController::stopMovement(uint8_t stopMode, uint8_t dest, uint8_t chann
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     StopMove mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     if (mes.SetStopMode(stopMode) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
     sendMessage(mes);
     opened_device.motor[mes.GetMotorID()].stopping = true;
@@ -1053,6 +1084,7 @@ void MotorController::setAccelerationProfile(uint16_t index, int8_t dest, uint16
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetBowIndex mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     if (mes.SetBowindex(index) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
     sendMessage(mes);
     EMPTY_IN_QUEUE
@@ -1070,6 +1102,7 @@ void MotorController::setLedP(uint16_t mode, int8_t dest, uint16_t channel)
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetLedMode mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     if (mes.SetMode(mode) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
     sendMessage(mes);
     EMPTY_IN_QUEUE
@@ -1108,6 +1141,7 @@ void MotorController::reqStatus(uint8_t dest, uint8_t channel)
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     ReqStatusUpdate mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     EMPTY_IN_QUEUE
 };
@@ -1117,6 +1151,7 @@ void MotorController::reqDcStatus(uint8_t dest, uint8_t channel)
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     ReqMotChanStatusUpdate mes(dest, SOURCE, channel);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     EMPTY_IN_QUEUE
 };
@@ -1126,6 +1161,7 @@ void MotorController::sendServerAlive(uint8_t dest)
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
     ServerAlive mes(dest, SOURCE);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     EMPTY_IN_QUEUE
 };
@@ -1142,6 +1178,7 @@ void MotorController::disableEomMessages(uint8_t dest)
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
     DisableEndMoveMessages mes(dest, SOURCE);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     opened_device.end_of_move_messages = false;
     EMPTY_IN_QUEUE
@@ -1152,6 +1189,7 @@ void MotorController::enableEomMessages(uint8_t dest)
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
     EnableEndMoveMessages mes(dest, SOURCE);
+    mes.opened_device = &opened_device;
     sendMessage(mes);
     opened_device.end_of_move_messages = true;
     EMPTY_IN_QUEUE
