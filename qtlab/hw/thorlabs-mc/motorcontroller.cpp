@@ -524,7 +524,9 @@ int MotorController::checkParams(uint8_t dest, int chanID)
 
 int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
 {
-    serial->waitForReadyRead(serial->getTimeout());
+    if (serial->bytesAvailable() < 2) {
+        serial->waitForReadyRead(serial->getTimeout());
+    }
     unsigned int bytes = serial->bytesAvailable();
     if (bytes == 0) return EMPTY;
     uint8_t buff[MAX_RESPONSE_SIZE];
