@@ -1238,6 +1238,7 @@ uint8_t MotorController::getMotorTrigger(uint8_t dest, uint8_t channel)
 void MotorController::postConnect_impl()
 {
     HwInfo info = getHwInfo();
+    logger->info(QString("Thorlabs MC model number: %1").arg(info.ModelNumber().c_str()));
     QMap<QString, dev_type> map;
 
 #define APPEND_TO_MAP(code) map[#code] = code;
