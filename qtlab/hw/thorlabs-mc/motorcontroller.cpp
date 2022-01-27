@@ -34,6 +34,16 @@ Logger *logger = getLogger("MotorController");
 
 using namespace QtLab::hw::Thorlabs;
 
+class AwaitingResponseHelper
+{
+public:
+    AwaitingResponseHelper(bool *myBool) : myBool(myBool) {*myBool = true;}
+    ~AwaitingResponseHelper() {*myBool = false;}
+
+private:
+    bool *myBool;
+};
+
 functions_set tdc_set{
     IDENTIFY,
 
@@ -465,6 +475,12 @@ functions_set all_set{
 MotorController::MotorController(QObject *parent) : SerialDevice(parent)
 {
     serial->setBaudRate(SerialPort::Baud115200);
+    QObject::connect(serial, &QSerialPort::readyRead, this, [ = ](){
+        if (serial->bytesAvailable() && !awaitingResponse) {
+            uint16_t ret_msgID;
+            checkIncomingQueue(ret_msgID);
+        }
+    });
 }
 
 
@@ -568,6 +584,7 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
         response.opened_device = &opened_device;
         assert (response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].homing = false;
+        emit movedHome();
         return MOVED_HOME_STATUS;
     }
     case MOVE_COMPLETED: {
@@ -576,6 +593,7 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
         response.opened_device = &opened_device;
         assert (response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].homing = false;
+        emit moveCompleted();
         return MOVE_COMPLETED_STATUS;
     }
     case MOVE_STOPPED: {
@@ -584,6 +602,7 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
         response.opened_device = &opened_device;
         assert (response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].homing = false;
+        void moveStopped();
         return MOVE_STOPPED_STATUS;
     }
     case GET_STATUSUPDATE: {
@@ -636,6 +655,7 @@ int MotorController::getResponseMess(uint16_t expected_msg, int size, uint8_t *m
 {
     int ret;
     uint16_t msgID;
+    AwaitingResponseHelper awh(&awaitingResponse);
     while (true) {
         ret = checkIncomingQueue(msgID);
         if (ret == OTHER_MESSAGE) {

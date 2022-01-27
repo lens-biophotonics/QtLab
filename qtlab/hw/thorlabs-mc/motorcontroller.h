@@ -69,6 +69,8 @@ namespace hw {
 namespace Thorlabs {
 class MotorController : public SerialDevice
 {
+    Q_OBJECT
+
 public:
 
     MotorController(QObject *parent = nullptr);
@@ -183,6 +185,11 @@ public:
 
     uint8_t getMotorTrigger(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
+signals:
+    void movedHome();
+    void moveCompleted();
+    void moveStopped();
+
 protected:
     virtual void postConnect_impl() override;
 
@@ -203,6 +210,8 @@ private:
     int devices_connected;
     controller_device opened_device;
     int opened_device_index;
+
+    bool awaitingResponse;
 };
 }
 }
