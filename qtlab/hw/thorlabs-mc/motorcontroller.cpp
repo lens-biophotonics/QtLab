@@ -677,7 +677,6 @@ int MotorController::getResponseMess(uint16_t expected_msg, int size, uint8_t *m
     return 0;
 }
 
-
 void MotorController::identify(uint8_t dest)
 {
     CHECK_ADDR_PARAMS(dest, -1)
@@ -760,7 +759,7 @@ void MotorController::stopUpdateMess(uint8_t dest)
     EMPTY_IN_QUEUE
 }
 
-HwInfo MotorController::getHwInfo(uint8_t dest)
+HwInfo MotorController::_getHwInfo(uint8_t dest)
 {
     CHECK_ADDR_PARAMS(dest, -1)
     EMPTY_IN_QUEUE
@@ -771,10 +770,16 @@ HwInfo MotorController::getHwInfo(uint8_t dest)
     ret = getResponseMess(HW_GET_INFO, 90, buff);
     if (ret != 0) RUNTIME_ERROR;
     HwInfo info;
+    info.opened_device = &opened_device;
     info.SetData(buff);
     free(buff);
     EMPTY_IN_QUEUE
     return info;
+}
+
+const HwInfo * MotorController::getHwInfo() const
+{
+    return &hwInfo;
 }
 
 RackBayUsed MotorController::getBayUsed(uint8_t bayID, uint8_t dest)
@@ -1237,8 +1242,10 @@ uint8_t MotorController::getMotorTrigger(uint8_t dest, uint8_t channel)
 
 void MotorController::postConnect_impl()
 {
-    HwInfo info = getHwInfo();
-    logger->info(QString("Thorlabs MC model number: %1").arg(info.ModelNumber().c_str()));
+    hwInfo = _getHwInfo();
+
+    logger->info(QString("Thorlabs MC model number: %1").arg(hwInfo.ModelNumber()));
+    logger->info(hwInfo.Notes());
     QMap<QString, dev_type> map;
 
 #define APPEND_TO_MAP(code) map[#code] = code;
@@ -1270,7 +1277,7 @@ void MotorController::postConnect_impl()
     APPEND_TO_MAP(TDC001);
     APPEND_TO_MAP(TBD001);
 
-    dev_type dt = map[QString::fromStdString(info.ModelNumber()).left(6)];
+    dev_type dt = map[hwInfo.ModelNumber().left(6)];
     int bays, channels;
     switch (dt) {
     case BBD101:

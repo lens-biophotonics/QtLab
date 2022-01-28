@@ -27,6 +27,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <QString>
+
 #include "device.h"
 #include "message_codes.h"
 #define HEADER_SIZE 6
@@ -68,11 +71,28 @@ public:
     }
 
     /**
+     * @brief Copy constructor
+     * @param m
+     */
+    Message(const Message& m) : length(m.length), opened_device(m.opened_device)
+    {
+        bytes = (uint8_t *) malloc(length);
+        memcpy(bytes, m.bytes, length);
+    }
+
+    /**
      * Frees allocated memory.
      */
     ~Message()
     {
         free(bytes);
+    }
+
+    Message & operator=(const Message & m)
+    {
+        bytes = (uint8_t *) malloc(length);
+        memcpy(bytes, m.bytes, length);
+        return *this;
     }
 
     /**
@@ -542,11 +562,9 @@ public:
      * Returns alphanumeric string describing model type.
      * @return model name in string
      */
-    std::string ModelNumber()
+    QString ModelNumber() const
     {
-        std::string ret;
-        ret.assign((char*) &bytes[10], 8);
-        return ret;
+        return QString::fromUtf8((const char*)&bytes[10], 8);
     }
 
     /**
@@ -558,11 +576,9 @@ public:
      * Returns closer description.
      * @return description string
      */
-    std::string Notes()
+    QString Notes()
     {
-        std::string ret;
-        ret.assign((char*) &bytes[24], 48);
-        return ret;
+        return QString::fromUtf8((const char*)&bytes[24], 48);
     }
 
     /**

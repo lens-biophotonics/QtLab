@@ -91,7 +91,9 @@ public:
 
     void stopUpdateMess(uint8_t dest = DEFAULTDEST);
 
-    HwInfo getHwInfo(uint8_t dest = DEFAULTDEST);
+    HwInfo _getHwInfo(uint8_t dest = DEFAULTDEST);
+
+    const HwInfo *getHwInfo() const;
 
     RackBayUsed getBayUsed(uint8_t bayID, uint8_t dest = DEFAULTDEST);
 
@@ -212,6 +214,7 @@ private:
     int opened_device_index;
 
     bool awaitingResponse;
+    HwInfo hwInfo;
 };
 }
 }
