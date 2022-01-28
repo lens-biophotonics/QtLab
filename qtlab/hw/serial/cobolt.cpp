@@ -9,6 +9,7 @@
 Cobolt::Cobolt(QObject *parent) : SerialDevice(parent)
 {
     serial->setLineEndTermination("\r\n", "\r\n");
+    serial->setTransceiveTimeout(100);
 
     QState *cs = serial->getConnectedState();
     QState *classUninitialized = new QState(cs);
@@ -327,7 +328,7 @@ void Cobolt::setVerboseName(const QString &value)
 
 QString Cobolt::transceiveChkOK(QString cmd)
 {
-    QString response = serial->transceive(cmd);
+    QString response = serial->transceive(cmd, "\r\n");
     if (response != "OK") {
         throw std::runtime_error(response.toLatin1());
     }
@@ -336,7 +337,7 @@ QString Cobolt::transceiveChkOK(QString cmd)
 
 QString Cobolt::transceiveChkSyntaxError(QString cmd)
 {
-    QString response = serial->transceive(cmd);
+    QString response = serial->transceive(cmd, "\r\n");
     if (response.startsWith("Syntax error")) {
         throw std::runtime_error(response.toLatin1());
     }
