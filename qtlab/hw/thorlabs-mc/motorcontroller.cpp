@@ -486,8 +486,8 @@ MotorController::MotorController(QObject *parent) : SerialDevice(parent)
 
 //----------------- Device communication functions ---------------------------------
 
-#define RUNTIME_ERROR {QString err = QString("Runtime error (%3) at %1:%2").arg(__FILE__).arg(__LINE__).arg(ret); throw std::runtime_error(err.toStdString());}
-#define RUNTIME_ERROR_INVALID_PARAM(x) throw std::runtime_error("Invalid param "#x);
+#define RUNTIME_ERROR {QString err = QString("Runtime error (%3) at %1:%2").arg(__FILE__).arg(__LINE__).arg(ret); emit error(err);}
+#define RUNTIME_ERROR_INVALID_PARAM(x) emit error("Invalid param "#x);
 
 #define EMPTY_IN_QUEUE ret = emptyIncomingQueue();    \
     if (ret != 0) RUNTIME_ERROR
@@ -547,7 +547,8 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
     if (bytes == 0) return EMPTY;
     uint8_t buff[MAX_RESPONSE_SIZE];
     if (serial->read((char*)buff, 2) != 2) {
-        throw std::runtime_error("Cannot read from serial");
+        emit error("Cannot read from serial");
+        return FATAL_ERROR;
     };
 
     uint16_t msgID = le16toh(*((uint16_t*) &buff[0]));
@@ -644,7 +645,7 @@ int MotorController::emptyIncomingQueue()
         case FT_ERROR: return FT_ERROR;
         case DEVICE_ERROR: return DEVICE_ERROR;
         case OTHER_MESSAGE: {
-            throw std::runtime_error("Protocol error");
+            emit error("Protocol error");
             return FATAL_ERROR;
         }
         }

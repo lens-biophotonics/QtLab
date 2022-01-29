@@ -191,6 +191,7 @@ signals:
     void movedHome();
     void moveCompleted();
     void moveStopped();
+    void error(QString);
 
 protected:
     virtual void postConnect_impl() override;
