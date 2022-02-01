@@ -1,27 +1,28 @@
 #ifndef AA_MPDSnCXX_H
 #define AA_MPDSnCXX_H
 
+#include <qtlab/hw/serial/serialdevice.h>
+
 #include <QObject>
 #include <QVector>
-
-#include <qtlab/hw/serial/serialdevice.h>
 
 class AA_MPDSnCxx : public SerialDevice
 {
     Q_OBJECT
 
 public:
-
-    struct LineStatus {
+    struct LineStatus
+    {
         friend class AA_MPDSnCxx;
-public:
-        int getId() const {return id;}
-        double getFreq() const {return freq;}
-        double getPower_dBm() const {return power_dBm;}
-        bool isOutputEnabled() const {return outputEnabled;}
-        bool isExternalModeEnabled() const {return externalMode;}
 
-private:
+    public:
+        int getId() const { return id; }
+        double getFreq() const { return freq; }
+        double getPower_dBm() const { return power_dBm; }
+        bool isOutputEnabled() const { return outputEnabled; }
+        bool isExternalModeEnabled() const { return externalMode; }
+
+    private:
         int id;
         double freq;
         double power_dBm;
@@ -108,7 +109,7 @@ private:
     bool blankingExternal;
     QVector<LineStatus *> status;
     enum MPDS_VERSION mpdsVersion;
-    QString altTerminator;  /**< alternative line terminator */
+    QString altTerminator; /**< alternative line terminator */
 
     QStringList _getStatus();
     void parseStatusLine(const QString &s);

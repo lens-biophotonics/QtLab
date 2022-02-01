@@ -1,10 +1,12 @@
-#include <QVBoxLayout>
-#include <QTime>
-
-#include <qtlab/core/logmanager.h>
 #include "logwidget.h"
 
-LogWidget::LogWidget(QWidget *parent) : QWidget(parent)
+#include <qtlab/core/logmanager.h>
+
+#include <QTime>
+#include <QVBoxLayout>
+
+LogWidget::LogWidget(QWidget *parent)
+    : QWidget(parent)
 {
     QVBoxLayout *layout = new QVBoxLayout();
 
@@ -13,8 +15,7 @@ LogWidget::LogWidget(QWidget *parent) : QWidget(parent)
     layout->addWidget(textEdit);
     setLayout(layout);
 
-    connect(&logManager(), &LogManager::newLogMessages,
-            this, &LogWidget::logMessages);
+    connect(&logManager(), &LogManager::newLogMessages, this, &LogWidget::logMessages);
 }
 
 void LogWidget::logMessages()

@@ -10,6 +10,6 @@ QString PFI2Line(QString term);
 QString getVersion();
 
 #include "NIDAQmx_ni_wrapper_methods.h"
-}
+} // namespace NI
 
 #endif // NATINST_H

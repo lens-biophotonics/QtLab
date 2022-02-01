@@ -2,8 +2,8 @@
 #define LOGGER_H
 
 #include <QEvent>
-#include <QString>
 #include <QObject>
+#include <QString>
 
 /**
  * @brief Type of log message.
@@ -13,7 +13,8 @@ class Logger : public QObject
 {
     Q_OBJECT
 public:
-    struct Message {
+    struct Message
+    {
         QtMsgType type;
         QString msg;
     };

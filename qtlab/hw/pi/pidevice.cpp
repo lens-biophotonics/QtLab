@@ -1,38 +1,37 @@
-#include <stdexcept>
 #include <memory>
-
-#include <QString>
-#include <QStateMachine>
-#include <QSerialPortInfo>
-#include <QMutexLocker>
+#include <stdexcept>
 
 #include <qtlab/core/logger.h>
-#include <qtlab/hw/pi/pidevice.h>
 #include <qtlab/hw/pi/pidaisychain.h>
+#include <qtlab/hw/pi/pidevice.h>
+
+#include <QMutexLocker>
+#include <QSerialPortInfo>
+#include <QStateMachine>
+#include <QString>
 
 static Logger *logger = getLogger("PIDevice");
 
-#define FUNCNAME(x) # x
+#define FUNCNAME(x) #x
 #ifdef WITH_HARDWARE
-#define CALL_THROW(functionCall)                                            \
-    QMutexLocker ml(&mutex);                                                \
-    if (!functionCall) {                                                    \
-        throw std::runtime_error(                                           \
-            std::string(FUNCNAME(functionCall)) + ": "                      \
-                        + getErrorString().toStdString());                  \
+#define CALL_THROW(functionCall) \
+    QMutexLocker ml(&mutex); \
+    if (!functionCall) { \
+        throw std::runtime_error(std::string(FUNCNAME(functionCall)) + ": " \
+                                 + getErrorString().toStdString()); \
     }
 #else
 #define CALL_THROW(func)
 #endif
 
-
-PIDevice::PIDevice(QObject *parent) : QObject(parent)
+PIDevice::PIDevice(QObject *parent)
+    : QObject(parent)
 {
     setupStateMachine();
 }
 
-PIDevice::PIDevice(const QString &verboseName, QObject *parent) :
-    PIDevice (parent)
+PIDevice::PIDevice(const QString &verboseName, QObject *parent)
+    : PIDevice(parent)
 {
     setVerboseName(verboseName);
 }
@@ -65,8 +64,9 @@ void PIDevice::connectSerial(const QString &portName, const int baud)
     emit connected();
 }
 
-void PIDevice::connectDaisyChainSerial(
-    const QString &portName, const int deviceNumber, const int baud)
+void PIDevice::connectDaisyChainSerial(const QString &portName,
+                                       const int deviceNumber,
+                                       const int baud)
 {
     QString pName = QSerialPortInfo(portName).systemLocation();
     id = openDaisyChain(pName, baud)->connectDevice(deviceNumber);
@@ -75,8 +75,7 @@ void PIDevice::connectDaisyChainSerial(
     setBaud(baud);
     setDeviceNumber(deviceNumber);
 
-    QString msg =
-        QString("Connected Daisy Chain device on port %1, device number %2");
+    QString msg = QString("Connected Daisy Chain device on port %1, device number %2");
     msg = msg.arg(portName).arg(deviceNumber);
     logger->info(msg);
     emit connected();
@@ -90,8 +89,7 @@ void PIDevice::connectDevice()
     }
     if (getDeviceNumber() > 0) {
         connectDaisyChainSerial(getPortName(), getDeviceNumber(), getBaud());
-    }
-    else {
+    } else {
         connectSerial(getPortName(), getBaud());
     }
 
@@ -117,7 +115,6 @@ bool PIDevice::isConnected()
     return id != -1;
 #endif
 }
-
 
 void PIDevice::move(const QString &axes, const double pos[])
 {
@@ -255,8 +252,7 @@ void PIDevice::fastMoveToReferenceSwitch(const QString &axes)
     CALL_THROW(PI_FRF(id, axes.toLatin1()));
 }
 
-void PIDevice::loadStages(
-    const QString &axes, const QStringList &stages)
+void PIDevice::loadStages(const QString &axes, const QStringList &stages)
 {
     if (axes.isEmpty() || stages.isEmpty()) {
         return;
@@ -346,11 +342,9 @@ void PIDevice::setupStateMachine()
     connectedState = new QState();
     disconnectedState = new QState();
 
-    connectedState->addTransition(
-        this, &PIDevice::disconnected, disconnectedState);
+    connectedState->addTransition(this, &PIDevice::disconnected, disconnectedState);
 
-    disconnectedState->addTransition(
-        this, &PIDevice::connected, connectedState);
+    disconnectedState->addTransition(this, &PIDevice::connected, connectedState);
 
     QStateMachine *sm = new QStateMachine();
 
@@ -379,8 +373,9 @@ QVector<double> PIDevice::getVectorOfDoubles(const PI_qVectorOfDoubles fp, const
     return vec;
 }
 
-void PIDevice::callFunctionWithVectorOfDoubles(
-    PI_vectorOfDoubles fp, const QString &axes, const double values[])
+void PIDevice::callFunctionWithVectorOfDoubles(PI_vectorOfDoubles fp,
+                                               const QString &axes,
+                                               const double values[])
 {
 #ifndef WITH_HARDWARE
     Q_UNUSED(fp)
@@ -413,9 +408,7 @@ void PIDevice::setStepSize(const QString &axis, const double value)
     stepSizeMap[axis] = value;
 }
 
-void PIDevice::setTriggerOutput(const TrigOutID oid,
-                                const CTOPam pam,
-                                const double val)
+void PIDevice::setTriggerOutput(const TrigOutID oid, const CTOPam pam, const double val)
 {
 #ifndef WITH_HARDWARE
     Q_UNUSED(oid)
@@ -431,8 +424,7 @@ void PIDevice::setTriggerOutput(const TrigOutID oid,
 #endif
 }
 
-void PIDevice::setTriggerOutputEnabled(
-    const TrigOutID oid, const BOOL enable)
+void PIDevice::setTriggerOutputEnabled(const TrigOutID oid, const BOOL enable)
 {
 #ifndef WITH_HARDWARE
     Q_UNUSED(oid)
@@ -450,8 +442,7 @@ bool PIDevice::isOnTarget(const QString &axis)
     QString temp;
     if (axis.isEmpty()) {
         temp = getAxisIdentifiers().at(0);
-    }
-    else {
+    } else {
         temp = axis.at(0);
     }
     int ont = 0;

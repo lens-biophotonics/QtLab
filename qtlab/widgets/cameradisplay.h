@@ -1,13 +1,13 @@
 #ifndef CAMERADISPLAY_H
 #define CAMERADISPLAY_H
 
-#include <QWidget>
-#include <QMenu>
 #include <qwt_plot_marker.h>
 #include <qwt_plot_zoomer.h>
 
-class CameraPlot;
+#include <QMenu>
+#include <QWidget>
 
+class CameraPlot;
 
 class CameraDisplay : public QWidget
 {

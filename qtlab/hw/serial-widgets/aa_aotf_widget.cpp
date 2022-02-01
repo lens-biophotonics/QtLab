@@ -1,26 +1,28 @@
-#include <QGroupBox>
-#include <QBoxLayout>
-#include <QRadioButton>
-#include <QCheckBox>
-#include <QLabel>
-#include <QPushButton>
-#include <QComboBox>
-#include <QListView>
-#include <QSerialPortInfo>
-#include <QMessageBox>
+#include "aa_aotf_widget.h"
 
 #include <qtlab/widgets/customspinbox.h>
 
-#include "aa_aotf_widget.h"
+#include <QBoxLayout>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QGroupBox>
+#include <QLabel>
+#include <QListView>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSerialPortInfo>
 
-#define CHECK_EXCEPTION(callable)                           \
-    try {                                                   \
-        callable;                                           \
-    } catch (std::runtime_error e) {                        \
-        QMessageBox::critical(nullptr, "Error", e.what());  \
-    }                                                       \
+#define CHECK_EXCEPTION(callable) \
+    try { \
+        callable; \
+    } catch (std::runtime_error e) { \
+        QMessageBox::critical(nullptr, "Error", e.what()); \
+    }
 
-AA_AOTFWidget::AA_AOTFWidget(AA_MPDSnCxx *aotf, int lines, QWidget *parent) : QWidget(parent), aotf(aotf)
+AA_AOTFWidget::AA_AOTFWidget(AA_MPDSnCxx *aotf, int lines, QWidget *parent)
+    : QWidget(parent)
+    , aotf(aotf)
 {
     setupUi(lines);
 }
@@ -39,14 +41,14 @@ void AA_AOTFWidget::setupUi(int lines)
             continue;
         }
         QString descr = QString("%1 (%2, %3)")
-                        .arg(info.portName())
-                        .arg(info.description())
-                        .arg(info.serialNumber());
+                            .arg(info.portName())
+                            .arg(info.description())
+                            .arg(info.serialNumber());
         serialPortComboBox->addItem(descr, info.portName());
     }
 
-    serialPortComboBox->setCurrentIndex(serialPortComboBox->findData(
-                                            aotf->serialPort()->portName()));
+    serialPortComboBox->setCurrentIndex(
+        serialPortComboBox->findData(aotf->serialPort()->portName()));
 
     int row = 0;
     QGridLayout *gridTop = new QGridLayout();
@@ -60,19 +62,18 @@ void AA_AOTFWidget::setupUi(int lines)
     hLayout->addWidget(disconnectPushButton);
     gridTop->addLayout(hLayout, row++, 1, 1, 1);
 
-    connect(connectPushButton, &QPushButton::clicked, aotf, [ = ](){
+    connect(connectPushButton, &QPushButton::clicked, aotf, [=]() {
         aotf->serialPort()->setPortName(serialPortComboBox->currentData().toString());
         CHECK_EXCEPTION(aotf->connect())
     });
 
     // connect(disconnectPushButton, &QPushButton::clicked, aotf, &SerialDevice::disconnect);
     // causes QSocketNotifier: Socket notifiers cannot be enabled or disabled from another thread
-    connect(disconnectPushButton, &QPushButton::clicked, aotf, [ = ](){
+    connect(disconnectPushButton, &QPushButton::clicked, aotf, [=]() {
         CHECK_EXCEPTION(aotf->disconnect())
     });
 
-
-// selected line
+    // selected line
 
     QGridLayout *gridSelected = new QGridLayout();
     int i = 0;
@@ -94,17 +95,26 @@ void AA_AOTFWidget::setupUi(int lines)
     gridSelected->addWidget(incrFreqPushButton, i++, 3);
     incrFreqPushButton->setToolTip("Fine adjustment");
 
-    connect(incrFreqPushButton, &QPushButton::clicked, this, [ = ](){
-        CHECK_EXCEPTION(freqSpinBox->setValue(aotf->stepFrequencyUp()))
-    }, Qt::DirectConnection);
+    connect(
+        incrFreqPushButton,
+        &QPushButton::clicked,
+        this,
+        [=]() { CHECK_EXCEPTION(freqSpinBox->setValue(aotf->stepFrequencyUp())) },
+        Qt::DirectConnection);
 
-    connect(decrFreqPushButton, &QPushButton::clicked, this, [ = ](){
-        CHECK_EXCEPTION(freqSpinBox->setValue(aotf->stepFrequencyDown()))
-    }, Qt::DirectConnection);
+    connect(
+        decrFreqPushButton,
+        &QPushButton::clicked,
+        this,
+        [=]() { CHECK_EXCEPTION(freqSpinBox->setValue(aotf->stepFrequencyDown())) },
+        Qt::DirectConnection);
 
-    connect(freqSpinBox, &DoubleSpinBox::returnPressed, this, [ = ](double value) {
-        CHECK_EXCEPTION(freqSpinBox->setValue(aotf->setFrequency(value)))
-    }, Qt::DirectConnection);
+    connect(
+        freqSpinBox,
+        &DoubleSpinBox::returnPressed,
+        this,
+        [=](double value) { CHECK_EXCEPTION(freqSpinBox->setValue(aotf->setFrequency(value))) },
+        Qt::DirectConnection);
 
     DoubleSpinBox *powerSpinBox = new DoubleSpinBox();
     powerSpinBox->setSuffix("dBm");
@@ -118,25 +128,37 @@ void AA_AOTFWidget::setupUi(int lines)
     gridSelected->addWidget(incrPowerPushButton, i++, 3);
     incrPowerPushButton->setToolTip("Fine adjustment");
 
-    connect(incrPowerPushButton, &QPushButton::clicked, this, [ = ]() {
-        CHECK_EXCEPTION(aotf->stepPowerUp())
-        powerSpinBox->setValue(aotf->selectedChanelStatus()->getPower_dBm());
-    }, Qt::DirectConnection);
+    connect(
+        incrPowerPushButton,
+        &QPushButton::clicked,
+        this,
+        [=]() {
+            CHECK_EXCEPTION(aotf->stepPowerUp())
+            powerSpinBox->setValue(aotf->selectedChanelStatus()->getPower_dBm());
+        },
+        Qt::DirectConnection);
 
-    connect(decrPowerPushButton, &QPushButton::clicked, this, [ = ]() {
-        CHECK_EXCEPTION(powerSpinBox->setValue(aotf->stepPowerDown()))
-        powerSpinBox->setValue(aotf->selectedChanelStatus()->getPower_dBm());
-    }, Qt::DirectConnection);
+    connect(
+        decrPowerPushButton,
+        &QPushButton::clicked,
+        this,
+        [=]() {
+            CHECK_EXCEPTION(powerSpinBox->setValue(aotf->stepPowerDown()))
+            powerSpinBox->setValue(aotf->selectedChanelStatus()->getPower_dBm());
+        },
+        Qt::DirectConnection);
 
-    connect(powerSpinBox, &DoubleSpinBox::returnPressed, this, [ = ](double value) {
-        CHECK_EXCEPTION(powerSpinBox->setValue(aotf->setPower_dBm(value)))
-    }, Qt::DirectConnection);
+    connect(
+        powerSpinBox,
+        &DoubleSpinBox::returnPressed,
+        this,
+        [=](double value) { CHECK_EXCEPTION(powerSpinBox->setValue(aotf->setPower_dBm(value))) },
+        Qt::DirectConnection);
 
     QGroupBox *selectedLineGb = new QGroupBox("Selected line");
     selectedLineGb->setLayout(gridSelected);
 
-
-// push buttons
+    // push buttons
 
     QBoxLayout *hPushButtonLayout = new QHBoxLayout();
     QPushButton *storePushButton = new QPushButton("Store");
@@ -160,48 +182,58 @@ void AA_AOTFWidget::setupUi(int lines)
     hPushButtonLayout->addWidget(intModePushButton);
     hPushButtonLayout->addWidget(extModePushButton);
 
-    connect(storePushButton, &QPushButton::clicked, this, [ = ](){
-        CHECK_EXCEPTION(aotf->storeParams())
-    }, Qt::DirectConnection);
+    connect(
+        storePushButton,
+        &QPushButton::clicked,
+        this,
+        [=]() { CHECK_EXCEPTION(aotf->storeParams()) },
+        Qt::DirectConnection);
 
-    connect(resetPushButton, &QPushButton::clicked, this, [ = ](){
-        CHECK_EXCEPTION(aotf->reset())
-    }, Qt::DirectConnection);
+    connect(
+        resetPushButton,
+        &QPushButton::clicked,
+        this,
+        [=]() { CHECK_EXCEPTION(aotf->reset()) },
+        Qt::DirectConnection);
 
-    connect(refreshPushButton, &QPushButton::clicked, this, [ = ](){
-        CHECK_EXCEPTION(aotf->refresh())
-    }, Qt::DirectConnection);
+    connect(
+        refreshPushButton,
+        &QPushButton::clicked,
+        this,
+        [=]() { CHECK_EXCEPTION(aotf->refresh()) },
+        Qt::DirectConnection);
 
-    connect(intModePushButton, &QPushButton::clicked, this, [ = ](){
-        CHECK_EXCEPTION(aotf->setExternalModeEnabled(false));
-    }, Qt::DirectConnection);
+    connect(
+        intModePushButton,
+        &QPushButton::clicked,
+        this,
+        [=]() { CHECK_EXCEPTION(aotf->setExternalModeEnabled(false)); },
+        Qt::DirectConnection);
 
-    connect(extModePushButton, &QPushButton::clicked, this, [ = ](){
-        CHECK_EXCEPTION(aotf->setExternalModeEnabled(true));
-    }, Qt::DirectConnection);
+    connect(
+        extModePushButton,
+        &QPushButton::clicked,
+        this,
+        [=]() { CHECK_EXCEPTION(aotf->setExternalModeEnabled(true)); },
+        Qt::DirectConnection);
 
-
-// vmode
+    // vmode
     QRadioButton *_5VMode = new QRadioButton("5V");
     QRadioButton *_10VMode = new QRadioButton("10V");
 
-    auto updateVMode = [ = ](){
+    auto updateVMode = [=]() {
         _5VMode->setChecked(!aotf->isVMode10V());
         _10VMode->setChecked(aotf->isVMode10V());
     };
 
-    connect(_5VMode, &QRadioButton::clicked, [ = ](){
-        CHECK_EXCEPTION(aotf->setVMode5V());
-    });
-    connect(_10VMode, &QRadioButton::clicked, [ = ](){
-        CHECK_EXCEPTION(aotf->setVMode10V());
-    });
+    connect(_5VMode, &QRadioButton::clicked, [=]() { CHECK_EXCEPTION(aotf->setVMode5V()); });
+    connect(_10VMode, &QRadioButton::clicked, [=]() { CHECK_EXCEPTION(aotf->setVMode10V()); });
 
     connect(aotf, &SerialDevice::connected, updateVMode);
     connect(refreshPushButton, &QPushButton::clicked, this, updateVMode, Qt::QueuedConnection);
     connect(resetPushButton, &QPushButton::clicked, this, updateVMode, Qt::QueuedConnection);
 
-// line status
+    // line status
 
     int col = 0;
     QGridLayout *gridBottom = new QGridLayout();
@@ -214,10 +246,10 @@ void AA_AOTFWidget::setupUi(int lines)
     gridBottom->addWidget(new QLabel("On/Off"), 0, col++);
     gridBottom->addWidget(new QLabel("Ext"), 0, col++);
 
-    QList<QLabel*> freqLabels;
-    QList<QLabel*> powerLabels;
-    QList<QLabel*> statusLabels;
-    QList<QLabel*> modeLabels;
+    QList<QLabel *> freqLabels;
+    QList<QLabel *> powerLabels;
+    QList<QLabel *> statusLabels;
+    QList<QLabel *> modeLabels;
 
     QLabel *blanking = new QLabel("Blanking");
     blanking->setAlignment(Qt::AlignCenter);
@@ -228,11 +260,11 @@ void AA_AOTFWidget::setupUi(int lines)
     QCheckBox *blnkExternalCheckbox = new QCheckBox();
     gridBottom->addWidget(blnkExternalCheckbox, 1, 6);
 
-    auto setBlanking = [ = ](){
+    auto setBlanking = [=]() {
         aotf->setBlanking(blnkStatusCheckbox->isChecked(), blnkExternalCheckbox->isChecked());
     };
 
-    auto updateBlanking = [ = ](){
+    auto updateBlanking = [=]() {
         blnkStatusCheckbox->setChecked(aotf->isBlankingEnabled());
         blnkExternalCheckbox->setChecked(aotf->isBlankingExternal());
     };
@@ -279,7 +311,7 @@ void AA_AOTFWidget::setupUi(int lines)
         QCheckBox *externalCheckbox = new QCheckBox();
         gridBottom->addWidget(externalCheckbox, i + 1, col++);
 
-        auto updateRow = [ = ](){
+        auto updateRow = [=]() {
             AA_MPDSnCxx::LineStatus *st = aotf->getLineStatus().at(i);
             freqLabel->setText(QString("%1 MHz").arg(st->getFreq(), 0, 'f', 3));
             powerLabel->setText(QString("%1 dBm").arg(st->getPower_dBm(), 0, 'f', 2));
@@ -298,17 +330,17 @@ void AA_AOTFWidget::setupUi(int lines)
             powerSpinBox->setValue(st->getPower_dBm());
         };
 
-        connect(statusCheckbox, &QCheckBox::clicked, [ = ](bool checked){
+        connect(statusCheckbox, &QCheckBox::clicked, [=](bool checked) {
             CHECK_EXCEPTION(aotf->setOutputEnabled(i, checked))
             updateRow();
         });
 
-        connect(externalCheckbox, &QCheckBox::clicked, [ = ](bool checked){
+        connect(externalCheckbox, &QCheckBox::clicked, [=](bool checked) {
             CHECK_EXCEPTION(aotf->setExternalModeEnabled(i, checked))
             updateRow();
         });
 
-        connect(radio, &QCheckBox::clicked, [ = ](bool checked){
+        connect(radio, &QCheckBox::clicked, [=](bool checked) {
             if (checked) {
                 CHECK_EXCEPTION(aotf->selectChannel(i))
                 updateRow();
@@ -321,13 +353,16 @@ void AA_AOTFWidget::setupUi(int lines)
               << incrFreqPushButton << decrFreqPushButton << incrPowerPushButton
               << decrPowerPushButton;
         for (QWidget *pb : wList) {
-            connect((QPushButton*)pb, &QPushButton::clicked, this, updateRow, Qt::QueuedConnection);
+            connect((QPushButton *) pb, &QPushButton::clicked, this, updateRow, Qt::QueuedConnection);
         }
 
         wList.clear();
         wList << freqSpinBox << powerSpinBox;
         for (QWidget *pb : wList) {
-            connect((DoubleSpinBox*)pb, &DoubleSpinBox::returnPressed, this, updateRow,
+            connect((DoubleSpinBox *) pb,
+                    &DoubleSpinBox::returnPressed,
+                    this,
+                    updateRow,
                     Qt::QueuedConnection);
         }
     }
@@ -335,8 +370,7 @@ void AA_AOTFWidget::setupUi(int lines)
     QGroupBox *lineStatusGb = new QGroupBox("Line status");
     lineStatusGb->setLayout(gridBottom);
 
-
-// layout
+    // layout
 
     QBoxLayout *vLayoutLeft = new QVBoxLayout();
     vLayoutLeft->addWidget(selectedLineGb);
@@ -388,7 +422,7 @@ void AA_AOTFWidget::setupUi(int lines)
         connectPushButton,
     };
 
-    for (QWidget * w : wList) {
+    for (QWidget *w : wList) {
         cs->assignProperty(w, "enabled", false);
         ds->assignProperty(w, "enabled", true);
     }

@@ -1,12 +1,12 @@
 #include <stdexcept>
 
+#include <qtlab/hw/serial/filterwheel.h>
+
 #include <QRegularExpression>
 #include <QStringList>
 
-#include <qtlab/hw/serial/filterwheel.h>
-
-
-FilterWheel::FilterWheel(QObject *parent) : SerialDevice(parent)
+FilterWheel::FilterWheel(QObject *parent)
+    : SerialDevice(parent)
 {
     serial->setLineEndTermination("\r", "\r");
     positionCount = -1;
@@ -17,7 +17,6 @@ void FilterWheel::postConnect_impl()
 {
     getPositionCount();
 };
-
 
 QString FilterWheel::getID()
 {
@@ -109,7 +108,9 @@ void FilterWheel::setBaudRate(FilterWheel::SERIAL_BAUD_RATE rate)
 QString FilterWheel::setPosition(int n)
 {
     if (n < 1 || n > positionCount)
-        return QString("ErrorFilterWheel: requested position %1 out of range [1,%2]").arg(n).arg(positionCount);
+        return QString("ErrorFilterWheel: requested position %1 out of range [1,%2]")
+            .arg(n)
+            .arg(positionCount);
     else
         return transceiveChkSyntaxError(QString("pos=%1").arg(n));
 }
@@ -144,7 +145,8 @@ QString FilterWheel::transceiveChkSyntaxError(QString cmd)
     serial->sendMsg(cmd);
     removeEcho(cmd);
     QString response = serial->receive();
-    response.append(serial->receive()); // sometimes the device does not send the full response during one communication
+    response.append(
+        serial->receive()); // sometimes the device does not send the full response during one communication
     response.remove('\r');
     response.remove(QRegExp("[<>]"));
     if (response.startsWith("Command error")) {
@@ -167,8 +169,7 @@ int FilterWheel::castStringToIntChkError(QString str)
     bool ok;
     int integer = str.toInt(&ok);
     if (!ok) {
-        throw std::runtime_error(
-                  QString("Cannot convert string to int: " + str).toLatin1());
+        throw std::runtime_error(QString("Cannot convert string to int: " + str).toLatin1());
     }
     return integer;
 }

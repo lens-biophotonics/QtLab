@@ -1,30 +1,31 @@
-#include <QHBoxLayout>
-#include <QCheckBox>
-#include <QDirIterator>
-#include <QStack>
-#include <QRegularExpression>
-#include <QDialog>
-#include <QContextMenuEvent>
-#include <QPair>
-#include <QPen>
-
-#include <qwt_slider.h>
-
 #include <qtlab/widgets/aspectratiowidget.h>
+#include <qtlab/widgets/cameradisplay.h>
+#include <qtlab/widgets/cameraplot.h>
 #include <qtlab/widgets/colormaps.h>
 #include <qtlab/widgets/customspinbox.h>
 
-#include <qtlab/widgets/cameraplot.h>
-#include <qtlab/widgets/cameradisplay.h>
+#include <qwt_slider.h>
+
+#include <QCheckBox>
+#include <QContextMenuEvent>
+#include <QDialog>
+#include <QDirIterator>
+#include <QHBoxLayout>
+#include <QPair>
+#include <QPen>
+#include <QRegularExpression>
+#include <QStack>
 
 class Zoomer : public QwtPlotZoomer
 {
 public:
     using QwtPlotZoomer::zoom;
 
-    Zoomer(QWidget *parent, bool doReplot = true) : QwtPlotZoomer(parent, doReplot) {}
+    Zoomer(QWidget *parent, bool doReplot = true)
+        : QwtPlotZoomer(parent, doReplot)
+    {}
 
-    void zoom(const QRectF& rect) override
+    void zoom(const QRectF &rect) override
     {
         // bound the zooming rect to the zoomBase dimensions
         QRectF boundedRect = rect & zoomBase();
@@ -32,15 +33,13 @@ public:
     }
 };
 
-CameraDisplay::CameraDisplay(QWidget *parent) :
-    QWidget(parent)
+CameraDisplay::CameraDisplay(QWidget *parent)
+    : QWidget(parent)
 {
     setupUi();
 }
 
-CameraDisplay::~CameraDisplay()
-{
-}
+CameraDisplay::~CameraDisplay() {}
 
 void CameraDisplay::setLUTPath(QString value)
 {
@@ -101,7 +100,8 @@ void CameraDisplay::setupUi()
     zoomer->setTrackerPen(QPen(Qt::green));
 
     cursorMarker = new QwtPlotMarker();
-    cursorMarker->setLineStyle(static_cast<QwtPlotMarker::LineStyle>(QwtPlotMarker::VLine | QwtPlotMarker::HLine));
+    cursorMarker->setLineStyle(
+        static_cast<QwtPlotMarker::LineStyle>(QwtPlotMarker::VLine | QwtPlotMarker::HLine));
     cursorMarker->setLinePen(Qt::green);
     cursorMarker->setValue(256, 256);
     cursorMarker->attach(plot);
@@ -152,43 +152,42 @@ void CameraDisplay::setupUi()
 
     QCheckBox *autoscaleCheckBox = new QCheckBox("Autoscale");
     autoscaleCheckBox->setChecked(autoscaleAction->isChecked());
-    connect(autoscaleCheckBox, &QCheckBox::clicked,
-            autoscaleAction, &QAction::trigger);
+    connect(autoscaleCheckBox, &QCheckBox::clicked, autoscaleAction, &QAction::trigger);
 
     QVBoxLayout *vLayout = new QVBoxLayout();
     vLayout->addLayout(grid);
     vLayout->addWidget(autoscaleCheckBox);
     dialog->setLayout(vLayout);
 
-    std::function<void(void)> updatePlotRange = [ = ](){
+    std::function<void(void)> updatePlotRange = [=]() {
         plot->setInterval(Qt::ZAxis, currentRange->first, currentRange->second);
     };
 
-    connect(minSlider, &QwtSlider::valueChanged, this, [ = ](double value){
+    connect(minSlider, &QwtSlider::valueChanged, this, [=](double value) {
         currentRange->first = value;
         minSpinBox->setValue(value);
         updatePlotRange();
     });
 
-    connect(maxSlider, &QwtSlider::valueChanged, this, [ = ](double value){
+    connect(maxSlider, &QwtSlider::valueChanged, this, [=](double value) {
         currentRange->second = value;
         maxSpinBox->setValue(value);
         updatePlotRange();
     });
 
-    connect(minSpinBox, &DoubleSpinBox::returnPressed, this, [ = ](double value){
+    connect(minSpinBox, &DoubleSpinBox::returnPressed, this, [=](double value) {
         currentRange->first = value;
         minSlider->setValue(value);
         updatePlotRange();
     });
 
-    connect(maxSpinBox, &DoubleSpinBox::returnPressed, this, [ = ](double value){
+    connect(maxSpinBox, &DoubleSpinBox::returnPressed, this, [=](double value) {
         currentRange->second = value;
         maxSlider->setValue(value);
         updatePlotRange();
     });
 
-    connect(autoscaleAction, &QAction::triggered, this, [ = ](bool checked){
+    connect(autoscaleAction, &QAction::triggered, this, [=](bool checked) {
         plot->setZAutoscaleEnabled(checked);
         if (!checked) {
             updatePlotRange();
@@ -210,21 +209,15 @@ void CameraDisplay::setupUi()
     menu->addSeparator();
 
     action = new QAction("Zoom out", this);
-    connect(action, &QAction::triggered, this, [ = ](){
-        zoomer->zoom(-1);
-    });
+    connect(action, &QAction::triggered, this, [=]() { zoomer->zoom(-1); });
     menu->addAction(action);
 
     action = new QAction("Zoom in", this);
-    connect(action, &QAction::triggered, this, [ = ](){
-        zoomer->zoom(1);
-    });
+    connect(action, &QAction::triggered, this, [=]() { zoomer->zoom(1); });
     menu->addAction(action);
 
     action = new QAction("Reset zoom", this);
-    connect(action, &QAction::triggered, this, [ = ](){
-        zoomer->zoom(0);
-    });
+    connect(action, &QAction::triggered, this, [=]() { zoomer->zoom(0); });
     menu->addAction(action);
 
     menu->addSeparator();
@@ -232,7 +225,7 @@ void CameraDisplay::setupUi()
     action = new QAction("Show cross", this);
     action->setCheckable(true);
     action->setChecked(false);
-    connect(action, &QAction::triggered, this, [ = ](bool checked){
+    connect(action, &QAction::triggered, this, [=](bool checked) {
         cursorMarker->setVisible(checked);
         plot->replot();
     });
@@ -257,29 +250,25 @@ void CameraDisplay::setupLUTmenu()
     LUTMenu->clear();
     QAction *action = new QAction("Grayscale");
     LUTMenu->addAction(action);
-    connect(action, &QAction::triggered, this, [ = ](){
+    connect(action, &QAction::triggered, this, [=]() {
         plot->setColorMap(new GrayScaleColorMap());
     });
 
     action = new QAction("Black Blue White");
     LUTMenu->addAction(action);
-    connect(action, &QAction::triggered, this, [ = ](){
+    connect(action, &QAction::triggered, this, [=]() {
         plot->setColorMap(new BlueWhiteColorMap());
     });
 
     action = new QAction("Hi Low");
     LUTMenu->addAction(action);
-    connect(action, &QAction::triggered, this, [ = ](){
-        plot->setColorMap(new HiLowColorMap());
-    });
+    connect(action, &QAction::triggered, this, [=]() { plot->setColorMap(new HiLowColorMap()); });
 
     LUTMenu->addSeparator();
 
     if (LUTPath.isEmpty())
         return;
-    QDirIterator it(LUTPath,
-                    QStringList() << "*.lut",
-                    QDir::NoFilter, QDirIterator::Subdirectories);
+    QDirIterator it(LUTPath, QStringList() << "*.lut", QDir::NoFilter, QDirIterator::Subdirectories);
     QStringList sl;
     while (it.hasNext()) {
         sl << it.next();
@@ -290,11 +279,10 @@ void CameraDisplay::setupLUTmenu()
     while (sli.hasNext()) {
         QString path = sli.next();
         QString name = path;
-        QAction *action = new QAction(name.remove(LUTPath)
-                                      .remove(QRegularExpression("\\.lut$")));
+        QAction *action = new QAction(name.remove(LUTPath).remove(QRegularExpression("\\.lut$")));
         LUTMenu->addAction(action);
 
-        connect(action, &QAction::triggered, this, [ = ](){
+        connect(action, &QAction::triggered, this, [=]() {
             plot->setColorMap(new IJLUTColorMap(path));
         });
     }

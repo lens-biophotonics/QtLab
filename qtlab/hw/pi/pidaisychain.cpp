@@ -1,5 +1,5 @@
-#include <stdexcept>
 #include <memory>
+#include <stdexcept>
 
 #include <QMap>
 
@@ -7,17 +7,16 @@
 #include <windows.h>
 #endif
 
-#include <PI_GCS2_DLL.h>
-
 #include <qtlab/hw/pi/pidaisychain.h>
 
+#include <PI_GCS2_DLL.h>
 
 static QMap<QString, PIDaisyChain *> dcMap;
 
-
-PIDaisyChain::PIDaisyChain(QObject *parent) : QObject(parent), id(-1)
-{
-}
+PIDaisyChain::PIDaisyChain(QObject *parent)
+    : QObject(parent)
+    , id(-1)
+{}
 
 PIDaisyChain::~PIDaisyChain()
 {
@@ -29,7 +28,10 @@ void PIDaisyChain::open(const QString &serialPortName, const int baud)
     std::unique_ptr<char[]> buf(new char[1024]);
 #ifdef Q_OS_UNIX
     id = PI_OpenRS232DaisyChainByDevName(serialPortName.toStdString().c_str(),
-                                         baud, &_nOfDevices, buf.get(), 1024);
+                                         baud,
+                                         &_nOfDevices,
+                                         buf.get(),
+                                         1024);
 #endif
 #ifdef Q_OS_WIN
     bool ok;
@@ -81,8 +83,7 @@ PIDaisyChain *openDaisyChain(const QString &portName, const int baud)
         dc = new PIDaisyChain();
         dc->open(portName, baud);
         dcMap[portName] = dc;
-    }
-    else {
+    } else {
         dc = it.value();
     }
     return dc;

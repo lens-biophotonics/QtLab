@@ -1,11 +1,10 @@
 #ifndef PIXMAPWIDGET_H
 #define PIXMAPWIDGET_H
 
-#include <QWidget>
-#include <QPushButton>
-
 #include <qtlab/widgets/aspectratiowidget.h>
 
+#include <QPushButton>
+#include <QWidget>
 
 /**
  * @brief The PixmapWidget class displays a pixmap with some visualization
@@ -44,7 +43,6 @@ private:
     QPushButton *rotateCCWPushButton = new QPushButton();
 
     void setupUi();
-
 };
 
 #endif // PIXMAPWIDGET_H

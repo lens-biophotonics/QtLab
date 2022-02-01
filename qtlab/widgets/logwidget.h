@@ -1,8 +1,8 @@
 #ifndef LOGWIDGET_H
 #define LOGWIDGET_H
 
-#include <QWidget>
 #include <QTextEdit>
+#include <QWidget>
 
 class LogWidget : public QWidget
 {

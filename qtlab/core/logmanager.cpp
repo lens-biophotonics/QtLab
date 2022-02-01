@@ -47,8 +47,7 @@ Logger *LogManager::getLogger(QString name)
     if (it == logMap.end()) {
         logger = new Logger(name);
         logMap[name] = logger;
-    }
-    else {
+    } else {
         logger = it.value();
     }
     return logger;

@@ -1,8 +1,8 @@
 #ifndef PIDAISYCHAIN_H
 #define PIDAISYCHAIN_H
 
-#include <QObject>
 #include <QList>
+#include <QObject>
 
 class PIDaisyChain : public QObject
 {

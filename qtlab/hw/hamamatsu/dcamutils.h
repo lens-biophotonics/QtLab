@@ -7,7 +7,8 @@ namespace DCAM {
 #include <dcamapi4.h>
 #include <dcamprop.h>
 
-struct ModelInfo {
+struct ModelInfo
+{
     QString vendor;
     QString model;
     QString bus;
@@ -25,6 +26,6 @@ QString getDevString(const HDCAM index, const int32_t iString);
 ModelInfo *getModelInfo(const size_t index);
 
 size_t getCameraIndex(const QString idStr);
-}
+} // namespace DCAM
 
 #endif // DCAMUTILS_H

@@ -1,19 +1,18 @@
+#include "pipositioncontrolwidget.h"
+
 #include <stdexcept>
 
-#include <QPushButton>
-#include <QMessageBox>
+#include <qtlab/hw/pi/pidevice.h>
+#include <qtlab/widgets/customspinbox.h>
+
 #include <QLabel>
+#include <QMessageBox>
+#include <QPushButton>
 #include <QState>
 #include <QTimer>
 
-#include <qtlab/hw/pi/pidevice.h>
-
-#include <qtlab/widgets/customspinbox.h>
-
-#include "pipositioncontrolwidget.h"
-
-PIPositionControlWidget::PIPositionControlWidget(QWidget *parent) :
-    QWidget(parent)
+PIPositionControlWidget::PIPositionControlWidget(QWidget *parent)
+    : QWidget(parent)
 {
     setupUI();
 }
@@ -82,8 +81,9 @@ DoubleSpinBox *PIPositionControlWidget::getPositionSpinbox(int i) const
     return positionSpinboxList.at(i);
 }
 
-void PIPositionControlWidget::appendRow(
-    PIDevice *device, const QString &axis, const QString &axisName)
+void PIPositionControlWidget::appendRow(PIDevice *device,
+                                        const QString &axis,
+                                        const QString &axisName)
 {
     int col = 0;
     grid->addWidget(new QLabel(axisName.isNull() ? device->getVerboseName() : axisName), row, col++);
@@ -160,17 +160,16 @@ void PIPositionControlWidget::appendRow(
         velocitySpinBox,
     };
 
-    for (QWidget * w : wList) {
+    for (QWidget *w : wList) {
         cs->assignProperty(w, "enabled", true);
         ds->assignProperty(w, "enabled", false);
     }
 
-    connect(haltPushButton, &QPushButton::clicked, this, [ = ](){
+    connect(haltPushButton, &QPushButton::clicked, this, [=]() {
         try {
             device->halt(axis);
             device->getError();
-        }
-        catch (std::runtime_error e) {
+        } catch (std::runtime_error e) {
             QMessageBox::critical(nullptr, "Error", e.what());
         }
     });
@@ -184,8 +183,7 @@ void PIPositionControlWidget::appendRow(
         SETVELOCITY,
     };
 
-    std::function<void(const enum ACTION)> performAction
-        = [ = ](const enum ACTION a){
+    std::function<void(const enum ACTION)> performAction = [=](const enum ACTION a) {
         double pos = positionSpinbox->value();
         double vel = velocitySpinBox->value();
         double stepSize = stepSpinBox->value();
@@ -227,40 +225,29 @@ void PIPositionControlWidget::appendRow(
             case SETVELOCITY:
                 break;
             }
-        }
-        catch (std::runtime_error e) {
+        } catch (std::runtime_error e) {
             QMessageBox::critical(nullptr, "Error", e.what());
         }
-        };
+    };
 
-    connect(positionSpinbox, &DoubleSpinBox::returnPressed, this, [ = ](){
-        performAction(MOVE);
-    });
+    connect(positionSpinbox, &DoubleSpinBox::returnPressed, this, [=]() { performAction(MOVE); });
 
-    connect(negEndPushButton, &QPushButton::clicked, this, [ = ](){
-        performAction(NEGEND);
-    });
+    connect(negEndPushButton, &QPushButton::clicked, this, [=]() { performAction(NEGEND); });
 
-    connect(stepDownPushButton, &QPushButton::clicked, this, [ = ](){
-        performAction(STEPDOWN);
-    });
+    connect(stepDownPushButton, &QPushButton::clicked, this, [=]() { performAction(STEPDOWN); });
 
-    connect(stepUpPushButton, &QPushButton::clicked, this, [ = ](){
-        performAction(STEPUP);
-    });
+    connect(stepUpPushButton, &QPushButton::clicked, this, [=]() { performAction(STEPUP); });
 
-    connect(posEndPushButton, &QPushButton::clicked, this, [ = ](){
-        performAction(POSEND);
-    });
+    connect(posEndPushButton, &QPushButton::clicked, this, [=]() { performAction(POSEND); });
 
-    connect(velocitySpinBox, &DoubleSpinBox::returnPressed, this, [ = ](){
+    connect(velocitySpinBox, &DoubleSpinBox::returnPressed, this, [=]() {
         performAction(SETVELOCITY);
     });
 
     QTimer *updateTimer = new QTimer(this);
     updateTimer->setInterval(500);
 
-    connect(updateTimer, &QTimer::timeout, this, [ = ]() {
+    connect(updateTimer, &QTimer::timeout, this, [=]() {
         try {
             double pos = device->getCurrentPosition(axis).at(0);
             currentPos->setText(QString("%1").arg(pos, 0, 'f', 3));
@@ -269,18 +256,23 @@ void PIPositionControlWidget::appendRow(
             } else {
                 currentPos->setStyleSheet("");
             }
+        } catch (std::runtime_error e) {
         }
-        catch (std::runtime_error e) {}
     });
 
-    connect(device, &PIDevice::connected, this, [ = ](){
-        double min = device->getTravelRangeLowEnd(axis).at(0);
-        double max = device->getTravelRangeHighEnd(axis).at(0);
+    connect(
+        device,
+        &PIDevice::connected,
+        this,
+        [=]() {
+            double min = device->getTravelRangeLowEnd(axis).at(0);
+            double max = device->getTravelRangeHighEnd(axis).at(0);
 
-        positionSpinbox->setRange(min, max);
+            positionSpinbox->setRange(min, max);
 
-        updateTimer->start();
-    }, Qt::QueuedConnection);
+            updateTimer->start();
+        },
+        Qt::QueuedConnection);
 
     connect(device, &PIDevice::disconnected, updateTimer, &QTimer::stop);
 }

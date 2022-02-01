@@ -1,17 +1,17 @@
 #include <stdexcept>
 
+#include <qtlab/core/logger.h>
+#include <qtlab/hw/serial/serialport.h>
+
 #include <QSerialPortInfo>
 #include <QStateMachine>
 #include <QTime>
 
-#include <qtlab/core/logger.h>
-
-#include <qtlab/hw/serial/serialport.h>
-
-#define RUNTIME_ERROR(what) {                                               \
-        logger->critical(what);                                             \
-        throw std::runtime_error(what);                                     \
-}                                                                           \
+#define RUNTIME_ERROR(what) \
+    { \
+        logger->critical(what); \
+        throw std::runtime_error(what); \
+    }
 
 static Logger *logger = getLogger("SerialPort");
 
@@ -282,7 +282,8 @@ void SerialPort::setPortBySerialNumber(const QString &serialNumber)
     }
     setPort(pi);
     logger->info(QString("Found serial number %1 on %2")
-                 .arg(portInfo().serialNumber()).arg(portInfo().portName()));
+                     .arg(portInfo().serialNumber())
+                     .arg(portInfo().portName()));
 }
 
 QStringList SerialPort::getLineEndTermination()

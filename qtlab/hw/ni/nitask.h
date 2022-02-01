@@ -22,38 +22,38 @@
  */
 
 #ifdef WITH_HARDWARE
-#define DAQmxErrChk(functionCall) {                                         \
-        int ret = functionCall;                                             \
-        if (DAQmxFailed(ret)) {                                             \
-            onError(ret);                                                   \
-        }                                                                   \
-        if (!task) {                                                        \
-            throw NITaskError(-1, "Task not initialized");                  \
-        }                                                                   \
-}
+#define DAQmxErrChk(functionCall) \
+    { \
+        int ret = functionCall; \
+        if (DAQmxFailed(ret)) { \
+            onError(ret); \
+        } \
+        if (!task) { \
+            throw NITaskError(-1, "Task not initialized"); \
+        } \
+    }
 #else
 #define DAQmxErrChk
 #endif
 
+#include <qtlab/hw/ni/natinst.h>
+
 #include <QObject>
 
 #include "qtlab-hw-ni_export.h"
-#include <qtlab/hw/ni/natinst.h>
 
 using namespace NI;
 
 class NITaskError : public std::runtime_error
 {
 public:
-    explicit NITaskError(int32 errCode, std::string err) : std::runtime_error(err)
+    explicit NITaskError(int32 errCode, std::string err)
+        : std::runtime_error(err)
     {
         _errCode = errCode;
     };
 
-    int32 errCode() const
-    {
-        return _errCode;
-    }
+    int32 errCode() const { return _errCode; }
 
 private:
     int32 _errCode;
@@ -163,11 +163,11 @@ signals:
     void stopped();
 
 protected:
-    [[ noreturn ]] void onError(int32 ret) const;
+    [[noreturn]] void onError(int32 ret) const;
     virtual void initializeTask_impl();
-    virtual void configureChannels_impl() {};
-    virtual void configureTiming_impl() {};
-    virtual void configureTriggering_impl() {};
+    virtual void configureChannels_impl(){};
+    virtual void configureTiming_impl(){};
+    virtual void configureTriggering_impl(){};
 
     TaskHandle task = nullptr;
     QStringList physicalChannels;

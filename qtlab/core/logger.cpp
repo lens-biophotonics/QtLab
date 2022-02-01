@@ -1,10 +1,10 @@
 #include <qtlab/core/logger.h>
 #include <qtlab/core/logmanager.h>
 
-
-Logger::Logger(QString name) : QObject(nullptr), name(name)
-{
-}
+Logger::Logger(QString name)
+    : QObject(nullptr)
+    , name(name)
+{}
 
 void Logger::_msg(QString str, QtMsgType type) const
 {

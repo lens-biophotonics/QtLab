@@ -1,10 +1,10 @@
 #ifndef PIPOSITIONCONTROLWIDGET_H
 #define PIPOSITIONCONTROLWIDGET_H
 
-#include <QWidget>
+#include <QDoubleSpinBox>
 #include <QGridLayout>
 #include <QGroupBox>
-#include <QDoubleSpinBox>
+#include <QWidget>
 
 class PIDevice;
 class DoubleSpinBox;
@@ -31,9 +31,9 @@ private:
     QGridLayout *grid;
     QGroupBox *gb;
 
-    QList<DoubleSpinBox*> positionSpinboxList;
-    QList<DoubleSpinBox*> velocitySpinBoxList;
-    QList<QDoubleSpinBox*> stepSpinBoxList;
+    QList<DoubleSpinBox *> positionSpinboxList;
+    QList<DoubleSpinBox *> velocitySpinBoxList;
+    QList<QDoubleSpinBox *> stepSpinBoxList;
 };
 
 #endif // PIPOSITIONCONTROLWIDGET_H

@@ -3,8 +3,9 @@
 
 #define FILTERWHEEL_MOTION_TIME 3000
 
-#include <QObject>
 #include <qtlab/hw/serial/serialdevice.h>
+
+#include <QObject>
 
 class FilterWheel : public SerialDevice
 {

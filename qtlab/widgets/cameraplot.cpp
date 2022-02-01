@@ -1,17 +1,18 @@
-#include <qwt_scale_engine.h>
-#include <qwt_scale_widget.h>
-
 #include "cameraplot.h"
 
 #include "colormaps.h"
 
+#include <qwt_scale_engine.h>
+#include <qwt_scale_widget.h>
 
-CameraPlot::CameraPlot(QWidget *parent) : QwtPlot(parent)
+CameraPlot::CameraPlot(QWidget *parent)
+    : QwtPlot(parent)
 {
     setup();
 }
 
-CameraPlot::CameraPlot(uint nRows, uint nCols, QWidget *parent) : QwtPlot(parent)
+CameraPlot::CameraPlot(uint nRows, uint nCols, QWidget *parent)
+    : QwtPlot(parent)
 {
     setup();
     setPlotSize(nRows, nCols);
@@ -89,8 +90,7 @@ void CameraPlot::_autoscale()
     for (const double val : vec) {
         if (val > max) {
             max = val;
-        }
-        else if (val < min) {
+        } else if (val < min) {
             min = val;
         }
     }
@@ -106,8 +106,7 @@ void CameraPlot::replot()
     QwtPlot::replot();
 }
 
-void CameraPlot::setInterval(const Qt::Axis axis, const double min,
-                             const double max)
+void CameraPlot::setInterval(const Qt::Axis axis, const double min, const double max)
 {
     ZInterval = QwtInterval(min, max);
     if (!ZInterval.isValid())

@@ -1,8 +1,9 @@
-#include <stdexcept>
-
 #include "serialdevice.h"
 
-SerialDevice::SerialDevice(QObject *parent) : QObject(parent)
+#include <stdexcept>
+
+SerialDevice::SerialDevice(QObject *parent)
+    : QObject(parent)
 {
     serial = new SerialPort(this);
 }
@@ -24,7 +25,7 @@ void SerialDevice::connect()
         msg = msg.arg(serial->portName());
         throw std::runtime_error(msg.toLatin1());
     } else {
-        serial->readAll();  // empty input buffer
+        serial->readAll(); // empty input buffer
         postConnect_impl();
         emit connected();
     }
@@ -51,6 +52,4 @@ SerialPort *SerialDevice::serialPort() const
  * The default implementation does nothing.
  */
 
-void SerialDevice::postConnect_impl()
-{
-}
+void SerialDevice::postConnect_impl() {}

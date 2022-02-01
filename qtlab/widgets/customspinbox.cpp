@@ -1,18 +1,15 @@
-#include <QLineEdit>
-
 #include "customspinbox.h"
 
+#include <QLineEdit>
 
-SpinBox::SpinBox(QWidget *parent) : QSpinBox (parent)
+SpinBox::SpinBox(QWidget *parent)
+    : QSpinBox(parent)
 {
-    connect(lineEdit(), &QLineEdit::returnPressed, [ = ](){
-        emit returnPressed(value());
-    });
+    connect(lineEdit(), &QLineEdit::returnPressed, [=]() { emit returnPressed(value()); });
 }
 
-DoubleSpinBox::DoubleSpinBox(QWidget *parent) : QDoubleSpinBox (parent)
+DoubleSpinBox::DoubleSpinBox(QWidget *parent)
+    : QDoubleSpinBox(parent)
 {
-    connect(lineEdit(), &QLineEdit::returnPressed, [ = ](){
-        emit returnPressed(value());
-    });
+    connect(lineEdit(), &QLineEdit::returnPressed, [=]() { emit returnPressed(value()); });
 }

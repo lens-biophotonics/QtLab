@@ -1,21 +1,21 @@
+#include "picontrollersettingswidget.h"
+
 #include <stdexcept>
 
-#include <QGroupBox>
-#include <QGridLayout>
-#include <QPushButton>
-#include <QSerialPortInfo>
-#include <QFormLayout>
-#include <QDialogButtonBox>
-#include <QButtonGroup>
-#include <QRadioButton>
-#include <QState>
-#include <QMessageBox>
-#include <QListView>
-
-#include <qtlab/hw/pi/pidevice.h>
 #include <qtlab/core/logger.h>
+#include <qtlab/hw/pi/pidevice.h>
 
-#include "picontrollersettingswidget.h"
+#include <QButtonGroup>
+#include <QDialogButtonBox>
+#include <QFormLayout>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QListView>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QRadioButton>
+#include <QSerialPortInfo>
+#include <QState>
 
 typedef enum {
     REFACTION_DONT_REFERENCE = 0,
@@ -24,9 +24,9 @@ typedef enum {
     REFACTION_REF_SWITCH = 3,
 } REFERENCE_ACTION;
 
-PIControllerSettingsWidget::PIControllerSettingsWidget(
-    PIDevice *device,
-    QWidget *parent) : QWidget(parent), device(device)
+PIControllerSettingsWidget::PIControllerSettingsWidget(PIDevice *device, QWidget *parent)
+    : QWidget(parent)
+    , device(device)
 {
     setupUI();
     refreshValues();
@@ -47,8 +47,7 @@ void PIControllerSettingsWidget::configureStages()
         if (availStages.isEmpty()) {
             throw std::runtime_error("Cannot find stages");
         }
-    }
-    catch (std::runtime_error e) {
+    } catch (std::runtime_error e) {
         QMessageBox::critical(this, "Error", e.what());
         return;
     }
@@ -94,12 +93,11 @@ void PIControllerSettingsWidget::configureStages()
         bg->addButton(rb, REFACTION_REF_SWITCH);
         hLayout->addWidget(rb);
 
-        formLayout->addRow(new QLabel(QString("Axis %1").arg(axes.at(i))),
-                           hLayout);
+        formLayout->addRow(new QLabel(QString("Axis %1").arg(axes.at(i))), hLayout);
     }
 
-    QDialogButtonBox *buttonBox = new QDialogButtonBox(
-        QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Cancel
+                                                       | QDialogButtonBox::Ok);
 
     connect(buttonBox, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
     connect(buttonBox, &QDialogButtonBox::rejected, dialog, &QDialog::reject);
@@ -153,8 +151,7 @@ void PIControllerSettingsWidget::configureStages()
         device->fastMoveToPositiveLimit(posAxes);
         device->fastMoveToNegativeLimit(negAxes);
         device->fastMoveToReferenceSwitch(switchAxes);
-    }
-    catch (std::runtime_error e) {
+    } catch (std::runtime_error e) {
         QMessageBox::critical(this, "Error", e.what());
     }
 }
@@ -175,9 +172,9 @@ void PIControllerSettingsWidget::setupUI()
             continue;
         }
         QString descr = QString("%1 (%2, %3)")
-                        .arg(info.portName())
-                        .arg(info.description())
-                        .arg(info.serialNumber());
+                            .arg(info.portName())
+                            .arg(info.description())
+                            .arg(info.serialNumber());
         serialPortComboBox->addItem(descr, info.portName());
     }
 
@@ -230,8 +227,7 @@ void PIControllerSettingsWidget::setupUI()
     grid->addWidget(new QLabel("Stages"), row, 0, 1, 1);
     grid->addWidget(stagesLabel, row++, 1, 1, 1);
 
-    QPushButton *configureStagesPushButton =
-        new QPushButton("Configure stages...");
+    QPushButton *configureStagesPushButton = new QPushButton("Configure stages...");
     grid->addWidget(configureStagesPushButton, row++, 1, 1, 1);
 
     QPushButton *refreshPushButton = new QPushButton("Refresh");
@@ -246,18 +242,26 @@ void PIControllerSettingsWidget::setupUI()
 
     setLayout(vlayout);
 
-    connect(configureStagesPushButton, &QPushButton::clicked,
-            this, &PIControllerSettingsWidget::configureStages);
-    connect(refreshPushButton, &QPushButton::clicked,
-            this, &PIControllerSettingsWidget::refreshValues);
+    connect(configureStagesPushButton,
+            &QPushButton::clicked,
+            this,
+            &PIControllerSettingsWidget::configureStages);
+    connect(refreshPushButton,
+            &QPushButton::clicked,
+            this,
+            &PIControllerSettingsWidget::refreshValues);
 
-    connect(connectPushButton, &QPushButton::clicked,
-            this, &PIControllerSettingsWidget::connectDevice);
-    connect(disconnectPushButton, &QPushButton::clicked,
-            device, &PIDevice::close);
+    connect(connectPushButton,
+            &QPushButton::clicked,
+            this,
+            &PIControllerSettingsWidget::connectDevice);
+    connect(disconnectPushButton, &QPushButton::clicked, device, &PIDevice::close);
 
-    connect(device, &PIDevice::connected, this,
-            &PIControllerSettingsWidget::refreshValues, Qt::QueuedConnection);
+    connect(device,
+            &PIDevice::connected,
+            this,
+            &PIControllerSettingsWidget::refreshValues,
+            Qt::QueuedConnection);
 
     QState *cs = device->getConnectedState();
     QState *ds = device->getDisconnectedState();
@@ -271,7 +275,7 @@ void PIControllerSettingsWidget::setupUI()
         disconnectPushButton,
     };
 
-    for (QWidget * w : wList) {
+    for (QWidget *w : wList) {
         cs->assignProperty(w, "enabled", true);
         ds->assignProperty(w, "enabled", false);
     }
@@ -284,7 +288,7 @@ void PIControllerSettingsWidget::setupUI()
         baudComboBox,
     };
 
-    for (QWidget * w : wList) {
+    for (QWidget *w : wList) {
         cs->assignProperty(w, "enabled", false);
         ds->assignProperty(w, "enabled", true);
     }
@@ -332,8 +336,7 @@ void PIControllerSettingsWidget::connectDevice()
         device->setDeviceNumber(deviceNumberSpinBox->value());
         device->setBaud(baud);
         device->connectDevice();
-    }
-    catch (std::runtime_error e) {
+    } catch (std::runtime_error e) {
         QMessageBox::critical(this, "Runtime error", e.what());
     }
 }

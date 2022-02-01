@@ -1,5 +1,5 @@
-#include <qtlab/hw/ni/nitask.h>
 #include <qtlab/core/logger.h>
+#include <qtlab/hw/ni/nitask.h>
 
 using namespace NI;
 
@@ -7,7 +7,8 @@ static Logger *logger = getLogger("NI");
 
 #define ERRBUF_SIZE 2048
 
-NITask::NITask(QObject *parent) : QObject(parent)
+NITask::NITask(QObject *parent)
+    : QObject(parent)
 {
     errBuff = new char[ERRBUF_SIZE];
 }

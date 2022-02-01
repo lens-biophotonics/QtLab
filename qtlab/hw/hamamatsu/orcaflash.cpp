@@ -1,22 +1,22 @@
 #include <stdexcept>
 
-#include <QStateMachine>
-#include <QMutexLocker>
-
-#include <qtlab/hw/hamamatsu/orcaflash.h>
 #include <qtlab/core/logger.h>
+#include <qtlab/hw/hamamatsu/orcaflash.h>
 
-#define FUNCNAME(x) # x
+#include <QMutexLocker>
+#include <QStateMachine>
+
+#define FUNCNAME(x) #x
 #ifndef QTLAB_DCAM_DEMO
 
-#define CALL_THROW(functionCall)                                            \
-    {                                                                       \
-        DCAM::DCAMERR err;                                                  \
-        {                                                                   \
-            QMutexLocker ml(&mutex);                                        \
-            err = functionCall;                                             \
-        }                                                                   \
-        throwError(err);                                                    \
+#define CALL_THROW(functionCall) \
+    { \
+        DCAM::DCAMERR err; \
+        { \
+            QMutexLocker ml(&mutex); \
+            err = functionCall; \
+        } \
+        throwError(err); \
     }
 #else
 #define CALL_THROW(func)
@@ -26,8 +26,10 @@ static Logger *logger = getLogger("OrcaFlash");
 
 using namespace DCAM;
 
-#define EXCEPTION_CONSTRUCTOR(name)                                         \
-    OrcaFlash::name::name() : std::runtime_error(FUNCNAME(name)) {}
+#define EXCEPTION_CONSTRUCTOR(name) \
+    OrcaFlash::name::name() \
+        : std::runtime_error(FUNCNAME(name)) \
+    {}
 
 EXCEPTION_CONSTRUCTOR(OrcaBusyException)
 EXCEPTION_CONSTRUCTOR(OrcaNotReadyException)
@@ -35,8 +37,8 @@ EXCEPTION_CONSTRUCTOR(OrcaNotStableException)
 EXCEPTION_CONSTRUCTOR(OrcaUnstableException)
 EXCEPTION_CONSTRUCTOR(OrcaNotBusyException)
 
-
-OrcaFlash::OrcaFlash(QObject *parent) : QObject(parent)
+OrcaFlash::OrcaFlash(QObject *parent)
+    : QObject(parent)
 {
     _isOpen = false;
     setNFramesInBuffer(10);
@@ -143,7 +145,8 @@ void OrcaFlash::logInfo()
     }
     logger->info(msg);
 
-    int32 framestampProducer = static_cast<int32_t>(getPropertyValue(DCAM_IDPROP_FRAMESTAMP_PRODUCER));
+    int32 framestampProducer = static_cast<int32_t>(
+        getPropertyValue(DCAM_IDPROP_FRAMESTAMP_PRODUCER));
     msg = "FRAMESTAMP is produced from ";
     switch (framestampProducer) {
     case DCAMPROP_FRAMESTAMP_PRODUCER__NONE:
@@ -176,7 +179,7 @@ void OrcaFlash::open(const int index)
     }
 
     DCAMDEV_OPEN param;
-    memset (&param, 0, sizeof(param));
+    memset(&param, 0, sizeof(param));
 
     param.index = index;
     param.size = sizeof(param);
@@ -262,10 +265,10 @@ double OrcaFlash::getLineInterval()
 #endif
 }
 
-void OrcaFlash::setOutputTrigger(
-    const OrcaFlash::ORCA_OUTPUT_TRIGGER_KIND kind,
-    const OrcaFlash::ORCA_OUTPUT_TRIGGER_SOURCE source,
-    const double polarity, const double period)
+void OrcaFlash::setOutputTrigger(const OrcaFlash::ORCA_OUTPUT_TRIGGER_KIND kind,
+                                 const OrcaFlash::ORCA_OUTPUT_TRIGGER_SOURCE source,
+                                 const double polarity,
+                                 const double period)
 {
     setPropertyValue(DCAM_IDPROP_OUTPUTTRIGGER_KIND, kind);
     setPropertyValue(DCAM_IDPROP_OUTPUTTRIGGER_SOURCE, source);
@@ -307,17 +310,19 @@ void OrcaFlash::startCapture()
     emit captureStarted();
 }
 
-void OrcaFlash::copyFrame(void * const buf, const size_t n,
-                          const int32_t frame, int32_t *frameStamp,
+void OrcaFlash::copyFrame(void *const buf,
+                          const size_t n,
+                          const int32_t frame,
+                          int32_t *frameStamp,
                           DCAM_TIMESTAMP *timestamp)
 {
 #ifdef QTLAB_DCAM_DEMO
     Q_UNUSED(frame)
     Q_UNUSED(frameStamp)
     Q_UNUSED(timestamp)
-    int k = n / (sizeof (int) * 64);
+    int k = n / (sizeof(int) * 64);
 
-    char *p = (char *)buf;
+    char *p = (char *) buf;
 
     size_t b = n / k;
     size_t tot = 0;
@@ -339,8 +344,7 @@ void OrcaFlash::copyFrame(void * const buf, const size_t n,
     dcamframe.buf = buf;
     dcamframe.width = getImageWidth();
     dcamframe.height = getImageHeight();
-    dcamframe.rowbytes = static_cast<int32_t>(
-        getPropertyValue(DCAM_IDPROP_IMAGE_ROWBYTES));
+    dcamframe.rowbytes = static_cast<int32_t>(getPropertyValue(DCAM_IDPROP_IMAGE_ROWBYTES));
     dcamframe.left = 0;
     dcamframe.top = 0;
 
@@ -356,7 +360,9 @@ void OrcaFlash::copyFrame(void * const buf, const size_t n,
 #endif
 }
 
-void OrcaFlash::lockFrame(const int32_t frame, void **buf, int32_t *frameStamp,
+void OrcaFlash::lockFrame(const int32_t frame,
+                          void **buf,
+                          int32_t *frameStamp,
                           DCAM_TIMESTAMP *timestamp)
 {
     DCAMBUF_FRAME dcamframe;
@@ -367,8 +373,7 @@ void OrcaFlash::lockFrame(const int32_t frame, void **buf, int32_t *frameStamp,
 
     dcamframe.width = getImageWidth();
     dcamframe.height = getImageHeight();
-    dcamframe.rowbytes = static_cast<int32_t>(
-        getPropertyValue(DCAM_IDPROP_IMAGE_ROWBYTES));
+    dcamframe.rowbytes = static_cast<int32_t>(getPropertyValue(DCAM_IDPROP_IMAGE_ROWBYTES));
     dcamframe.left = 0;
     dcamframe.top = 0;
 
@@ -397,9 +402,9 @@ void OrcaFlash::lockFrame(DCAMBUF_FRAME *dcambufFrame)
     int rowBytes = 2048 * 2;
     int n = rowBytes * dcambufFrame->height;
 
-    int k = n / (sizeof (int) * 64);
+    int k = n / (sizeof(int) * 64);
 
-    char *p = (char *)dcambufFrame->buf;
+    char *p = (char *) dcambufFrame->buf;
 
     size_t b = n / k;
     size_t tot = 0;
@@ -416,7 +421,7 @@ void OrcaFlash::lockFrame(DCAMBUF_FRAME *dcambufFrame)
     CALL_THROW(dcambuf_lockframe(h, dcambufFrame));
 }
 
-void OrcaFlash::copyLastFrame(void * const buf, const size_t n)
+void OrcaFlash::copyLastFrame(void *const buf, const size_t n)
 {
     copyFrame(buf, n, -1, nullptr, nullptr);
 }
@@ -486,8 +491,7 @@ void OrcaFlash::setExposureTime(const double sec)
 
 OrcaFlash::ORCA_TRIGGER_MODE OrcaFlash::getTriggerMode()
 {
-    return static_cast<ORCA_TRIGGER_MODE>(
-        getPropertyValue(DCAM_IDPROP_TRIGGER_MODE));
+    return static_cast<ORCA_TRIGGER_MODE>(getPropertyValue(DCAM_IDPROP_TRIGGER_MODE));
 }
 
 void OrcaFlash::setTriggerMode(const ORCA_TRIGGER_MODE mode)
@@ -502,12 +506,10 @@ void OrcaFlash::setTriggerSource(const OrcaFlash::ORCA_TRIGGERSOURCE source)
 
 OrcaFlash::ORCA_TRIGGER_POLARITY OrcaFlash::getTriggerPolarity()
 {
-    return static_cast<ORCA_TRIGGER_POLARITY>(
-        getPropertyValue(DCAM_IDPROP_TRIGGERPOLARITY));
+    return static_cast<ORCA_TRIGGER_POLARITY>(getPropertyValue(DCAM_IDPROP_TRIGGERPOLARITY));
 }
 
-void OrcaFlash::setTriggerPolarity(
-    const OrcaFlash::ORCA_TRIGGER_POLARITY polarity)
+void OrcaFlash::setTriggerPolarity(const OrcaFlash::ORCA_TRIGGER_POLARITY polarity)
 {
     setPropertyValue(DCAM_IDPROP_TRIGGERPOLARITY, polarity);
 }

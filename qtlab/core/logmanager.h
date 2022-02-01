@@ -1,11 +1,12 @@
 #ifndef LOGMANAGER_H
 #define LOGMANAGER_H
 
-#include <QMap>
-#include <QObject>
-#include <QMutex>
-
 #include <qtlab/core/logger.h>
+
+#include <QMap>
+#include <QMutex>
+#include <QObject>
+
 #include "qtlab-core_export.h"
 
 /**
@@ -41,6 +42,6 @@ private:
     void appendMessage(Logger::Message msg);
 };
 
-LogManager& logManager();
+LogManager &logManager();
 
 #endif // LOGMANAGER_H

@@ -1,13 +1,14 @@
-#include <qtlab/hw/ni/natinst.h>
 #include <qtlab/core/logger.h>
+#include <qtlab/hw/ni/natinst.h>
 
 #ifdef WITH_HARDWARE
-#define DAQmxErrChk(functionCall) {                                         \
-        int ret = functionCall;                                             \
-        if (DAQmxFailed(ret)) {                                             \
-            logger->critical(QString("Error %1").arg(ret));                 \
-        }                                                                   \
-}
+#define DAQmxErrChk(functionCall) \
+    { \
+        int ret = functionCall; \
+        if (DAQmxFailed(ret)) { \
+            logger->critical(QString("Error %1").arg(ret)); \
+        } \
+    }
 #else
 #define DAQmxErrChk
 #endif
@@ -16,7 +17,7 @@ using namespace NI;
 
 static Logger *logger = getLogger("NI");
 
-typedef int32 (*daqmx_f_ptr)(const char*, char*, uInt32);
+typedef int32 (*daqmx_f_ptr)(const char *, char *, uInt32);
 
 // used by coccinelle wrappers
 static QStringList getList(daqmx_f_ptr myfp)
@@ -43,10 +44,16 @@ static QStringList getList(daqmx_f_ptr myfp)
 
 #ifndef WITH_HARDWARE
 extern "C" {
-int32 __CFUNC     DAQmxLoadTask (const char taskName[], TaskHandle *taskHandle) {return 0;};
-int32 __CFUNC     DAQmxCreateTask (const char taskName[], TaskHandle *taskHandle) {return 0;};
-#include "NIDAQmx_task_dummy.cpp"
+int32 __CFUNC DAQmxLoadTask(const char taskName[], TaskHandle *taskHandle)
+{
+    return 0;
+};
+int32 __CFUNC DAQmxCreateTask(const char taskName[], TaskHandle *taskHandle)
+{
+    return 0;
+};
 #include "NIDAQmx_ni_dummy.cpp"
+#include "NIDAQmx_task_dummy.cpp"
 }
 #endif
 
@@ -66,10 +73,12 @@ int32 __CFUNC     DAQmxCreateTask (const char taskName[], TaskHandle *taskHandle
 QString NI::PFI2Line(QString term)
 {
     int idx = term.indexOf("PFI");
-    if (idx == -1 || !term.startsWith("/")) return QString();
+    if (idx == -1 || !term.startsWith("/"))
+        return QString();
     bool ok = false;
     int pfi = term.mid(idx + 3).toInt(&ok);
-    if (!ok) return QString();
+    if (!ok)
+        return QString();
     int port = pfi / 8 + 1;
     int line = pfi % 8;
     term.truncate(idx);
@@ -79,7 +88,7 @@ QString NI::PFI2Line(QString term)
 QString NI::getVersion()
 {
     return QString("%1.%2.%3")
-           .arg(getSysNIDAQMajorVersion())
-           .arg(getSysNIDAQMinorVersion())
-           .arg(getSysNIDAQUpdateVersion());
+        .arg(getSysNIDAQMajorVersion())
+        .arg(getSysNIDAQMinorVersion())
+        .arg(getSysNIDAQUpdateVersion());
 }

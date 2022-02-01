@@ -1,9 +1,9 @@
 #ifndef SERIALPORT_H
 #define SERIALPORT_H
 
+#include <QMutex>
 #include <QSerialPort>
 #include <QState>
-#include <QMutex>
 
 class SerialPort : public QSerialPort
 {

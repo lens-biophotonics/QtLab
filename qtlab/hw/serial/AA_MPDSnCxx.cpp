@@ -1,12 +1,13 @@
-#include <QStringList>
-#include <QRegularExpression>
-#include <QThread>
-
 #include "AA_MPDSnCxx.h"
+
 #include "serialport.h"
 
+#include <QRegularExpression>
+#include <QStringList>
+#include <QThread>
 
-AA_MPDSnCxx::AA_MPDSnCxx(QObject *parent) : SerialDevice(parent)
+AA_MPDSnCxx::AA_MPDSnCxx(QObject *parent)
+    : SerialDevice(parent)
 {
     serial->setBaudRate(57600);
     serial->setTimeout(200);
@@ -230,7 +231,7 @@ int AA_MPDSnCxx::getNChannels() const
 
 void AA_MPDSnCxx::setExternalModeEnabled(bool enable)
 {
-    _transceive(QString("i%1\r").arg(enable ? "1" : "0"), "?");  // sic
+    _transceive(QString("i%1\r").arg(enable ? "1" : "0"), "?"); // sic
     if (mpdsVersion == MPDS_VERSION_8) {
         getStatus();
     } else {
@@ -366,7 +367,7 @@ int AA_MPDSnCxx::stepProfileDown()
 
 void AA_MPDSnCxx::setBlanking(bool enableOutput, bool enableExternal, bool store)
 {
-    QString s = QString("L0I%1O%2\r").arg((int)(!enableExternal)).arg((int)enableOutput);
+    QString s = QString("L0I%1O%2\r").arg((int) (!enableExternal)).arg((int) enableOutput);
     if (store) {
         s += "E";
     }
@@ -410,14 +411,17 @@ void AA_MPDSnCxx::parseStatusLine(const QString &s)
     bool ok;
     int count = 0;
     int c = 1;
-    int line = match.captured(c++).toInt(&ok); count += ok;
+    int line = match.captured(c++).toInt(&ok);
+    count += ok;
 
     if (line >= nChannels) {
         return;
     }
 
-    double freq = match.captured(c++).toDouble(&ok); count += ok;
-    double pow_dBm = match.captured(c++).toDouble(&ok); count += ok;
+    double freq = match.captured(c++).toDouble(&ok);
+    count += ok;
+    double pow_dBm = match.captured(c++).toDouble(&ok);
+    count += ok;
     if (count != 3) {
         throw std::runtime_error(("Cannot parse string: " + s).toStdString());
     }

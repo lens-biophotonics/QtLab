@@ -1,12 +1,12 @@
-#include <QFile>
-#include <QDataStream>
-#include <QRegularExpression>
-#include <QVector>
-#include <QTextStream>
+#include "colormaps.h"
 
 #include <qwt_interval.h>
 
-#include "colormaps.h"
+#include <QDataStream>
+#include <QFile>
+#include <QRegularExpression>
+#include <QTextStream>
+#include <QVector>
 
 QwtLinearColorMap *copyColorMap(const QwtLinearColorMap *colorMap)
 {
@@ -23,21 +23,18 @@ QwtLinearColorMap *copyColorMap(const QwtLinearColorMap *colorMap)
     return cm;
 }
 
+GrayScaleColorMap::GrayScaleColorMap()
+    : QwtLinearColorMap(Qt::black, Qt::white)
+{}
 
-GrayScaleColorMap::GrayScaleColorMap() :
-    QwtLinearColorMap (Qt::black, Qt::white)
-{
-}
-
-
-BlueWhiteColorMap::BlueWhiteColorMap() :
-    QwtLinearColorMap (Qt::black, Qt::white)
+BlueWhiteColorMap::BlueWhiteColorMap()
+    : QwtLinearColorMap(Qt::black, Qt::white)
 {
     addColorStop(0.5, Qt::blue);
 }
 
-HiLowColorMap::HiLowColorMap() :
-    QwtLinearColorMap (Qt::blue, Qt::red)
+HiLowColorMap::HiLowColorMap()
+    : QwtLinearColorMap(Qt::blue, Qt::red)
 {
     addColorStop(1. / 256, Qt::black);
     addColorStop(1 - 1. / 256, Qt::white);
@@ -48,8 +45,8 @@ HiLowColorMap::HiLowColorMap() :
  * @param fname
  */
 
-IJLUTColorMap::IJLUTColorMap(QString fname) :
-    QwtLinearColorMap ()
+IJLUTColorMap::IJLUTColorMap(QString fname)
+    : QwtLinearColorMap()
 {
     QFile file(fname);
     if (!file.open(QIODevice::ReadOnly))
@@ -68,16 +65,15 @@ IJLUTColorMap::IJLUTColorMap(QString fname) :
     if (length > 768) {
         QDataStream in(&file);
         int icol = 0;
-        file.read(reinterpret_cast<char*>(&icol), 4);
-        if (icol == 1280262985) {  // ICOL (NIH Image LUT Header)
+        file.read(reinterpret_cast<char *>(&icol), 4);
+        if (icol == 1280262985) { // ICOL (NIH Image LUT Header)
             quint16 dummy;
             in >> dummy;
             in >> ncolors;
             file.seek(0x20);
             ok = true;
         }
-    }
-    else if (length == 768 || length == 970) {
+    } else if (length == 768 || length == 970) {
         ncolors = 256;
         file.seek(0);
         ok = true;
@@ -89,7 +85,7 @@ IJLUTColorMap::IJLUTColorMap(QString fname) :
         blues = file.read(ncolors);
     }
 
-    if (!ok) {  // Read text LUT
+    if (!ok) { // Read text LUT
         file.seek(0);
         QTextStream in(&file);
         QStringList allLines = in.readAll().split('\n');

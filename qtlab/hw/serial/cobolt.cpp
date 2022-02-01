@@ -1,12 +1,12 @@
 #include <stdexcept>
 
-#include <QRegularExpression>
-
 #include <qtlab/hw/serial/cobolt.h>
 #include <qtlab/hw/serial/serialport.h>
 
+#include <QRegularExpression>
 
-Cobolt::Cobolt(QObject *parent) : SerialDevice(parent)
+Cobolt::Cobolt(QObject *parent)
+    : SerialDevice(parent)
 {
     serial->setLineEndTermination("\r\n", "\r\n");
     serial->setTransceiveTimeout(100);
@@ -32,8 +32,7 @@ void Cobolt::postConnect_impl()
         try {
             init();
             break;
-        }
-        catch (std::runtime_error) {
+        } catch (std::runtime_error) {
             continue;
         }
     }

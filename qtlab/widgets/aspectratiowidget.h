@@ -1,18 +1,19 @@
 #ifndef ASPECTRATIOWIDGET_H
 #define ASPECTRATIOWIDGET_H
 
-#include <QWidget>
-#include <QHBoxLayout>
-
 #include <qwt_plot.h>
 
+#include <QHBoxLayout>
+#include <QWidget>
 
 class AspectRatioWidget : public QWidget
 {
     Q_OBJECT
 public:
-    AspectRatioWidget(QWidget *widget, double ratio,
-                      int paddingW = 0, int paddingH = 0,
+    AspectRatioWidget(QWidget *widget,
+                      double ratio,
+                      int paddingW = 0,
+                      int paddingH = 0,
                       QWidget *parent = nullptr);
 
 public slots:

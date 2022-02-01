@@ -3,20 +3,21 @@
 
 #include <stdexcept>
 
-#include <QObject>
+#include <qtlab/hw/hamamatsu/dcamutils.h>
+
 #include <QMutex>
+#include <QObject>
 #include <QState>
 
 #include "qtlab-hw-hamamatsu_export.h"
 
-#include <qtlab/hw/hamamatsu/dcamutils.h>
+#define CLASSNAME(x) #x
 
-#define CLASSNAME(x) # x
-
-#define EXCEPTION_CLASS(name)                                               \
-    class name : public std::runtime_error {                                \
-public:                                                                     \
-        name();                                                             \
+#define EXCEPTION_CLASS(name) \
+    class name : public std::runtime_error \
+    { \
+    public: \
+        name(); \
     };
 
 class QTLAB_HW_HAMAMATSU_EXPORT OrcaFlash : public QObject
@@ -76,8 +77,8 @@ public:
 
     enum ORCA_SENSOR_MODE {
         SENSOR_MODE_AREA = DCAM::DCAMPROP_SENSORMODE__AREA,
-        SENSOR_MODE_LINE= DCAM::DCAMPROP_SENSORMODE__LINE,
-        SENSOR_MODE_TDI= DCAM::DCAMPROP_SENSORMODE__TDI,
+        SENSOR_MODE_LINE = DCAM::DCAMPROP_SENSORMODE__LINE,
+        SENSOR_MODE_TDI = DCAM::DCAMPROP_SENSORMODE__TDI,
         SENSOR_MODE_TDI_EXTENDED = DCAM::DCAMPROP_SENSORMODE__TDI_EXTENDED,
         SENSOR_MODE_PROGRESSIVE = DCAM::DCAMPROP_SENSORMODE__PROGRESSIVE,
         SENSOR_MODE_SPLIT_VIEW = DCAM::DCAMPROP_SENSORMODE__SPLITVIEW,
@@ -96,14 +97,17 @@ public:
     int32_t nFramesInBuffer() const;
 
     void startCapture();
-    void copyFrame(void * const buf, const size_t n, const int32_t frame,
+    void copyFrame(void *const buf,
+                   const size_t n,
+                   const int32_t frame,
                    int32_t *frameStamp = nullptr,
                    DCAM::DCAM_TIMESTAMP *timestamp = nullptr);
-    void lockFrame(const int32_t frame, void **buf,
+    void lockFrame(const int32_t frame,
+                   void **buf,
                    int32_t *frameStamp = nullptr,
                    DCAM::DCAM_TIMESTAMP *timestamp = nullptr);
     void lockFrame(DCAM::DCAMBUF_FRAME *dcambufFrame);
-    void copyLastFrame(void * const buf, const size_t n);
+    void copyLastFrame(void *const buf, const size_t n);
     DCAM::int32 wait(const DCAM::int32 timeout_ms, const DCAM::int32 eventMask);
 
     void buf_release();
@@ -133,7 +137,8 @@ public:
     double getLineInterval();
     void setOutputTrigger(const ORCA_OUTPUT_TRIGGER_KIND kind,
                           const ORCA_OUTPUT_TRIGGER_SOURCE source,
-                          const double polarity, const double period);
+                          const double polarity,
+                          const double period);
     void setSensorMode(const ORCA_SENSOR_MODE mode);
     int nOfLines() const;
 

@@ -1,14 +1,16 @@
-#include <QPainter>
-
 #include "pixmapwidget.h"
+
+#include <QPainter>
 
 class PaintArea : public QWidget
 {
     friend PixmapWidget;
+
 public:
-    PaintArea(QWidget *parent = nullptr) : QWidget(parent)
-    {
-    }
+    PaintArea(QWidget *parent = nullptr)
+        : QWidget(parent)
+    {}
+
 protected:
     void paintEvent(QPaintEvent *event)
     {
@@ -51,7 +53,6 @@ protected:
         if (rotationStep % 2)
             r = r.transposed();
 
-
         painter.drawPixmap(r, pm, pm.rect());
     }
 
@@ -72,17 +73,17 @@ PixmapWidget::PixmapWidget(double aspectRatio, QWidget *parent)
 
 bool PixmapWidget::isFlippedlr()
 {
-    return static_cast<PaintArea*>(paintArea)->fliplr;
+    return static_cast<PaintArea *>(paintArea)->fliplr;
 }
 
 bool PixmapWidget::isFlippedud()
 {
-    return static_cast<PaintArea*>(paintArea)->flipud;
+    return static_cast<PaintArea *>(paintArea)->flipud;
 }
 
 uint PixmapWidget::getRotationStep()
 {
-    return static_cast<PaintArea*>(paintArea)->rotationStep % 4;
+    return static_cast<PaintArea *>(paintArea)->rotationStep % 4;
 }
 
 void PixmapWidget::setupUi()
@@ -138,7 +139,7 @@ void PixmapWidget::setupUi()
 
 void PixmapWidget::setPixmap(const QPixmap &pm)
 {
-    PaintArea *pa = static_cast<PaintArea*>(paintArea);
+    PaintArea *pa = static_cast<PaintArea *>(paintArea);
     pa->pm = pm;
     setAspectRatio(1. * pm.width() / pm.height());
     arw->readjust();
@@ -146,7 +147,7 @@ void PixmapWidget::setPixmap(const QPixmap &pm)
 
 void PixmapWidget::rotatecw()
 {
-    PaintArea *pa = static_cast<PaintArea*>(paintArea);
+    PaintArea *pa = static_cast<PaintArea *>(paintArea);
     if (pa->fliplr ^ pa->flipud)
         pa->rotationStep--;
     else
@@ -157,7 +158,7 @@ void PixmapWidget::rotatecw()
 
 void PixmapWidget::rotateccw()
 {
-    PaintArea *pa = static_cast<PaintArea*>(paintArea);
+    PaintArea *pa = static_cast<PaintArea *>(paintArea);
     if (pa->fliplr ^ pa->flipud)
         pa->rotationStep++;
     else
@@ -168,7 +169,7 @@ void PixmapWidget::rotateccw()
 
 void PixmapWidget::setRotationStep(uint step)
 {
-    PaintArea *pa = static_cast<PaintArea*>(paintArea);
+    PaintArea *pa = static_cast<PaintArea *>(paintArea);
     if (step % 2)
         arw->invertRatio();
     pa->rotationStep = step;
@@ -176,7 +177,7 @@ void PixmapWidget::setRotationStep(uint step)
 
 void PixmapWidget::fliplr()
 {
-    PaintArea *pa = static_cast<PaintArea*>(paintArea);
+    PaintArea *pa = static_cast<PaintArea *>(paintArea);
     pa->fliplr = !pa->fliplr;
     fliplrPushButton->setChecked(pa->fliplr);
     paintArea->update();
@@ -184,7 +185,7 @@ void PixmapWidget::fliplr()
 
 void PixmapWidget::flipud()
 {
-    PaintArea *pa = static_cast<PaintArea*>(paintArea);
+    PaintArea *pa = static_cast<PaintArea *>(paintArea);
     pa->flipud = !pa->flipud;
     flipudPushButton->setChecked(pa->flipud);
     paintArea->update();

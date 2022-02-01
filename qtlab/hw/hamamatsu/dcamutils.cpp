@@ -1,7 +1,7 @@
 #include <stdexcept>
 
-#include <qtlab/hw/hamamatsu/dcamutils.h>
 #include <qtlab/core/logger.h>
+#include <qtlab/hw/hamamatsu/dcamutils.h>
 
 #include <QMap>
 
@@ -10,7 +10,6 @@ using namespace DCAM;
 static Logger *logger = getLogger("DCAM");
 static QMap<size_t, ModelInfo *> map;
 static QMap<QString, size_t> mapByIDStr;
-
 
 namespace DCAM {
 
@@ -66,7 +65,7 @@ QString errString(DCAMERR err)
 {
 #ifdef QTLAB_DCAM_DEMO
     Q_UNREACHABLE();
-    return QString("Error 0x%1").arg((uint)err, 0, 16);
+    return QString("Error 0x%1").arg((uint) err, 0, 16);
 #else
     return getDevString(0, err);
 #endif
@@ -81,7 +80,7 @@ int init_dcam()
     int nCamera;
     bool ok = false;
     DCAMAPI_INIT param;
-    memset (&param, 0, sizeof(param));
+    memset(&param, 0, sizeof(param));
 
     param.size = sizeof(param);
     DCAMERR ret = dcamapi_init(&param);
@@ -103,18 +102,15 @@ int init_dcam()
     logger->info(QString("Found %1 cameras").arg(nCamera));
     for (int64_t i = 0; i < nCamera; ++i) {
         ModelInfo *mi = new ModelInfo();
-        HDCAM h = (HDCAM)i;
+        HDCAM h = (HDCAM) i;
         mi->vendor = getDevString(h, DCAM_IDSTR_VENDOR);
         mi->model = getDevString(h, DCAM_IDSTR_MODEL);
         mi->bus = getDevString(h, DCAM_IDSTR_BUS);
         mi->cameraID = getDevString(h, DCAM_IDSTR_CAMERAID);
         mi->cameraVersion = getDevString(h, DCAM_IDSTR_CAMERAVERSION);
         mi->driverVersion = getDevString(h, DCAM_IDSTR_DRIVERVERSION);
-        logger->info(QString("Camera #%1 ").arg(i)
-                     + mi->vendor + " "
-                     + mi->model + " "
-                     + mi->cameraID + " "
-                     + mi->cameraVersion);
+        logger->info(QString("Camera #%1 ").arg(i) + mi->vendor + " " + mi->model + " "
+                     + mi->cameraID + " " + mi->cameraVersion);
         map.insert(i, mi);
         mapByIDStr.insert(mi->cameraID, i);
     }
@@ -137,4 +133,4 @@ void uninit_dcam()
     map.clear();
     mapByIDStr.clear();
 }
-}
+} // namespace DCAM

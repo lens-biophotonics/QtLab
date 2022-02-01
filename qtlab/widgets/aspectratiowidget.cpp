@@ -1,12 +1,14 @@
-#include <QResizeEvent>
-
 #include "aspectratiowidget.h"
 
+#include <QResizeEvent>
+
 AspectRatioWidget::AspectRatioWidget(
-        QWidget *widget, double ratio,
-        int paddingW, int paddingH, QWidget *parent) :
-    QWidget(parent), wdg(widget), ratio(ratio),
-    paddingW(paddingW), paddingH(paddingH)
+    QWidget *widget, double ratio, int paddingW, int paddingH, QWidget *parent)
+    : QWidget(parent)
+    , wdg(widget)
+    , ratio(ratio)
+    , paddingW(paddingW)
+    , paddingH(paddingH)
 {
     layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
     layout->setMargin(0);
@@ -16,15 +18,15 @@ AspectRatioWidget::AspectRatioWidget(
     layout->addItem(new QSpacerItem(0, 0));
 }
 
-void AspectRatioWidget::resizeEvent(QResizeEvent *event) {
+void AspectRatioWidget::resizeEvent(QResizeEvent *event)
+{
     Q_UNUSED(event);
     readjust();
 }
 
 void AspectRatioWidget::readjust()
 {
-    double thisAspectRatio = static_cast<double>(size().width())
-                             / size().height();
+    double thisAspectRatio = static_cast<double>(size().width()) / size().height();
     int widgetStretch, outerStretch;
 
     double h = height() + paddingH;
@@ -37,8 +39,7 @@ void AspectRatioWidget::readjust()
         layout->setDirection(QBoxLayout::LeftToRight);
         widgetStretch = static_cast<int>(h * r);
         outerStretch = static_cast<int>((w - widgetStretch) / 2 + 0.5);
-    }
-    else // too tall
+    } else // too tall
     {
         layout->setDirection(QBoxLayout::TopToBottom);
         widgetStretch = static_cast<int>(w * (1. / r));

@@ -1,12 +1,12 @@
 #ifndef TIMEPLOT_H
 #define TIMEPLOT_H
 
-#include <QMenu>
-#include <QDialog>
-
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 #include <qwt_scale_draw.h>
+
+#include <QDialog>
+#include <QMenu>
 
 /**
  * @brief The APDPlot class implements the plot used to display APD counts.

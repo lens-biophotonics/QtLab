@@ -1,10 +1,9 @@
 #ifndef AOTFWIDGET_H
 #define AOTFWIDGET_H
 
-#include <QWidget>
-
 #include <qtlab/hw/serial/AA_MPDSnCxx.h>
 
+#include <QWidget>
 
 class AA_AOTFWidget : public QWidget
 {

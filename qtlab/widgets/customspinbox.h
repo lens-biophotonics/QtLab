@@ -1,9 +1,9 @@
 #ifndef CUSTOMSPINBOX_H
 #define CUSTOMSPINBOX_H
 
-#include <QWidget>
-#include <QSpinBox>
 #include <QDoubleSpinBox>
+#include <QSpinBox>
+#include <QWidget>
 
 #include "qtlab-widgets_export.h"
 
@@ -26,6 +26,5 @@ public:
 signals:
     void returnPressed(double value);
 };
-
 
 #endif // CUSTOMSPINBOX_H

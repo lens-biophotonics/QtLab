@@ -1,22 +1,26 @@
-#include <QApplication>
-#include <QMouseEvent>
-#include <QGridLayout>
-
-#include <qwt_text_label.h>
-#include <qwt_scale_widget.h>
-#include <qwt_slider.h>
-#include <qwt_plot_layout.h>
-
 #include "timeplot.h"
+
 #include "customspinbox.h"
 
+#include <qwt_plot_layout.h>
+#include <qwt_scale_widget.h>
+#include <qwt_slider.h>
+#include <qwt_text_label.h>
+
+#include <QApplication>
+#include <QGridLayout>
+#include <QMouseEvent>
 
 // maybe replace with QwtDateScaleDraw
 class TimeScaleDraw : public QwtScaleDraw
 {
     friend class TimePlot;
+
 public:
-    TimeScaleDraw(double samplingRate) : QwtScaleDraw(), rate(samplingRate) {}
+    TimeScaleDraw(double samplingRate)
+        : QwtScaleDraw()
+        , rate(samplingRate)
+    {}
     virtual QwtText label(double value) const override
     {
         if (value == hiddenMajTick) {
@@ -24,12 +28,13 @@ public:
         }
         double v = value / rate;
         uint h = v / 3600;
-        uint m = v / 60; m = m % 60;
+        uint m = v / 60;
+        m = m % 60;
         uint s = v - h * 3600 - m * 60;
         return QwtText(QString("%1:%2:%3")
-                       .arg(h, 2, 10, QChar('0'))
-                       .arg(m, 2, 10, QChar('0'))
-                       .arg(s, 2, 10, QChar('0')));
+                           .arg(h, 2, 10, QChar('0'))
+                           .arg(m, 2, 10, QChar('0'))
+                           .arg(s, 2, 10, QChar('0')));
     }
 
 private:
@@ -37,10 +42,8 @@ private:
     double hiddenMajTick = std::numeric_limits<double>::max();
 };
 
-
-
-TimePlot::TimePlot(QWidget *parent) :
-    QwtPlot(parent)
+TimePlot::TimePlot(QWidget *parent)
+    : QwtPlot(parent)
 {
     setupUi();
     setSamplingRate(1);
@@ -93,30 +96,30 @@ void TimePlot::setupUi()
 
     dialog->setLayout(grid);
 
-    std::function<void(void)> updatePlotRange = [ = ](){
+    std::function<void(void)> updatePlotRange = [=]() {
         setAxisScale(xBottom, currentRange->first, currentRange->second);
         replot();
     };
 
-    connect(minSlider, &QwtSlider::valueChanged, this, [ = ](double value){
+    connect(minSlider, &QwtSlider::valueChanged, this, [=](double value) {
         currentRange->first = value;
         minSpinBox->setValue(value);
         updatePlotRange();
     });
 
-    connect(maxSlider, &QwtSlider::valueChanged, this, [ = ](double value){
+    connect(maxSlider, &QwtSlider::valueChanged, this, [=](double value) {
         currentRange->second = value;
         maxSpinBox->setValue(value);
         updatePlotRange();
     });
 
-    connect(minSpinBox, &DoubleSpinBox::returnPressed, this, [ = ](double value){
+    connect(minSpinBox, &DoubleSpinBox::returnPressed, this, [=](double value) {
         currentRange->first = value;
         minSlider->setValue(value);
         updatePlotRange();
     });
 
-    connect(maxSpinBox, &DoubleSpinBox::returnPressed, this, [ = ](double value){
+    connect(maxSpinBox, &DoubleSpinBox::returnPressed, this, [=](double value) {
         currentRange->second = value;
         maxSlider->setValue(value);
         updatePlotRange();
@@ -124,8 +127,7 @@ void TimePlot::setupUi()
 
     setCanvasBackground(QBrush(Qt::black));
     curve = new QwtPlotCurve();
-    curve->setPen(Qt::white, 1),
-    curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
+    curve->setPen(Qt::white, 1), curve->setRenderHint(QwtPlotItem::RenderAntialiased, true);
     curve->attach(this);
     xData = new QVector<double>();
     yData = new QVector<double>();
@@ -152,15 +154,14 @@ void TimePlot::setupUi()
     showCountsLabelAction->setText("Show counts label");
     showCountsLabelAction->setCheckable(true);
     showCountsLabelAction->setChecked(false);
-    connect(showCountsLabelAction, triggered,
-            countsLabel, &QwtTextLabel::setVisible);
+    connect(showCountsLabelAction, triggered, countsLabel, &QwtTextLabel::setVisible);
     countsLabel->setVisible(false);
 
     QAction *autoscaleYAction = new QAction(this);
     autoscaleYAction->setText("Autoscale Y");
     autoscaleYAction->setCheckable(true);
     autoscaleYAction->setChecked(true);
-    connect(autoscaleYAction, triggered, [ = ](){
+    connect(autoscaleYAction, triggered, [=]() {
         setAxisAutoScale(yLeft, autoscaleYAction->isChecked());
         replot();
     });
@@ -169,7 +170,7 @@ void TimePlot::setupUi()
     swipeXAction->setText("Swipe X");
     swipeXAction->setCheckable(true);
 
-    connect(swipeXAction, triggered, this, [ = ](){
+    connect(swipeXAction, triggered, this, [=]() {
         bool enable = !swipeXAction->isChecked();
         maxSlider->setEnabled(enable);
         minSlider->setEnabled(enable);
@@ -193,7 +194,7 @@ void TimePlot::updateCountsLabel(double value)
 
 void TimePlot::appendPoint(double y)
 {
-    if ((size_t)yData->size() + 1 > nResSamples) {
+    if ((size_t) yData->size() + 1 > nResSamples) {
         xData->remove(0);
         yData->remove(0);
         xData->append(sampCounter);
@@ -210,7 +211,7 @@ void TimePlot::appendPoints(const QVector<double> &y)
 {
     if (!y.size())
         return;
-    if ((size_t)yData->size() + y.size() > nResSamples) {
+    if ((size_t) yData->size() + y.size() > nResSamples) {
         size_t _free = nResSamples - yData->size();
         size_t diff = y.size() - _free;
         xData->remove(0, diff);
@@ -240,7 +241,7 @@ void TimePlot::clear()
 
 void TimePlot::setSamplingRate(double Hz)
 {
-    static_cast<TimeScaleDraw*>(scaleDraw)->rate = Hz;
+    static_cast<TimeScaleDraw *>(scaleDraw)->rate = Hz;
 }
 
 void TimePlot::setBufSize(size_t nSamples)
@@ -256,7 +257,7 @@ void TimePlot::setBufSize(size_t nSamples)
 
 void TimePlot::setBufSize(double seconds)
 {
-    size_t bs = (size_t)(static_cast<TimeScaleDraw*>(scaleDraw)->rate * seconds);
+    size_t bs = (size_t) (static_cast<TimeScaleDraw *>(scaleDraw)->rate * seconds);
     setBufSize(bs);
 }
 
@@ -268,7 +269,6 @@ void TimePlot::setSwipeXEnabled(bool enable)
     swipeXAction->trigger();
 }
 
-
 void TimePlot::mouseDoubleClickEvent(QMouseEvent *e)
 {
     QwtScaleWidget *sw = axisWidget(xBottom);
@@ -278,8 +278,7 @@ void TimePlot::mouseDoubleClickEvent(QMouseEvent *e)
     }
     // do not catch event if it happens outside the
     // x axis widget (see also heightForWidth())
-    if (height() - e->pos().y() > sw->height())
-    {
+    if (height() - e->pos().y() > sw->height()) {
         e->ignore();
         return;
     }
@@ -296,13 +295,11 @@ void TimePlot::replot()
         // when swiping, make sure that the last major tick is not drawn
         // to have smooth scrolling (because its label would occupy too much
         // space)
-        const QList<double> &majTicks
-            = axisScaleDiv(xBottom).ticks(QwtScaleDiv::MajorTick);
+        const QList<double> &majTicks = axisScaleDiv(xBottom).ticks(QwtScaleDiv::MajorTick);
         if (majTicks.size() > 2) {
             double diff = majTicks.at(1) - majTicks.at(0);
             if (sampCounter >= majTicks.last() + diff)
-                static_cast<TimeScaleDraw*>(scaleDraw)->hiddenMajTick
-                    = majTicks.last() + diff;
+                static_cast<TimeScaleDraw *>(scaleDraw)->hiddenMajTick = majTicks.last() + diff;
         }
         setAxisScale(QwtPlot::xBottom, xData->first(), xData->last());
     }

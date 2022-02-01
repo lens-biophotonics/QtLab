@@ -1,8 +1,9 @@
 #ifndef COBOLT_H
 #define COBOLT_H
 
-#include <QObject>
 #include <qtlab/hw/serial/serialdevice.h>
+
+#include <QObject>
 
 class Cobolt : public SerialDevice
 {
@@ -33,7 +34,7 @@ class Cobolt : public SerialDevice
         FAULT_NOERRORS = 0,
         FAULT_TEMPERATUR_EERROR = 1,
         FAULT_INTERLOCK_ERROR = 3,
-        FAULT_CONSTANT_POWER_TIMEOUT= 4,
+        FAULT_CONSTANT_POWER_TIMEOUT = 4,
     };
 
 public:
@@ -96,7 +97,7 @@ protected:
 private:
     QString verboseName;
     QString modelNumber;
-    int wl;  /**< @brief wavelength */
+    int wl; /**< @brief wavelength */
 
     enum COBOLT_CLASS coboltClass;
 

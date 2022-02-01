@@ -7,17 +7,16 @@
 #include <windows.h>
 #endif
 
-#include "qtlab-hw-pi_export.h"
-
-#include <PI_GCS2_DLL.h>
-
+#include <QMutex>
 #include <QObject>
 #include <QState>
-#include <QMutex>
 #include <QVector>
 
-typedef BOOL (*PI_qVectorOfDoubles)(int, const char*, double*);
-typedef BOOL (*PI_vectorOfDoubles)(int, const char*, const double*);
+#include "qtlab-hw-pi_export.h"
+#include <PI_GCS2_DLL.h>
+
+typedef BOOL (*PI_qVectorOfDoubles)(int, const char *, double *);
+typedef BOOL (*PI_vectorOfDoubles)(int, const char *, const double *);
 
 class QTLAB_HW_PI_EXPORT PIDevice : public QObject
 {
@@ -32,21 +31,21 @@ public:
     };
 
     enum CTOPam {
-        TriggerStep         = 1,
-        Axis                = 2,
-        TriggerMode         = 3,
-        Polarity            = 7,
-        StartThreshold      = 8,
-        StopThreshold       = 9,
-        TriggerPosition     = 10,
+        TriggerStep = 1,
+        Axis = 2,
+        TriggerMode = 3,
+        Polarity = 7,
+        StartThreshold = 8,
+        StopThreshold = 9,
+        TriggerPosition = 10,
     };
 
     enum TriggerMode {
-        PositionDistance    = 0,
-        OnTarget            = 2,
-        MotionError         = 5,
-        InMotion            = 6,
-        PositionOffset      = 7,
+        PositionDistance = 0,
+        OnTarget = 2,
+        MotionError = 5,
+        InMotion = 6,
+        PositionOffset = 7,
     };
 
     enum Polarity {
@@ -59,7 +58,8 @@ public:
     virtual ~PIDevice();
     void connectSerial(const QString &portName, const int baud);
     void connectDaisyChainSerial(const QString &portName,
-                                 const int deviceNumber, const int baud = 38400);
+                                 const int deviceNumber,
+                                 const int baud = 38400);
 
     void connectDevice();
 
@@ -115,11 +115,8 @@ public:
     double getStepSize(const QString &axis) const;
     void setStepSize(const QString &axis, const double value);
 
-    void setTriggerOutput(const TrigOutID oid,
-                          const CTOPam pam,
-                          const double val);
-    void setTriggerOutputEnabled(const TrigOutID oid,
-                                 const BOOL enable);
+    void setTriggerOutput(const TrigOutID oid, const CTOPam pam, const double val);
+    void setTriggerOutputEnabled(const TrigOutID oid, const BOOL enable);
 
     bool isOnTarget(const QString &axis = "");
 
@@ -132,10 +129,10 @@ public slots:
 
 private:
     void setupStateMachine();
-    QVector<double> getVectorOfDoubles(
-        const PI_qVectorOfDoubles fp, const QString &axes);
-    void callFunctionWithVectorOfDoubles(
-        PI_vectorOfDoubles fp, const QString &axes, const double values[]);
+    QVector<double> getVectorOfDoubles(const PI_qVectorOfDoubles fp, const QString &axes);
+    void callFunctionWithVectorOfDoubles(PI_vectorOfDoubles fp,
+                                         const QString &axes,
+                                         const double values[]);
 
     int id = -1;
 
