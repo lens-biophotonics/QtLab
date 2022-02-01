@@ -22,7 +22,7 @@ SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 
 set(OTHER_FILES
     .gitignore
-    uncrustify.cfg
+    .clang-format
     LICENSE.txt
     README.md
 )
