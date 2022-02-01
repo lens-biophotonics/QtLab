@@ -22,16 +22,17 @@
 #ifndef DEVICE_H
 #define DEVICE_H
 
-#include <set>
-#include <limits.h>
 #include <inttypes.h>
+#include <limits.h>
+#include <set>
 
 namespace QtLab {
 namespace hw {
 namespace Thorlabs {
 typedef std::set<int> functions_set;
 
-typedef struct {
+typedef struct
+{
     int motor_type;
     int max_pos = INT_MAX;
     int max_vel = INT_MAX;
@@ -47,15 +48,16 @@ typedef struct {
     bool stopping = false;
 } motor_device;
 
-typedef struct {
+typedef struct
+{
     int device_type;
     int hw_type;
     int bays;
     int channels;
     uint8_t dest;
     bool status_updates;
-    char *SN = (char*) "00000000";
-    char *dev_type_name = (char*) "No device name";
+    char *SN = (char *) "00000000";
+    char *dev_type_name = (char *) "No device name";
     bool bay_used[3];
     motor_device motor[3];
     bool end_of_move_messages = true;
@@ -93,6 +95,4 @@ enum dev_type {
 } // namespace hw
 } // namespace QtLab
 
-
-
- #endif  // DEVICE_H
+#endif // DEVICE_H

@@ -22,19 +22,18 @@
 #ifndef MOTORCONTROLLER_H
 #define MOTORCONTROLLER_H
 
-#include <endian.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <pthread.h>
-
-#include <QObject>
-
-#include <qtlab/hw/serial/serialdevice.h>
-
 #include "device.h"
 #include "messages.h"
 
+#include <endian.h>
+#include <pthread.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
+#include <qtlab/hw/serial/serialdevice.h>
+
+#include <QObject>
 
 #define MAX_RESPONSE_SIZE 128
 #define SOURCE 0x01
@@ -72,10 +71,9 @@ class MotorController : public SerialDevice
     Q_OBJECT
 
 public:
-
     MotorController(QObject *parent = nullptr);
 
-// ------------------------- Generic device calls ------------------------------
+    // ------------------------- Generic device calls ------------------------------
 
     void identify(uint8_t dest = DEFAULTDEST);
 
@@ -97,49 +95,77 @@ public:
 
     RackBayUsed getBayUsed(uint8_t bayID, uint8_t dest = DEFAULTDEST);
 
-//-------------------------- Motor control calls ------------------------------
+    //-------------------------- Motor control calls ------------------------------
 
     void flashProgYes(uint8_t dest = DEFAULTDEST);
 
     void flashProgNo(uint8_t dest = DEFAULTDEST);
 
-    int setPositionCounter(int32_t pos, uint8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    int setPositionCounter(int32_t pos,
+                           uint8_t dest = DEFAULTDEST,
+                           uint16_t channel = DEFAULTCHANNEL16);
 
     int getPositionCounter(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-    int setEncoderCounter(int32_t count, uint8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    int setEncoderCounter(int32_t count,
+                          uint8_t dest = DEFAULTDEST,
+                          uint16_t channel = DEFAULTCHANNEL16);
 
     int32_t getEncoderCounter(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-    void setVelocityP(int32_t acc, int32_t maxVel, uint8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    void setVelocityP(int32_t acc,
+                      int32_t maxVel,
+                      uint8_t dest = DEFAULTDEST,
+                      uint16_t channel = DEFAULTCHANNEL16);
 
     VelocityParams getVelocityP(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-    void setJogP(uint16_t mode, int32_t stepSize, int32_t vel, int32_t acc, uint16_t stopMode, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    void setJogP(uint16_t mode,
+                 int32_t stepSize,
+                 int32_t vel,
+                 int32_t acc,
+                 uint16_t stopMode,
+                 int8_t dest = DEFAULTDEST,
+                 uint16_t channel = DEFAULTCHANNEL16);
 
     JogParams getJogP(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-    void setPowerUsed(uint16_t rest_power, uint16_t move_power, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    void setPowerUsed(uint16_t rest_power,
+                      uint16_t move_power,
+                      int8_t dest = DEFAULTDEST,
+                      uint16_t channel = DEFAULTCHANNEL16);
 
     PowerParams getPowerUsed(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-    void setBacklashDist(uint32_t dist, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    void setBacklashDist(uint32_t dist,
+                         int8_t dest = DEFAULTDEST,
+                         uint16_t channel = DEFAULTCHANNEL16);
 
     int32_t getBacklashDist(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-    void setRelativeMoveP(uint32_t dist, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    void setRelativeMoveP(uint32_t dist,
+                          int8_t dest = DEFAULTDEST,
+                          uint16_t channel = DEFAULTCHANNEL16);
 
     int32_t getRelativeMoveP(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-    void setAbsoluteMoveP(uint32_t pos, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    void setAbsoluteMoveP(uint32_t pos,
+                          int8_t dest = DEFAULTDEST,
+                          uint16_t channel = DEFAULTCHANNEL16);
 
     int32_t getAbsoluteMoveP(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-    void setHomingVel(uint32_t vel, int8_t dest = DEFAULTDEST,  uint16_t channel = DEFAULTCHANNEL16);
+    void setHomingVel(uint32_t vel, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
 
     int32_t getHomingVel(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-    void setLimitSwitchConfig(uint16_t CwHwLim, uint16_t CCwHwLim, uint16_t CwSwLim, uint16_t CCwSwLim, uint16_t mode, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    void setLimitSwitchConfig(uint16_t CwHwLim,
+                              uint16_t CCwHwLim,
+                              uint16_t CwSwLim,
+                              uint16_t CCwSwLim,
+                              uint16_t mode,
+                              int8_t dest = DEFAULTDEST,
+                              uint16_t channel = DEFAULTCHANNEL16);
 
     void getLimitSwitchConfig(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
@@ -147,19 +173,31 @@ public:
 
     void startSetRelativeMove(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-    void startRelativeMove(int32_t dist, uint8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    void startRelativeMove(int32_t dist,
+                           uint8_t dest = DEFAULTDEST,
+                           uint16_t channel = DEFAULTCHANNEL16);
 
     void startSetAbsoluteMove(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-    void startAbsoluteMove(int32_t pos, uint8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    void startAbsoluteMove(int32_t pos,
+                           uint8_t dest = DEFAULTDEST,
+                           uint16_t channel = DEFAULTCHANNEL16);
 
-    void startJogMove(uint8_t direction, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    void startJogMove(uint8_t direction,
+                      uint8_t dest = DEFAULTDEST,
+                      uint8_t channel = DEFAULTCHANNEL8);
 
-    void startSetVelocityMove(uint8_t direction, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    void startSetVelocityMove(uint8_t direction,
+                              uint8_t dest = DEFAULTDEST,
+                              uint8_t channel = DEFAULTCHANNEL8);
 
-    void stopMovement(uint8_t stopMode = 0x02, uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
+    void stopMovement(uint8_t stopMode = 0x02,
+                      uint8_t dest = DEFAULTDEST,
+                      uint8_t channel = DEFAULTCHANNEL8);
 
-    void setAccelerationProfile(uint16_t index, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    void setAccelerationProfile(uint16_t index,
+                                int8_t dest = DEFAULTDEST,
+                                uint16_t channel = DEFAULTCHANNEL16);
 
     uint16_t getAccelerationProfile(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
@@ -167,7 +205,12 @@ public:
 
     uint16_t getLedP(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
-    void setButtons(uint16_t mode, int32_t pos1, int32_t pos2, uint16_t timeout, int8_t dest = DEFAULTDEST, uint16_t channel = DEFAULTCHANNEL16);
+    void setButtons(uint16_t mode,
+                    int32_t pos1,
+                    int32_t pos2,
+                    uint16_t timeout,
+                    int8_t dest = DEFAULTDEST,
+                    uint16_t channel = DEFAULTCHANNEL16);
 
     ButtonParams getButtonsInfo(uint8_t dest = DEFAULTDEST, uint8_t channel = DEFAULTCHANNEL8);
 
@@ -197,7 +240,6 @@ protected:
     virtual void postConnect_impl() override;
 
 private:
-
     //----------------- Device communication functions ---------------------------------
 
     int checkParams(uint8_t dest, int chanID);
@@ -217,8 +259,8 @@ private:
     bool awaitingResponse;
     HwInfo hwInfo;
 };
-}
-}
-}
+} // namespace Thorlabs
+} // namespace hw
+} // namespace QtLab
 
 #endif // MOTORCONTROLLER_H

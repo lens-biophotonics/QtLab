@@ -19,12 +19,11 @@
 **                                                                        **
 ****************************************************************************/
 
-
-#include <sys/signalfd.h>
-#include <signal.h>
-#include <unistd.h>
-#include <errno.h>
 #include <assert.h>
+#include <errno.h>
+#include <signal.h>
+#include <sys/signalfd.h>
+#include <unistd.h>
 
 #include <qtlab/core/logger.h>
 
@@ -37,8 +36,12 @@ using namespace QtLab::hw::Thorlabs;
 class AwaitingResponseHelper
 {
 public:
-    AwaitingResponseHelper(bool *myBool) : myBool(myBool) {*myBool = true;}
-    ~AwaitingResponseHelper() {*myBool = false;}
+    AwaitingResponseHelper(bool *myBool)
+        : myBool(myBool)
+    {
+        *myBool = true;
+    }
+    ~AwaitingResponseHelper() { *myBool = false; }
 
 private:
     bool *myBool;
@@ -205,277 +208,272 @@ functions_set tst_set{
     GET_STATUSBITS,
 };
 
-functions_set bsc_set{
-    IDENTIFY,
-
-    SET_CHANENABLESTATE,
-    REQ_CHANENABLESTATE,
-    GET_CHANENABLESTATE,
-
-    HW_DISCONNECT,
-    HW_RESPONSE,
-    RICHRESPONSE,
-
-    HW_START_UPDATEMSGS,
-    HW_STOP_UPDATEMSGS,
-    HW_REQ_INFO,
-    HW_GET_INFO,
-
-    RACK_REQ_BAYUSED,
-    RACK_GET_BAYUSED,
-
-    SET_POSCOUNTER,
-    REQ_POSCOUNTER,
-    GET_POSCOUNTER,
-
-    SET_ENCCOUNTER,
-    REQ_ENCCOUNTER,
-    GET_ENCCOUNTER,
-
-    SET_VELPARAMS,
-    REQ_VELPARAMS,
-    GET_VELPARAMS,
-
-    SET_JOGPARAMS,
-    REQ_JOGPARAMS,
-    GET_JOGPARAMS,
-
-    SET_POWERPARAMS,
-    REQ_POWERPARAMS,
-    GET_POWERPARAMS,
-
-    SET_GENMOVEPARAMS,
-    REQ_GENMOVEPARAMS,
-    GET_GENMOVEPARAMS,
-
-    SET_MOVERELPARAMS,
-    REQ_MOVERELPARAMS,
-    GET_MOVERELPARAMS,
-
-    SET_MOVEABSPARAMS,
-    REQ_MOVEABSPARAMS,
-    GET_MOVEABSPARAMS,
-
-    SET_HOMEPARAMS,
-    REQ_HOMEPARAMS,
-    GET_HOMEPARAMS,
-
-    SET_LIMSWITCHPARAMS,
-    REQ_LIMSWITCHPARAMS,
-    GET_LIMSWITCHPARAMS,
-
-    MOVE_HOME,
-    MOVE_HOMED,
-
-    MOVE_RELATIVE,
-    MOVE_COMPLETED,
-    MOVE_ABSOLUTE,
-    MOVE_JOG,
-    MOVE_VELOCITY,
-    MOVE_STOP,
-    MOVE_STOPPED,
-
-    GET_STATUSUPDATE,
-    REQ_STATUSUPDATE,
-
-    REQ_STATUSBITS,
-    GET_STATUSBITS,
-
-    SET_TRIGGER,
-    REQ_TRIGGER,
-    GET_TRIGGER
-};
-
-functions_set bbd_set{
-    IDENTIFY,
-
-    SET_CHANENABLESTATE,
-    REQ_CHANENABLESTATE,
-    GET_CHANENABLESTATE,
-
-    HW_DISCONNECT,
-    HW_RESPONSE,
-    RICHRESPONSE,
-
-    HW_START_UPDATEMSGS,
-    HW_STOP_UPDATEMSGS,
-    HW_REQ_INFO,
-    HW_GET_INFO,
-
-    RACK_REQ_BAYUSED,
-    RACK_GET_BAYUSED,
-
-    SET_POSCOUNTER,
-    REQ_POSCOUNTER,
-    GET_POSCOUNTER,
-
-    SET_ENCCOUNTER,
-    REQ_ENCCOUNTER,
-    GET_ENCCOUNTER,
-
-    SET_VELPARAMS,
-    REQ_VELPARAMS,
-    GET_VELPARAMS,
-
-    SET_JOGPARAMS,
-    REQ_JOGPARAMS,
-    GET_JOGPARAMS,
-
-    SET_GENMOVEPARAMS,
-    REQ_GENMOVEPARAMS,
-    GET_GENMOVEPARAMS,
-
-    SET_MOVERELPARAMS,
-    REQ_MOVERELPARAMS,
-    GET_MOVERELPARAMS,
-
-    SET_MOVEABSPARAMS,
-    REQ_MOVEABSPARAMS,
-    GET_MOVEABSPARAMS,
-
-    SET_HOMEPARAMS,
-    REQ_HOMEPARAMS,
-    GET_HOMEPARAMS,
-
-    SET_LIMSWITCHPARAMS,
-    REQ_LIMSWITCHPARAMS,
-    GET_LIMSWITCHPARAMS,
-
-    MOVE_HOME,
-    MOVE_HOMED,
-
-    MOVE_RELATIVE,
-    MOVE_COMPLETED,
-    MOVE_ABSOLUTE,
-    MOVE_JOG,
-    MOVE_VELOCITY,
-    MOVE_STOP,
-    MOVE_STOPPED,
-
-    GET_DCSTATUSUPDATE,
-    REQ_DCSTATUSUPDATE,
-    ACK_DCSTATUSUPDATE,
-
-    REQ_STATUSBITS,
-    GET_STATUSBITS,
-
-    SUSPEND_ENDOFMOVEMSGS,
-    RESUME_ENDOFMOVEMSGS,
-
-    SET_TRIGGER,
-    REQ_TRIGGER,
-    GET_TRIGGER
-};
-
-functions_set all_set{
-    IDENTIFY,
-
-    SET_CHANENABLESTATE,
-    REQ_CHANENABLESTATE,
-    GET_CHANENABLESTATE,
-
-    HW_DISCONNECT,
-    HW_RESPONSE,
-    RICHRESPONSE,
-
-    HW_START_UPDATEMSGS,
-    HW_STOP_UPDATEMSGS,
-    HW_REQ_INFO,
-    HW_GET_INFO,
-
-    RACK_REQ_BAYUSED,
-    RACK_GET_BAYUSED,
-    HUB_REQ_BAYUSED,
-    HUB_GET_BAYUSED,
-
-    HW_YES_FLASH_PROGRAMMING,
-    HW_NO_FLASH_PROGRAMMING,
-
-    SET_POSCOUNTER,
-    REQ_POSCOUNTER,
-    GET_POSCOUNTER,
-
-    SET_ENCCOUNTER,
-    REQ_ENCCOUNTER,
-    GET_ENCCOUNTER,
-
-    SET_VELPARAMS,
-    REQ_VELPARAMS,
-    GET_VELPARAMS,
-
-    SET_JOGPARAMS,
-    REQ_JOGPARAMS,
-    GET_JOGPARAMS,
-
-    SET_POWERPARAMS,
-    REQ_POWERPARAMS,
-    GET_POWERPARAMS,
-
-    SET_GENMOVEPARAMS,
-    REQ_GENMOVEPARAMS,
-    GET_GENMOVEPARAMS,
-
-    SET_MOVERELPARAMS,
-    REQ_MOVERELPARAMS,
-    GET_MOVERELPARAMS,
-
-    SET_MOVEABSPARAMS,
-    REQ_MOVEABSPARAMS,
-    GET_MOVEABSPARAMS,
-
-    SET_HOMEPARAMS,
-    REQ_HOMEPARAMS,
-    GET_HOMEPARAMS,
-
-    SET_LIMSWITCHPARAMS,
-    REQ_LIMSWITCHPARAMS,
-    GET_LIMSWITCHPARAMS,
-
-    MOVE_HOME,
-    MOVE_HOMED,
-
-    MOVE_RELATIVE,
-    MOVE_COMPLETED,
-    MOVE_ABSOLUTE,
-    MOVE_JOG,
-    MOVE_VELOCITY,
-    MOVE_STOP,
-    MOVE_STOPPED,
-
-    SET_BOWINDEX,
-    REQ_BOWINDEX,
-    GET_BOWINDEX,
-
-    SET_AVMODES,
-    REQ_AVMODES,
-    GET_AVMODES,
-
-    SET_BUTTONPARAMS,
-    REQ_BUTTONPARAMS,
-    GET_BUTTONPARAMS,
-
-    GET_STATUSUPDATE,
-    REQ_STATUSUPDATE,
-
-    GET_DCSTATUSUPDATE,
-    REQ_DCSTATUSUPDATE,
-    ACK_DCSTATUSUPDATE,
-
-    REQ_STATUSBITS,
-    GET_STATUSBITS,
-
-    SUSPEND_ENDOFMOVEMSGS,
-    RESUME_ENDOFMOVEMSGS,
-
-    SET_TRIGGER,
-    REQ_TRIGGER,
-    GET_TRIGGER
-};
-
-MotorController::MotorController(QObject *parent) : SerialDevice(parent)
+functions_set bsc_set{IDENTIFY,
+
+                      SET_CHANENABLESTATE,
+                      REQ_CHANENABLESTATE,
+                      GET_CHANENABLESTATE,
+
+                      HW_DISCONNECT,
+                      HW_RESPONSE,
+                      RICHRESPONSE,
+
+                      HW_START_UPDATEMSGS,
+                      HW_STOP_UPDATEMSGS,
+                      HW_REQ_INFO,
+                      HW_GET_INFO,
+
+                      RACK_REQ_BAYUSED,
+                      RACK_GET_BAYUSED,
+
+                      SET_POSCOUNTER,
+                      REQ_POSCOUNTER,
+                      GET_POSCOUNTER,
+
+                      SET_ENCCOUNTER,
+                      REQ_ENCCOUNTER,
+                      GET_ENCCOUNTER,
+
+                      SET_VELPARAMS,
+                      REQ_VELPARAMS,
+                      GET_VELPARAMS,
+
+                      SET_JOGPARAMS,
+                      REQ_JOGPARAMS,
+                      GET_JOGPARAMS,
+
+                      SET_POWERPARAMS,
+                      REQ_POWERPARAMS,
+                      GET_POWERPARAMS,
+
+                      SET_GENMOVEPARAMS,
+                      REQ_GENMOVEPARAMS,
+                      GET_GENMOVEPARAMS,
+
+                      SET_MOVERELPARAMS,
+                      REQ_MOVERELPARAMS,
+                      GET_MOVERELPARAMS,
+
+                      SET_MOVEABSPARAMS,
+                      REQ_MOVEABSPARAMS,
+                      GET_MOVEABSPARAMS,
+
+                      SET_HOMEPARAMS,
+                      REQ_HOMEPARAMS,
+                      GET_HOMEPARAMS,
+
+                      SET_LIMSWITCHPARAMS,
+                      REQ_LIMSWITCHPARAMS,
+                      GET_LIMSWITCHPARAMS,
+
+                      MOVE_HOME,
+                      MOVE_HOMED,
+
+                      MOVE_RELATIVE,
+                      MOVE_COMPLETED,
+                      MOVE_ABSOLUTE,
+                      MOVE_JOG,
+                      MOVE_VELOCITY,
+                      MOVE_STOP,
+                      MOVE_STOPPED,
+
+                      GET_STATUSUPDATE,
+                      REQ_STATUSUPDATE,
+
+                      REQ_STATUSBITS,
+                      GET_STATUSBITS,
+
+                      SET_TRIGGER,
+                      REQ_TRIGGER,
+                      GET_TRIGGER};
+
+functions_set bbd_set{IDENTIFY,
+
+                      SET_CHANENABLESTATE,
+                      REQ_CHANENABLESTATE,
+                      GET_CHANENABLESTATE,
+
+                      HW_DISCONNECT,
+                      HW_RESPONSE,
+                      RICHRESPONSE,
+
+                      HW_START_UPDATEMSGS,
+                      HW_STOP_UPDATEMSGS,
+                      HW_REQ_INFO,
+                      HW_GET_INFO,
+
+                      RACK_REQ_BAYUSED,
+                      RACK_GET_BAYUSED,
+
+                      SET_POSCOUNTER,
+                      REQ_POSCOUNTER,
+                      GET_POSCOUNTER,
+
+                      SET_ENCCOUNTER,
+                      REQ_ENCCOUNTER,
+                      GET_ENCCOUNTER,
+
+                      SET_VELPARAMS,
+                      REQ_VELPARAMS,
+                      GET_VELPARAMS,
+
+                      SET_JOGPARAMS,
+                      REQ_JOGPARAMS,
+                      GET_JOGPARAMS,
+
+                      SET_GENMOVEPARAMS,
+                      REQ_GENMOVEPARAMS,
+                      GET_GENMOVEPARAMS,
+
+                      SET_MOVERELPARAMS,
+                      REQ_MOVERELPARAMS,
+                      GET_MOVERELPARAMS,
+
+                      SET_MOVEABSPARAMS,
+                      REQ_MOVEABSPARAMS,
+                      GET_MOVEABSPARAMS,
+
+                      SET_HOMEPARAMS,
+                      REQ_HOMEPARAMS,
+                      GET_HOMEPARAMS,
+
+                      SET_LIMSWITCHPARAMS,
+                      REQ_LIMSWITCHPARAMS,
+                      GET_LIMSWITCHPARAMS,
+
+                      MOVE_HOME,
+                      MOVE_HOMED,
+
+                      MOVE_RELATIVE,
+                      MOVE_COMPLETED,
+                      MOVE_ABSOLUTE,
+                      MOVE_JOG,
+                      MOVE_VELOCITY,
+                      MOVE_STOP,
+                      MOVE_STOPPED,
+
+                      GET_DCSTATUSUPDATE,
+                      REQ_DCSTATUSUPDATE,
+                      ACK_DCSTATUSUPDATE,
+
+                      REQ_STATUSBITS,
+                      GET_STATUSBITS,
+
+                      SUSPEND_ENDOFMOVEMSGS,
+                      RESUME_ENDOFMOVEMSGS,
+
+                      SET_TRIGGER,
+                      REQ_TRIGGER,
+                      GET_TRIGGER};
+
+functions_set all_set{IDENTIFY,
+
+                      SET_CHANENABLESTATE,
+                      REQ_CHANENABLESTATE,
+                      GET_CHANENABLESTATE,
+
+                      HW_DISCONNECT,
+                      HW_RESPONSE,
+                      RICHRESPONSE,
+
+                      HW_START_UPDATEMSGS,
+                      HW_STOP_UPDATEMSGS,
+                      HW_REQ_INFO,
+                      HW_GET_INFO,
+
+                      RACK_REQ_BAYUSED,
+                      RACK_GET_BAYUSED,
+                      HUB_REQ_BAYUSED,
+                      HUB_GET_BAYUSED,
+
+                      HW_YES_FLASH_PROGRAMMING,
+                      HW_NO_FLASH_PROGRAMMING,
+
+                      SET_POSCOUNTER,
+                      REQ_POSCOUNTER,
+                      GET_POSCOUNTER,
+
+                      SET_ENCCOUNTER,
+                      REQ_ENCCOUNTER,
+                      GET_ENCCOUNTER,
+
+                      SET_VELPARAMS,
+                      REQ_VELPARAMS,
+                      GET_VELPARAMS,
+
+                      SET_JOGPARAMS,
+                      REQ_JOGPARAMS,
+                      GET_JOGPARAMS,
+
+                      SET_POWERPARAMS,
+                      REQ_POWERPARAMS,
+                      GET_POWERPARAMS,
+
+                      SET_GENMOVEPARAMS,
+                      REQ_GENMOVEPARAMS,
+                      GET_GENMOVEPARAMS,
+
+                      SET_MOVERELPARAMS,
+                      REQ_MOVERELPARAMS,
+                      GET_MOVERELPARAMS,
+
+                      SET_MOVEABSPARAMS,
+                      REQ_MOVEABSPARAMS,
+                      GET_MOVEABSPARAMS,
+
+                      SET_HOMEPARAMS,
+                      REQ_HOMEPARAMS,
+                      GET_HOMEPARAMS,
+
+                      SET_LIMSWITCHPARAMS,
+                      REQ_LIMSWITCHPARAMS,
+                      GET_LIMSWITCHPARAMS,
+
+                      MOVE_HOME,
+                      MOVE_HOMED,
+
+                      MOVE_RELATIVE,
+                      MOVE_COMPLETED,
+                      MOVE_ABSOLUTE,
+                      MOVE_JOG,
+                      MOVE_VELOCITY,
+                      MOVE_STOP,
+                      MOVE_STOPPED,
+
+                      SET_BOWINDEX,
+                      REQ_BOWINDEX,
+                      GET_BOWINDEX,
+
+                      SET_AVMODES,
+                      REQ_AVMODES,
+                      GET_AVMODES,
+
+                      SET_BUTTONPARAMS,
+                      REQ_BUTTONPARAMS,
+                      GET_BUTTONPARAMS,
+
+                      GET_STATUSUPDATE,
+                      REQ_STATUSUPDATE,
+
+                      GET_DCSTATUSUPDATE,
+                      REQ_DCSTATUSUPDATE,
+                      ACK_DCSTATUSUPDATE,
+
+                      REQ_STATUSBITS,
+                      GET_STATUSBITS,
+
+                      SUSPEND_ENDOFMOVEMSGS,
+                      RESUME_ENDOFMOVEMSGS,
+
+                      SET_TRIGGER,
+                      REQ_TRIGGER,
+                      GET_TRIGGER};
+
+MotorController::MotorController(QObject *parent)
+    : SerialDevice(parent)
 {
     serial->setBaudRate(SerialPort::Baud115200);
-    QObject::connect(serial, &QSerialPort::readyRead, this, [ = ](){
+    QObject::connect(serial, &QSerialPort::readyRead, this, [=]() {
         if (serial->bytesAvailable() && !awaitingResponse) {
             uint16_t ret_msgID;
             checkIncomingQueue(ret_msgID);
@@ -483,57 +481,73 @@ MotorController::MotorController(QObject *parent) : SerialDevice(parent)
     });
 }
 
-
 //----------------- Device communication functions ---------------------------------
 
-#define RUNTIME_ERROR {QString err = QString("Runtime error (%3) at %1:%2").arg(__FILE__).arg(__LINE__).arg(ret); emit error(err);}
-#define RUNTIME_ERROR_INVALID_PARAM(x) emit error("Invalid param "#x);
+#define RUNTIME_ERROR \
+    { \
+        QString err = QString("Runtime error (%3) at %1:%2").arg(__FILE__).arg(__LINE__).arg(ret); \
+        emit error(err); \
+    }
+#define RUNTIME_ERROR_INVALID_PARAM(x) emit error("Invalid param " #x);
 
-#define EMPTY_IN_QUEUE ret = emptyIncomingQueue();    \
-    if (ret != 0) RUNTIME_ERROR
+#define EMPTY_IN_QUEUE \
+    ret = emptyIncomingQueue(); \
+    if (ret != 0) \
+    RUNTIME_ERROR
 
-#define CHECK_ADDR_PARAMS(dest, chanID) int ret;        \
-    ret = checkParams(dest, chanID);                  \
-    if (ret != 0) RUNTIME_ERROR
+#define CHECK_ADDR_PARAMS(dest, chanID) \
+    int ret; \
+    ret = checkParams(dest, chanID); \
+    if (ret != 0) \
+    RUNTIME_ERROR
 
 #define GET_MESS(req_mess_class, buff_size, get_mess_code, get_mess_class) \
-    CHECK_ADDR_PARAMS(dest, channel)                        \
-    EMPTY_IN_QUEUE                                          \
-    req_mess_class mes(dest, SOURCE, channel);              \
-    mes.opened_device = &opened_device;                     \
-    sendMessage(mes);                                       \
-    uint8_t *buff = (uint8_t *) malloc(buff_size);          \
-    ret = getResponseMess(get_mess_code, buff_size, buff);  \
-    message.SetData(buff);                                  \
-    free(buff);                                             \
-    if (ret != 0) RUNTIME_ERROR;                            \
+    CHECK_ADDR_PARAMS(dest, channel) \
+    EMPTY_IN_QUEUE \
+    req_mess_class mes(dest, SOURCE, channel); \
+    mes.opened_device = &opened_device; \
+    sendMessage(mes); \
+    uint8_t *buff = (uint8_t *) malloc(buff_size); \
+    ret = getResponseMess(get_mess_code, buff_size, buff); \
+    message.SetData(buff); \
+    free(buff); \
+    if (ret != 0) \
+        RUNTIME_ERROR; \
     EMPTY_IN_QUEUE
-
 
 void MotorController::sendMessage(Message &message)
 {
-    QByteArray ba((char *)message.data(), message.msize());
+    QByteArray ba((char *) message.data(), message.msize());
     serial->sendMsg(ba);
 }
 
 int MotorController::checkParams(uint8_t dest, int chanID)
 {
-    if (chanID > opened_device.channels && chanID != -1) return INVALID_CHANNEL;
-    if (dest == 0x11 || dest == 0x50) return 0;
+    if (chanID > opened_device.channels && chanID != -1)
+        return INVALID_CHANNEL;
+    if (dest == 0x11 || dest == 0x50)
+        return 0;
     switch (dest) {
     case 0x21: {
-        if (opened_device.bays >= 1 && opened_device.bay_used[0]) return 0;
-        else return INVALID_DEST;
+        if (opened_device.bays >= 1 && opened_device.bay_used[0])
+            return 0;
+        else
+            return INVALID_DEST;
     }
     case 0x22: {
-        if (opened_device.bays >= 2 && opened_device.bay_used[1]) return 0;
-        else return INVALID_DEST;
+        if (opened_device.bays >= 2 && opened_device.bay_used[1])
+            return 0;
+        else
+            return INVALID_DEST;
     }
     case 0x23: {
-        if (opened_device.bays == 3 && opened_device.bay_used[2]) return 0;
-        else return INVALID_DEST;
+        if (opened_device.bays == 3 && opened_device.bay_used[2])
+            return 0;
+        else
+            return INVALID_DEST;
     }
-    default: return INVALID_DEST;
+    default:
+        return INVALID_DEST;
     };
     return 0;
 };
@@ -544,83 +558,85 @@ int MotorController::checkIncomingQueue(uint16_t &ret_msgID)
         serial->waitForReadyRead(serial->getTimeout());
     }
     unsigned int bytes = serial->bytesAvailable();
-    if (bytes == 0) return EMPTY;
+    if (bytes == 0)
+        return EMPTY;
     uint8_t buff[MAX_RESPONSE_SIZE];
-    if (serial->read((char*)buff, 2) != 2) {
+    if (serial->read((char *) buff, 2) != 2) {
         emit error("Cannot read from serial");
         return FATAL_ERROR;
     };
 
-    uint16_t msgID = le16toh(*((uint16_t*) &buff[0]));
+    uint16_t msgID = le16toh(*((uint16_t *) &buff[0]));
     switch (msgID) {
     case HW_DISCONNECT: {
-        serial->read((char*)&buff[2], 4);
+        serial->read((char *) &buff[2], 4);
         HwDisconnect response(buff);
         response.opened_device = &opened_device;
         logger->info(QString("Device with serial %1 disconnecting").arg(opened_device.SN));
         return FATAL_ERROR;
     }
     case HW_RESPONSE: {
-        serial->read((char*)&buff[2], 4);
+        serial->read((char *) &buff[2], 4);
         HwResponse response(buff);
         response.opened_device = &opened_device;
         logger->critical(QString("Device with serial %1 encountered error").arg(opened_device.SN));
         return DEVICE_ERROR;
     }
     case RICHRESPONSE: {
-        serial->read((char*)&buff[2], 72);
+        serial->read((char *) &buff[2], 72);
         HwResponseInfo response(buff);
         response.opened_device = &opened_device;
         logger->critical(QString("Device with serial %1 encountered error").arg(opened_device.SN));
         logger->critical("Detailed description of error");
         uint16_t error_cause = response.GetMsgID();
-        if (error_cause != 0) logger->critical(QString("\tMessage causing error: %1").arg(error_cause));
+        if (error_cause != 0)
+            logger->critical(QString("\tMessage causing error: %1").arg(error_cause));
         logger->critical(QString("\tThorlabs error code: %1").arg(response.GetCode()));
         logger->critical(QString("\t\tDescription: %1").arg(response.GetDescription()));
         return DEVICE_ERROR;
     }
     case MOVE_HOMED: {
-        serial->read((char*)&buff[2], 4);
+        serial->read((char *) &buff[2], 4);
         MovedHome response(buff);
         response.opened_device = &opened_device;
-        assert (response.GetMotorID() < 3);
+        assert(response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].homing = false;
         emit movedHome();
         return MOVED_HOME_STATUS;
     }
     case MOVE_COMPLETED: {
-        serial->read((char*)&buff[2], 18);     // 14 bytes for status updates
+        serial->read((char *) &buff[2], 18); // 14 bytes for status updates
         MoveCompleted response(buff);
         response.opened_device = &opened_device;
-        assert (response.GetMotorID() < 3);
+        assert(response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].homing = false;
         emit moveCompleted();
         return MOVE_COMPLETED_STATUS;
     }
     case MOVE_STOPPED: {
-        serial->read((char*)&buff[2], 18);    // 14 bytes for status updates
+        serial->read((char *) &buff[2], 18); // 14 bytes for status updates
         MoveStopped response(buff);
         response.opened_device = &opened_device;
-        assert (response.GetMotorID() < 3);
+        assert(response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].homing = false;
         void moveStopped();
         return MOVE_STOPPED_STATUS;
     }
     case GET_STATUSUPDATE: {
-        serial->read((char*)&buff[2], 18);
+        serial->read((char *) &buff[2], 18);
         GetStatusUpdate response(buff);
         response.opened_device = &opened_device;
-        assert (response.GetMotorID() < 3);
+        assert(response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].status_enc_count = response.GetEncCount();
         opened_device.motor[response.GetMotorID()].status_position = response.GetPosition();
         opened_device.motor[response.GetMotorID()].status_status_bits = response.GetStatusBits();
         return 0;
     }
     case GET_DCSTATUSUPDATE: {
-        serial->read((char*)&buff[2], 18);
+        serial->read((char *) &buff[2], 18);
         GetMotChanStatusUpdate response(buff);
         response.opened_device = &opened_device;
-        assert (response.GetMotorID() < 3);
+        assert(response.GetMotorID() < 3);
         opened_device.motor[response.GetMotorID()].status_velocity = response.GetVelocity();
         opened_device.motor[response.GetMotorID()].status_position = response.GetPosition();
         opened_device.motor[response.GetMotorID()].status_status_bits = response.GetStatusBits();
@@ -638,12 +654,18 @@ int MotorController::emptyIncomingQueue()
     while (true) {
         uint16_t messID = 0;
         int ret = checkIncomingQueue(messID);
-        if (ret == EMPTY) return 0;
-        if (ret == MOVED_HOME_STATUS || ret == MOVE_COMPLETED_STATUS || ret == MOVE_STOPPED_STATUS || ret == 0) continue;
+        if (ret == EMPTY)
+            return 0;
+        if (ret == MOVED_HOME_STATUS || ret == MOVE_COMPLETED_STATUS || ret == MOVE_STOPPED_STATUS
+            || ret == 0)
+            continue;
         switch (ret) {
-        case FATAL_ERROR: return FATAL_ERROR;
-        case FT_ERROR: return FT_ERROR;
-        case DEVICE_ERROR: return DEVICE_ERROR;
+        case FATAL_ERROR:
+            return FATAL_ERROR;
+        case FT_ERROR:
+            return FT_ERROR;
+        case DEVICE_ERROR:
+            return DEVICE_ERROR;
         case OTHER_MESSAGE: {
             emit error("Protocol error");
             return FATAL_ERROR;
@@ -661,18 +683,23 @@ int MotorController::getResponseMess(uint16_t expected_msg, int size, uint8_t *m
         ret = checkIncomingQueue(msgID);
         if (ret == OTHER_MESSAGE) {
             if (msgID == expected_msg) {
-                *((int16_t *) &mess[0]) =  htole16(msgID);
+                *((int16_t *) &mess[0]) = htole16(msgID);
                 QByteArray ba = serial->readNBytes(size - 2);
                 memcpy(&mess[2], ba.data(), ba.size());
                 return 0;
-            }
-            else return FATAL_ERROR;
+            } else
+                return FATAL_ERROR;
         }
-        if (ret == MOVED_HOME_STATUS || ret == MOVE_COMPLETED_STATUS || ret == MOVE_STOPPED_STATUS || ret == 0) continue;
+        if (ret == MOVED_HOME_STATUS || ret == MOVE_COMPLETED_STATUS || ret == MOVE_STOPPED_STATUS
+            || ret == 0)
+            continue;
         switch (ret) {
-        case FATAL_ERROR: return FATAL_ERROR;
-        case FT_ERROR: return FT_ERROR;
-        case DEVICE_ERROR: return DEVICE_ERROR;
+        case FATAL_ERROR:
+            return FATAL_ERROR;
+        case FT_ERROR:
+            return FT_ERROR;
+        case DEVICE_ERROR:
+            return DEVICE_ERROR;
         }
     }
     return 0;
@@ -717,7 +744,8 @@ ChannelState MotorController::getChannelState(uint8_t dest, uint8_t chanel)
     sendMessage(mes);
     uint8_t *buff = (uint8_t *) malloc(HEADER_SIZE);
     ret = getResponseMess(GET_CHANENABLESTATE, HEADER_SIZE, buff);
-    if (ret != 0) RUNTIME_ERROR;
+    if (ret != 0)
+        RUNTIME_ERROR;
     ChannelState info;
     info.SetData(buff);
     free(buff);
@@ -769,7 +797,8 @@ HwInfo MotorController::_getHwInfo(uint8_t dest)
     sendMessage(mes);
     uint8_t *buff = (uint8_t *) malloc(90);
     ret = getResponseMess(HW_GET_INFO, 90, buff);
-    if (ret != 0) RUNTIME_ERROR;
+    if (ret != 0)
+        RUNTIME_ERROR;
     HwInfo info;
     info.opened_device = &opened_device;
     info.SetData(buff);
@@ -778,7 +807,7 @@ HwInfo MotorController::_getHwInfo(uint8_t dest)
     return info;
 }
 
-const HwInfo * MotorController::getHwInfo() const
+const HwInfo *MotorController::getHwInfo() const
 {
     return &hwInfo;
 }
@@ -795,7 +824,8 @@ RackBayUsed MotorController::getBayUsed(uint8_t bayID, uint8_t dest)
     ret = getResponseMess(RACK_GET_BAYUSED, HEADER_SIZE, buff);
     RackBayUsed message;
     message.opened_device = &opened_device;
-    if (ret != 0) RUNTIME_ERROR;
+    if (ret != 0)
+        RUNTIME_ERROR;
     message.SetData(buff);
     free(buff);
     EMPTY_IN_QUEUE
@@ -866,8 +896,10 @@ void MotorController::setVelocityP(int32_t acc, int32_t maxVel, uint8_t dest, ui
     EMPTY_IN_QUEUE
     SetVelocityParams mes(dest, SOURCE, channel);
     mes.opened_device = &opened_device;
-    if (mes.SetAcceleration(acc) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
-    if (mes.SetMaxVel(maxVel) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(2);
+    if (mes.SetAcceleration(acc) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(1);
+    if (mes.SetMaxVel(maxVel) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(2);
     EMPTY_IN_QUEUE
 };
 
@@ -878,17 +910,27 @@ VelocityParams MotorController::getVelocityP(uint8_t dest, uint8_t channel)
     return message;
 };
 
-void MotorController::setJogP(uint16_t mode, int32_t stepSize, int32_t vel, int32_t acc, uint16_t stopMode, int8_t dest, uint16_t channel)
+void MotorController::setJogP(uint16_t mode,
+                              int32_t stepSize,
+                              int32_t vel,
+                              int32_t acc,
+                              uint16_t stopMode,
+                              int8_t dest,
+                              uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetJogParams mes(dest, SOURCE, channel);
     mes.opened_device = &opened_device;
-    if (mes.SetJogMode(mode) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
+    if (mes.SetJogMode(mode) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(1);
     mes.SetStepSize(stepSize);
-    if (mes.SetMaxVelocity(vel) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(3);
-    if (mes.SetAcceleration(acc) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(4);
-    if (mes.SetStopMode(stopMode) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(5);
+    if (mes.SetMaxVelocity(vel) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(3);
+    if (mes.SetAcceleration(acc) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(4);
+    if (mes.SetStopMode(stopMode) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(5);
     sendMessage(mes);
     EMPTY_IN_QUEUE
 };
@@ -900,14 +942,19 @@ JogParams MotorController::getJogP(uint8_t dest, uint8_t channel)
     return message;
 };
 
-void MotorController::setPowerUsed(uint16_t rest_power, uint16_t move_power, int8_t dest, uint16_t channel)
+void MotorController::setPowerUsed(uint16_t rest_power,
+                                   uint16_t move_power,
+                                   int8_t dest,
+                                   uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetPowerParams mes(dest, SOURCE, channel);
     mes.opened_device = &opened_device;
-    if (mes.SetRestFactor(rest_power) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
-    if (mes.SetMoveFactor(move_power) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(2);
+    if (mes.SetRestFactor(rest_power) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(1);
+    if (mes.SetMoveFactor(move_power) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(2);
     sendMessage(mes);
     EMPTY_IN_QUEUE
 };
@@ -973,13 +1020,14 @@ int32_t MotorController::getAbsoluteMoveP(uint8_t dest, uint8_t channel)
     return message.GetAbsolutePos();
 };
 
-void MotorController::setHomingVel(uint32_t vel, int8_t dest,  uint16_t channel)
+void MotorController::setHomingVel(uint32_t vel, int8_t dest, uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetHomeParams mes(dest, SOURCE, channel);
     mes.opened_device = &opened_device;
-    if (mes.SetHomingVelocity(vel) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
+    if (mes.SetHomingVelocity(vel) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(1);
     sendMessage(mes);
     EMPTY_IN_QUEUE
 };
@@ -991,19 +1039,31 @@ int32_t MotorController::getHomingVel(uint8_t dest, uint8_t channel)
     return message.GetHomingVelocity();
 };
 
-void MotorController::setLimitSwitchConfig(uint16_t CwHwLim, uint16_t CCwHwLim, uint16_t CwSwLim, uint16_t CCwSwLim, uint16_t mode, int8_t dest, uint16_t channel)
+void MotorController::setLimitSwitchConfig(uint16_t CwHwLim,
+                                           uint16_t CCwHwLim,
+                                           uint16_t CwSwLim,
+                                           uint16_t CCwSwLim,
+                                           uint16_t mode,
+                                           int8_t dest,
+                                           uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetLimitSwitchParams mes(dest, SOURCE, channel);
     mes.opened_device = &opened_device;
-    if (mes.SetClockwiseHardLimit(CwHwLim) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
-    if (mes.SetCounterlockwiseHardLimit(CCwHwLim) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(2);
-    if (mes.SetClockwiseSoftLimit(CwSwLim) == IGNORED_PARAM) logger->warning("Software limit ignored in this device");
-    if (mes.SetCounterlockwiseSoftLimit(CCwSwLim) == IGNORED_PARAM) logger->warning("Software limit ignored in this device");
+    if (mes.SetClockwiseHardLimit(CwHwLim) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(1);
+    if (mes.SetCounterlockwiseHardLimit(CCwHwLim) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(2);
+    if (mes.SetClockwiseSoftLimit(CwSwLim) == IGNORED_PARAM)
+        logger->warning("Software limit ignored in this device");
+    if (mes.SetCounterlockwiseSoftLimit(CCwSwLim) == IGNORED_PARAM)
+        logger->warning("Software limit ignored in this device");
     ret = mes.SetLimitMode(mode);
-    if (ret == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(5);
-    if (ret == IGNORED_PARAM) logger->warning("Limit mode ignored in this device");
+    if (ret == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(5);
+    if (ret == IGNORED_PARAM)
+        logger->warning("Limit mode ignored in this device");
     sendMessage(mes);
     EMPTY_IN_QUEUE
 };
@@ -1065,7 +1125,8 @@ void MotorController::startAbsoluteMove(int32_t pos, uint8_t dest, uint16_t chan
     EMPTY_IN_QUEUE
     MoveAbsolute2 mes(dest, SOURCE, channel);
     mes.opened_device = &opened_device;
-    if (mes.SetAbsoluteDistance(pos) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
+    if (mes.SetAbsoluteDistance(pos) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(1);
     sendMessage(mes);
     opened_device.motor[mes.GetMotorID()].moving = true;
     EMPTY_IN_QUEUE
@@ -1077,7 +1138,8 @@ void MotorController::startJogMove(uint8_t direction, uint8_t dest, uint8_t chan
     EMPTY_IN_QUEUE
     JogMove mes(dest, SOURCE, channel);
     mes.opened_device = &opened_device;
-    if (mes.SetDirection(direction) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
+    if (mes.SetDirection(direction) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(1);
     sendMessage(mes);
     opened_device.motor[mes.GetMotorID()].moving = true;
     EMPTY_IN_QUEUE
@@ -1089,7 +1151,8 @@ void MotorController::startSetVelocityMove(uint8_t direction, uint8_t dest, uint
     EMPTY_IN_QUEUE
     MovewVelocity mes(dest, SOURCE, channel);
     mes.opened_device = &opened_device;
-    if (mes.SetDirection(direction) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
+    if (mes.SetDirection(direction) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(1);
     sendMessage(mes);
     opened_device.motor[mes.GetMotorID()].moving = true;
     EMPTY_IN_QUEUE
@@ -1101,7 +1164,8 @@ void MotorController::stopMovement(uint8_t stopMode, uint8_t dest, uint8_t chann
     EMPTY_IN_QUEUE
     StopMove mes(dest, SOURCE, channel);
     mes.opened_device = &opened_device;
-    if (mes.SetStopMode(stopMode) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
+    if (mes.SetStopMode(stopMode) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(1);
     sendMessage(mes);
     opened_device.motor[mes.GetMotorID()].stopping = true;
     EMPTY_IN_QUEUE
@@ -1113,7 +1177,8 @@ void MotorController::setAccelerationProfile(uint16_t index, int8_t dest, uint16
     EMPTY_IN_QUEUE
     SetBowIndex mes(dest, SOURCE, channel);
     mes.opened_device = &opened_device;
-    if (mes.SetBowindex(index) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
+    if (mes.SetBowindex(index) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(1);
     sendMessage(mes);
     EMPTY_IN_QUEUE
 };
@@ -1131,7 +1196,8 @@ void MotorController::setLedP(uint16_t mode, int8_t dest, uint16_t channel)
     EMPTY_IN_QUEUE
     SetLedMode mes(dest, SOURCE, channel);
     mes.opened_device = &opened_device;
-    if (mes.SetMode(mode) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
+    if (mes.SetMode(mode) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(1);
     sendMessage(mes);
     EMPTY_IN_QUEUE
 };
@@ -1143,16 +1209,21 @@ uint16_t MotorController::getLedP(uint8_t dest, uint8_t channel)
     return message.GetMode();
 };
 
-void MotorController::setButtons(uint16_t mode, int32_t pos1, int32_t pos2, uint16_t timeout, int8_t dest, uint16_t channel)
+void MotorController::setButtons(
+    uint16_t mode, int32_t pos1, int32_t pos2, uint16_t timeout, int8_t dest, uint16_t channel)
 {
     CHECK_ADDR_PARAMS(dest, channel)
     EMPTY_IN_QUEUE
     SetButtonParams mes(dest, SOURCE, channel);
     mes.opened_device = &opened_device;
-    if (mes.SetMode(mode) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(1);
-    if (mes.SetPosition1(pos1) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(2);
-    if (mes.SetPosition2(pos2) == INVALID_PARAM) RUNTIME_ERROR_INVALID_PARAM(3);
-    if (mes.SetTimeout(timeout) == IGNORED_PARAM) logger->warning("Timeout ignored in this device");
+    if (mes.SetMode(mode) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(1);
+    if (mes.SetPosition1(pos1) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(2);
+    if (mes.SetPosition2(pos2) == INVALID_PARAM)
+        RUNTIME_ERROR_INVALID_PARAM(3);
+    if (mes.SetTimeout(timeout) == IGNORED_PARAM)
+        logger->warning("Timeout ignored in this device");
     sendMessage(mes);
     EMPTY_IN_QUEUE
 };
@@ -1229,7 +1300,8 @@ void MotorController::createTrigger(uint8_t mode, uint8_t dest, uint8_t channel)
     EMPTY_IN_QUEUE
     SetTrigger mes(dest, SOURCE, channel);
     mes.opened_device = &opened_device;
-    if (mes.SetMode(mode) == IGNORED_PARAM) logger->warning("trigger ignored in this device");
+    if (mes.SetMode(mode) == IGNORED_PARAM)
+        logger->warning("trigger ignored in this device");
     sendMessage(mes);
     EMPTY_IN_QUEUE
 };

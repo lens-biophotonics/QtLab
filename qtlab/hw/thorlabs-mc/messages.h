@@ -22,15 +22,17 @@
 #ifndef MESSAGES
 #define MESSAGES
 
+#include "device.h"
+
 #include <endian.h>
-#include <string>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <string>
+
 #include <QString>
 
-#include "device.h"
 #include "message_codes.h"
 #define HEADER_SIZE 6
 
@@ -47,13 +49,14 @@ namespace Thorlabs {
 class Message
 {
     friend class MotorController;
+
 public:
     /**
      * Basic constructor. Allocates required space and copies buffer to message.
      * @param buffer- buffer pointer
      * @param buffer_size  - buffer size
      */
-    Message(uint8_t* buffer, unsigned int buffer_size)
+    Message(uint8_t *buffer, unsigned int buffer_size)
     {
         bytes = (uint8_t *) malloc(buffer_size);
         bytes = (uint8_t *) memcpy(bytes, buffer, buffer_size);
@@ -74,7 +77,9 @@ public:
      * @brief Copy constructor
      * @param m
      */
-    Message(const Message& m) : length(m.length), opened_device(m.opened_device)
+    Message(const Message &m)
+        : length(m.length)
+        , opened_device(m.opened_device)
     {
         bytes = (uint8_t *) malloc(length);
         memcpy(bytes, m.bytes, length);
@@ -83,12 +88,9 @@ public:
     /**
      * Frees allocated memory.
      */
-    ~Message()
-    {
-        free(bytes);
-    }
+    ~Message() { free(bytes); }
 
-    Message & operator=(const Message & m)
+    Message &operator=(const Message &m)
     {
         bytes = (uint8_t *) malloc(length);
         memcpy(bytes, m.bytes, length);
@@ -99,13 +101,13 @@ public:
      * Returns pointer to message data.
      * @return uint8_t pointer to start of message data buffer
      */
-    uint8_t* data(){ return bytes; }
+    uint8_t *data() { return bytes; }
 
     /**
      * Returns size of message data.
      * @return buffer size
      */
-    unsigned int msize(){ return length; }
+    unsigned int msize() { return length; }
 
 protected:
     unsigned int length;
@@ -122,13 +124,17 @@ public:
     /**
      * Constructs empty message composed of header only.
      */
-    HeaderMessage() : Message(6){}
+    HeaderMessage()
+        : Message(6)
+    {}
 
     /**
      * Constructs message and copies data buffer to message.
      * @param header_bytes - pointer to buffer to copy
      */
-    HeaderMessage(uint8_t *header_bytes) : Message(header_bytes, HEADER_SIZE){}
+    HeaderMessage(uint8_t *header_bytes)
+        : Message(header_bytes, HEADER_SIZE)
+    {}
 
     /**
      * Construct message with specified parameters.
@@ -138,7 +144,8 @@ public:
      * @param dest - destination address
      * @param source - source address
      */
-    HeaderMessage(uint16_t type, uint8_t param1, uint8_t param2, uint8_t dest, uint8_t source) : Message(HEADER_SIZE)
+    HeaderMessage(uint16_t type, uint8_t param1, uint8_t param2, uint8_t dest, uint8_t source)
+        : Message(HEADER_SIZE)
     {
         *((uint16_t *) &bytes[0]) = htole16(type);
         bytes[2] = param1;
@@ -151,7 +158,7 @@ public:
      * Sets message data.
      * @param data - pointer to buffer to copy
      */
-    void SetData(uint8_t *data){ bytes = (uint8_t *) memcpy(bytes, data, length); }
+    void SetData(uint8_t *data) { bytes = (uint8_t *) memcpy(bytes, data, length); }
 
     /**
      * Gets parameters from message.
@@ -179,46 +186,43 @@ public:
      * Sets first parameter
      * @param param
      */
-    void SetFirstParam(uint8_t param){ bytes[2] = param; }
+    void SetFirstParam(uint8_t param) { bytes[2] = param; }
     /**
      * Returns first parameter
      * @return parameter
      */
-    uint8_t GetFirstParam(){return bytes[2];}
+    uint8_t GetFirstParam() { return bytes[2]; }
 
     /**
      * Sets second parameter
      * @param param
      */
-    void SetSecondParam(uint8_t param){ bytes[3] = param; }
+    void SetSecondParam(uint8_t param) { bytes[3] = param; }
     /**
      * Returns second parameter
      * @param param
      */
-    uint8_t GetSecondParam(){return bytes[3];}
+    uint8_t GetSecondParam() { return bytes[3]; }
 
     /**
      * Returns source address.
      */
-    uint8_t GetSource(){ return bytes[5]; }
+    uint8_t GetSource() { return bytes[5]; }
     /**
      * Sets source address.
      * @param source
      */
-    void SetSource(uint8_t source){ bytes[5] = source; }
+    void SetSource(uint8_t source) { bytes[5] = source; }
 
     /**
      * Returns destination address.
      */
-    uint8_t GetDest(){ return bytes[4]; }
+    uint8_t GetDest() { return bytes[4]; }
     /**
      * Sets destination address.
      * @param dest
      */
-    void SetDest(uint8_t dest)
-    {
-        bytes[4] = dest;
-    }
+    void SetDest(uint8_t dest) { bytes[4] = dest; }
 
     /**
      * One controller device can be connected up to 3 motors. Function calculates
@@ -227,17 +231,20 @@ public:
      */
     uint8_t GetMotorID()
     {
-        if (opened_device->bays == -1) return (GetFirstParam() - 1);  // channel type, channels numbered from 1, in field from 0
-        else {                                                  // bay type, numbering 0x21 ..0x23,
-            if (GetSource() == 0x01) return (GetDest() - 0x21); // outgoing message
-            else return (GetSource() - 0x21);                   // incoming message
+        if (opened_device->bays == -1)
+            return (GetFirstParam() - 1); // channel type, channels numbered from 1, in field from 0
+        else {                            // bay type, numbering 0x21 ..0x23,
+            if (GetSource() == 0x01)
+                return (GetDest() - 0x21); // outgoing message
+            else
+                return (GetSource() - 0x21); // incoming message
         }
     }
 
     /**
      * @return number specifying message type
      */
-    uint16_t GetType(){ return le16toh(*((uint16_t *) &bytes[0]));}
+    uint16_t GetType() { return le16toh(*((uint16_t *) &bytes[0])); }
 };
 
 /*
@@ -250,14 +257,17 @@ public:
      * Creates empty message with specified size
      * @param size
      */
-    LongMessage(unsigned int size) : Message(size){}
+    LongMessage(unsigned int size)
+        : Message(size)
+    {}
 
     /**
      * Creates message, allocates space and copies given buffer to message.
      * @param input_bytes - buffer pointer
      * @param buffer_size - buffer size
      */
-    LongMessage(uint8_t *input_bytes, unsigned int buffer_size) : Message(input_bytes, buffer_size){};
+    LongMessage(uint8_t *input_bytes, unsigned int buffer_size)
+        : Message(input_bytes, buffer_size){};
 
     /**
      * Creates message and sets parameters in header.
@@ -266,7 +276,8 @@ public:
      * @param dest - destination address
      * @param source - source address
      */
-    LongMessage(uint16_t type, uint16_t data_size, uint8_t dest, uint8_t source) : Message(HEADER_SIZE + data_size)
+    LongMessage(uint16_t type, uint16_t data_size, uint8_t dest, uint8_t source)
+        : Message(HEADER_SIZE + data_size)
     {
         *((uint16_t *) &bytes[0]) = htole16(type);
         *((uint16_t *) &bytes[2]) = htole16(data_size);
@@ -278,49 +289,48 @@ public:
      * Sets message data.
      * @param data - pointer to buffer to copy
      */
-    void SetData(uint8_t *data){ bytes = (uint8_t *) memcpy(bytes, data, length); }
-
+    void SetData(uint8_t *data) { bytes = (uint8_t *) memcpy(bytes, data, length); }
 
     /**
      * Sets destination address.
      */
-    void SetDest(uint8_t dest){ bytes[4] = (dest | 0x80); }
+    void SetDest(uint8_t dest) { bytes[4] = (dest | 0x80); }
     /**
      * Returns destination address.
      */
-    uint8_t GetDest(){ return bytes[4]; }
+    uint8_t GetDest() { return bytes[4]; }
 
     /**
      * Returns source address.
      */
-    uint8_t GetSource(){ return bytes[5]; }
+    uint8_t GetSource() { return bytes[5]; }
     /**
      * Sets source address.
      */
-    void SetSource(uint8_t source){ bytes[5] = source; }
+    void SetSource(uint8_t source) { bytes[5] = source; }
 
     /**
      * Return length of data following header.
      * @return length
      */
-    uint16_t GetPacketLength(){ return le16toh(*((uint16_t *) &bytes[2]));}
+    uint16_t GetPacketLength() { return le16toh(*((uint16_t *) &bytes[2])); }
     /**
      * Sets parameter specifying length of data following header.
      * @param size
      */
-    void SetPacketLength(uint16_t size){ *((uint16_t *) &bytes[2]) = htole16(size);}
+    void SetPacketLength(uint16_t size) { *((uint16_t *) &bytes[2]) = htole16(size); }
 
     /**
      * Returns number specifying message type.
      * @return type
      */
-    uint16_t GetType(){ return le16toh(*((uint16_t *) &bytes[0]));}
+    uint16_t GetType() { return le16toh(*((uint16_t *) &bytes[0])); }
 
     /**
      * Return channel ID
      * @return channel ID in range 0x21-0x23
      */
-    uint16_t GetChanID(){ return le16toh(*((uint16_t*) &bytes[6])); }
+    uint16_t GetChanID() { return le16toh(*((uint16_t *) &bytes[6])); }
 
     /**
      * Sets channel ID.
@@ -329,7 +339,8 @@ public:
      */
     int SetChanID(int16_t chanID)
     {
-        if (chanID > opened_device->channels) return INVALID_PARAM;
+        if (chanID > opened_device->channels)
+            return INVALID_PARAM;
         *((uint16_t *) &bytes[6]) = htole16(chanID);
         return 0;
     }
@@ -341,14 +352,16 @@ public:
      */
     uint16_t GetMotorID()
     {
-        if (opened_device->bays == -1) return (GetChanID() - 1);  // channel type, channels numbered from 1, in field from 0
-        else {                                                  // bay type, numbering 0x21 ..0x23,
-            if (GetSource() == 0x01) return (GetDest() - 0x21); // outgoing message
-            else return (GetSource() - 0x21);                   // incoming message
+        if (opened_device->bays == -1)
+            return (GetChanID() - 1); // channel type, channels numbered from 1, in field from 0
+        else {                        // bay type, numbering 0x21 ..0x23,
+            if (GetSource() == 0x01)
+                return (GetDest() - 0x21); // outgoing message
+            else
+                return (GetSource() - 0x21); // incoming message
         }
     }
 };
-
 
 // Generic messages -------------------------------------------------------------
 
@@ -360,9 +373,10 @@ public:
 class IdentifyMs : public HeaderMessage
 {
 public:
-    IdentifyMs(uint8_t dest, uint8_t source) : HeaderMessage(IDENTIFY, 0, 0, dest, source){}
+    IdentifyMs(uint8_t dest, uint8_t source)
+        : HeaderMessage(IDENTIFY, 0, 0, dest, source)
+    {}
 };
-
 
 /**
  * Used to enable or disable channel.
@@ -374,7 +388,8 @@ public:
 class SetChannelState : public HeaderMessage
 {
 public:
-    SetChannelState(uint8_t chanID, uint8_t ableState, uint8_t dest, uint8_t source) : HeaderMessage(SET_CHANENABLESTATE, chanID, ableState, dest, source){};
+    SetChannelState(uint8_t chanID, uint8_t ableState, uint8_t dest, uint8_t source)
+        : HeaderMessage(SET_CHANENABLESTATE, chanID, ableState, dest, source){};
 
     /**
      * Set channel ability.
@@ -383,7 +398,8 @@ public:
      */
     int SetAbleState(uint8_t state)
     {
-        if (state != 1 && state != 2) return INVALID_PARAM;
+        if (state != 1 && state != 2)
+            return INVALID_PARAM;
         SetSecondParam(state);
         return 0;
     }
@@ -398,7 +414,8 @@ public:
 class ReqChannelState : public HeaderMessage
 {
 public:
-    ReqChannelState(uint8_t chanID, uint8_t dest, uint8_t source) : HeaderMessage(REQ_CHANENABLESTATE, chanID, 0, dest, source){};
+    ReqChannelState(uint8_t chanID, uint8_t dest, uint8_t source)
+        : HeaderMessage(REQ_CHANENABLESTATE, chanID, 0, dest, source){};
 };
 
 /**
@@ -407,20 +424,24 @@ public:
 class ChannelState : public HeaderMessage
 {
 public:
-    ChannelState() : HeaderMessage(){}
+    ChannelState()
+        : HeaderMessage()
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    ChannelState(uint8_t *mess) : HeaderMessage(mess){}
+    ChannelState(uint8_t *mess)
+        : HeaderMessage(mess)
+    {}
 
     /**
      * Saves info in given variables.
      * @param chanID - channel ID
      * @param state - 0x01 = enabled, 0x02 = disabled
      */
-    void Getinfo(uint8_t *chanID, uint8_t *state){ GetParams(chanID, state); }
+    void Getinfo(uint8_t *chanID, uint8_t *state) { GetParams(chanID, state); }
 };
 
 /**
@@ -429,20 +450,26 @@ public:
 class HwDisconnect : public HeaderMessage
 {
 public:
-    HwDisconnect() : HeaderMessage(){}
+    HwDisconnect()
+        : HeaderMessage()
+    {}
 
     /**
      * Construct message and fills addresses
      * @param dest - destination address
      * @param source - source address
      */
-    HwDisconnect(uint8_t dest, uint8_t source) : HeaderMessage(HW_DISCONNECT, 0, 0, dest, source){}
+    HwDisconnect(uint8_t dest, uint8_t source)
+        : HeaderMessage(HW_DISCONNECT, 0, 0, dest, source)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    HwDisconnect(uint8_t *mess) : HeaderMessage(mess){}
+    HwDisconnect(uint8_t *mess)
+        : HeaderMessage(mess)
+    {}
 };
 
 /**
@@ -451,13 +478,17 @@ public:
 class HwResponse : public HeaderMessage
 {
 public:
-    HwResponse() : HeaderMessage(){}
+    HwResponse()
+        : HeaderMessage()
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    HwResponse(uint8_t *mess) : HeaderMessage(mess){}
+    HwResponse(uint8_t *mess)
+        : HeaderMessage(mess)
+    {}
 };
 
 /**
@@ -466,31 +497,32 @@ public:
 class HwResponseInfo : public LongMessage
 {
 public:
-    HwResponseInfo() : LongMessage(74){}
+    HwResponseInfo()
+        : LongMessage(74)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    HwResponseInfo(uint8_t *mess) : LongMessage(mess, 74){}
+    HwResponseInfo(uint8_t *mess)
+        : LongMessage(mess, 74)
+    {}
 
     /**
      * @return ID of message that caused error
      */
-    uint16_t GetMsgID(){ return le16toh(*((uint16_t *) &bytes[6])); }
+    uint16_t GetMsgID() { return le16toh(*((uint16_t *) &bytes[6])); }
 
     /**
      * @return Thorlabs specific error code
      */
-    uint16_t GetCode(){ return le16toh(*((uint16_t *) &bytes[8])); }
+    uint16_t GetCode() { return le16toh(*((uint16_t *) &bytes[8])); }
 
     /**
      * @return  Closer description of error. ASCII string terminated with '\0'.
      */
-    char* GetDescription()
-    {
-        return (char*) &bytes[10];
-    }
+    char *GetDescription() { return (char *) &bytes[10]; }
 };
 
 /**
@@ -501,7 +533,8 @@ public:
 class StartUpdateMessages : public HeaderMessage
 {
 public:
-    StartUpdateMessages(uint8_t dest, uint8_t source) : HeaderMessage(HW_START_UPDATEMSGS, 0, 0, dest, source){};
+    StartUpdateMessages(uint8_t dest, uint8_t source)
+        : HeaderMessage(HW_START_UPDATEMSGS, 0, 0, dest, source){};
 
     /**
      * Sets update message rate.
@@ -510,7 +543,9 @@ public:
      */
     int SetUpdaterate(uint8_t rate)
     {
-        if (opened_device->device_type == BBD101 || opened_device->device_type == BBD102 || opened_device->device_type == BBD103) return IGNORED_PARAM;
+        if (opened_device->device_type == BBD101 || opened_device->device_type == BBD102
+            || opened_device->device_type == BBD103)
+            return IGNORED_PARAM;
         SetFirstParam(rate);
         return 0;
     }
@@ -524,7 +559,9 @@ public:
 class StopUpdateMessages : public HeaderMessage
 {
 public:
-    StopUpdateMessages(uint8_t dest, uint8_t source) : HeaderMessage(HW_STOP_UPDATEMSGS, 0, 0, dest, source){}
+    StopUpdateMessages(uint8_t dest, uint8_t source)
+        : HeaderMessage(HW_STOP_UPDATEMSGS, 0, 0, dest, source)
+    {}
 };
 
 /**
@@ -535,7 +572,9 @@ public:
 class ReqHwInfo : public HeaderMessage
 {
 public:
-    ReqHwInfo(uint8_t dest, uint8_t source) : HeaderMessage(HW_REQ_INFO, 0, 0, dest, source){}
+    ReqHwInfo(uint8_t dest, uint8_t source)
+        : HeaderMessage(HW_REQ_INFO, 0, 0, dest, source)
+    {}
 };
 
 /**
@@ -544,57 +583,55 @@ public:
 class HwInfo : public LongMessage
 {
 public:
-    HwInfo() : LongMessage(90){}
+    HwInfo()
+        : LongMessage(90)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    HwInfo(uint8_t *mess) : LongMessage(mess, 90){}
+    HwInfo(uint8_t *mess)
+        : LongMessage(mess, 90)
+    {}
 
     /**
      * Returns serial number.
      * @return serial number
      */
-    int32_t SerialNumber(){ return le32toh(*((int32_t*) &bytes[6])); }
+    int32_t SerialNumber() { return le32toh(*((int32_t *) &bytes[6])); }
 
     /**
      * Returns alphanumeric string describing model type.
      * @return model name in string
      */
-    QString ModelNumber() const
-    {
-        return QString::fromUtf8((const char*)&bytes[10], 8);
-    }
+    QString ModelNumber() const { return QString::fromUtf8((const char *) &bytes[10], 8); }
 
     /**
      * @return 44 = brushless DC controller, 45 = multi channel motherboard
      */
-    uint16_t HWType(){ return le16toh(*((uint16_t*) &bytes[18]));}
+    uint16_t HWType() { return le16toh(*((uint16_t *) &bytes[18])); }
 
     /**
      * Returns closer description.
      * @return description string
      */
-    QString Notes()
-    {
-        return QString::fromUtf8((const char*)&bytes[24], 48);
-    }
+    QString Notes() { return QString::fromUtf8((const char *) &bytes[24], 48); }
 
     /**
      * @brief Returns hardware version number.
      */
-    uint16_t HwVersion(){ return le16toh(*((uint16_t*) &bytes[84])); }
+    uint16_t HwVersion() { return le16toh(*((uint16_t *) &bytes[84])); }
 
     /**
      * @brief Returns modification state of device.
      */
-    uint16_t ModState(){ return le16toh(*((uint16_t*) &bytes[86])); }
+    uint16_t ModState() { return le16toh(*((uint16_t *) &bytes[86])); }
 
     /**
      * @brief Returns number of channels.
      */
-    uint16_t NumChannels(){ return le16toh(*((uint16_t*) &bytes[88])); };
+    uint16_t NumChannels() { return le16toh(*((uint16_t *) &bytes[88])); };
 };
 
 /**
@@ -605,13 +642,15 @@ public:
 class ReqRackBayUsed : public HeaderMessage
 {
 public:
-    ReqRackBayUsed(uint8_t dest, uint8_t source) : HeaderMessage(RACK_REQ_BAYUSED, 0, 0, dest, source){}
+    ReqRackBayUsed(uint8_t dest, uint8_t source)
+        : HeaderMessage(RACK_REQ_BAYUSED, 0, 0, dest, source)
+    {}
 
     /**
      * Sets bay ID to request info on.
      * @param bayID
      */
-    void SetBayIdent(uint8_t bayID){ SetFirstParam(bayID); }
+    void SetBayIdent(uint8_t bayID) { SetFirstParam(bayID); }
 };
 
 /**
@@ -620,26 +659,28 @@ public:
 class RackBayUsed : public HeaderMessage
 {
 public:
-    RackBayUsed() : HeaderMessage(){};
+    RackBayUsed()
+        : HeaderMessage(){};
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    RackBayUsed(uint8_t *mess) : HeaderMessage(mess){}
+    RackBayUsed(uint8_t *mess)
+        : HeaderMessage(mess)
+    {}
 
     /**
      * Return bay ID from message.
      * @return bay ID
      */
-    uint8_t GetBayID(){ return GetFirstParam(); }
+    uint8_t GetBayID() { return GetFirstParam(); }
 
     /**
      * @return 1 - bay occupied, 2 - bay empty
      */
-    uint8_t GetBayState(){ return GetSecondParam(); }
+    uint8_t GetBayState() { return GetSecondParam(); }
 };
-
 
 //Motor control messages ---------------------------------------------------
 
@@ -651,7 +692,8 @@ public:
 class YesFlashProg : public HeaderMessage
 {
 public:
-    YesFlashProg(uint8_t dest, uint8_t source) : HeaderMessage(HW_YES_FLASH_PROGRAMMING, 0, 0, dest, source){};
+    YesFlashProg(uint8_t dest, uint8_t source)
+        : HeaderMessage(HW_YES_FLASH_PROGRAMMING, 0, 0, dest, source){};
 };
 
 /**
@@ -662,7 +704,8 @@ public:
 class NoFlashProg : public HeaderMessage
 {
 public:
-    NoFlashProg(uint8_t dest, uint8_t source) : HeaderMessage(HW_NO_FLASH_PROGRAMMING, 0, 0, dest, source){};
+    NoFlashProg(uint8_t dest, uint8_t source)
+        : HeaderMessage(HW_NO_FLASH_PROGRAMMING, 0, 0, dest, source){};
 };
 
 /**
@@ -674,7 +717,8 @@ public:
 class SetPosCounter : public LongMessage
 {
 public:
-    SetPosCounter(uint8_t dest, uint8_t source, uint16_t chanID) : LongMessage(SET_POSCOUNTER, 6, dest, source)
+    SetPosCounter(uint8_t dest, uint8_t source, uint16_t chanID)
+        : LongMessage(SET_POSCOUNTER, 6, dest, source)
     {
         *((uint16_t *) &bytes[6]) = htole16(chanID);
     }
@@ -700,7 +744,9 @@ public:
 class ReqPosCounter : public HeaderMessage
 {
 public:
-    ReqPosCounter(uint8_t dest, uint8_t source,  uint8_t chanId) : HeaderMessage(REQ_POSCOUNTER, chanId, 0, dest, source){}
+    ReqPosCounter(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_POSCOUNTER, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -709,18 +755,20 @@ public:
 class GetPosCounter : public LongMessage
 {
 public:
-    GetPosCounter() : LongMessage(12){};
+    GetPosCounter()
+        : LongMessage(12){};
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetPosCounter(uint8_t *mess) : LongMessage(mess, 12){};
+    GetPosCounter(uint8_t *mess)
+        : LongMessage(mess, 12){};
 
     /**
      * @return position counter value
      */
-    int32_t GetPosition(){ return le32toh(*((int32_t*) &bytes[8])); }
+    int32_t GetPosition() { return le32toh(*((int32_t *) &bytes[8])); }
 };
 
 /**
@@ -732,7 +780,8 @@ public:
 class SetEncCount : public LongMessage
 {
 public:
-    SetEncCount(uint8_t dest, uint8_t source, uint16_t chanID) : LongMessage(SET_ENCCOUNTER, 6, dest, source)
+    SetEncCount(uint8_t dest, uint8_t source, uint16_t chanID)
+        : LongMessage(SET_ENCCOUNTER, 6, dest, source)
     {
         *((uint16_t *) &bytes[6]) = htole16(chanID);
     }
@@ -758,7 +807,9 @@ public:
 class ReqEncCount : public HeaderMessage
 {
 public:
-    ReqEncCount(uint8_t dest, uint8_t source, uint8_t chanId) : HeaderMessage(REQ_ENCCOUNTER, chanId, 0, dest, source){}
+    ReqEncCount(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_ENCCOUNTER, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -767,18 +818,22 @@ public:
 class GetEncCount : public LongMessage
 {
 public:
-    GetEncCount() : LongMessage(12){}
+    GetEncCount()
+        : LongMessage(12)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetEncCount(uint8_t *mess) : LongMessage(mess, 12){}
+    GetEncCount(uint8_t *mess)
+        : LongMessage(mess, 12)
+    {}
 
     /**
      * @return encoder counter value
      */
-    int32_t GetEncCounter(){ return le32toh(*((int16_t*) &bytes[8])); }
+    int32_t GetEncCounter() { return le32toh(*((int16_t *) &bytes[8])); }
 };
 
 /**
@@ -807,7 +862,8 @@ public:
      */
     int SetAcceleration(int32_t acc)
     {
-        if (abs(acc) > opened_device->motor[GetMotorID()].max_acc) return INVALID_PARAM;
+        if (abs(acc) > opened_device->motor[GetMotorID()].max_acc)
+            return INVALID_PARAM;
         *((int32_t *) &bytes[12]) = htole32(acc);
         return 0;
     }
@@ -819,7 +875,8 @@ public:
      */
     int SetMaxVel(int32_t max)
     {
-        if (abs(max) > opened_device->motor[GetMotorID()].max_vel) return INVALID_PARAM;
+        if (abs(max) > opened_device->motor[GetMotorID()].max_vel)
+            return INVALID_PARAM;
         *((int32_t *) &bytes[16]) = htole32(max);
         return 0;
     }
@@ -834,7 +891,9 @@ public:
 class ReqVelocityParams : public HeaderMessage
 {
 public:
-    ReqVelocityParams(uint8_t dest, uint8_t source,  uint8_t chanId) : HeaderMessage(REQ_VELPARAMS, chanId, 0, dest, source){}
+    ReqVelocityParams(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_VELPARAMS, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -843,26 +902,30 @@ public:
 class VelocityParams : public LongMessage
 {
 public:
-    VelocityParams() : LongMessage(20){}
+    VelocityParams()
+        : LongMessage(20)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    VelocityParams(uint8_t *mess) : LongMessage(mess, 20){}
+    VelocityParams(uint8_t *mess)
+        : LongMessage(mess, 20)
+    {}
 
     /**
      * @return minimal velocity in Thorlabs specified units.
      */
-    int32_t GetMinVel(){ return le32toh(*((int32_t*) &bytes[8])); }
+    int32_t GetMinVel() { return le32toh(*((int32_t *) &bytes[8])); }
     /**
      * @return maximal velocity in Thorlabs specified units.
      */
-    int32_t GetMaxVel(){ return le32toh(*((int32_t*) &bytes[16])); }
+    int32_t GetMaxVel() { return le32toh(*((int32_t *) &bytes[16])); }
     /**
      * @return acceleration in Thorlabs specified units.
      */
-    int32_t GetAcceleration(){ return le32toh(*((int32_t*) &bytes[12])); }
+    int32_t GetAcceleration() { return le32toh(*((int32_t *) &bytes[12])); }
 };
 
 /**
@@ -887,7 +950,8 @@ public:
      */
     int SetJogMode(uint16_t mode)
     {
-        if (mode != 1 && mode != 2) return INVALID_PARAM;
+        if (mode != 1 && mode != 2)
+            return INVALID_PARAM;
         *((uint16_t *) &bytes[8]) = htole16(mode);
         return 0;
     }
@@ -896,7 +960,7 @@ public:
      * Sets size of step if single step mode is used.
      * @param stepSize - size of step in Thorlabs specified units
      */
-    void SetStepSize(int32_t stepSize){ *((int32_t *) &bytes[10]) = htole32(stepSize); }
+    void SetStepSize(int32_t stepSize) { *((int32_t *) &bytes[10]) = htole32(stepSize); }
 
     /**
      * Sets maximal velocity.
@@ -905,7 +969,8 @@ public:
      */
     int SetMaxVelocity(int32_t velocity)
     {
-        if (abs(velocity) > opened_device->motor[GetMotorID()].max_vel) return INVALID_PARAM;
+        if (abs(velocity) > opened_device->motor[GetMotorID()].max_vel)
+            return INVALID_PARAM;
         *((int32_t *) &bytes[22]) = htole32(velocity);
         return 0;
     }
@@ -916,7 +981,8 @@ public:
      */
     int SetAcceleration(int32_t acc)
     {
-        if (abs(acc) > opened_device->motor[GetMotorID()].max_acc) return INVALID_PARAM;
+        if (abs(acc) > opened_device->motor[GetMotorID()].max_acc)
+            return INVALID_PARAM;
         *((int32_t *) &bytes[18]) = htole32(acc);
         return 0;
     }
@@ -926,7 +992,8 @@ public:
      */
     int SetStopMode(uint16_t mode)
     {
-        if (mode != 1 && mode != 2) return INVALID_PARAM;
+        if (mode != 1 && mode != 2)
+            return INVALID_PARAM;
         *((uint16_t *) &bytes[26]) = htole16(mode);
         return 0;
     }
@@ -941,7 +1008,9 @@ public:
 class ReqJogParams : public HeaderMessage
 {
 public:
-    ReqJogParams(uint8_t dest, uint8_t source,  uint8_t chanId) : HeaderMessage(REQ_JOGPARAMS, chanId, 0, dest, source){}
+    ReqJogParams(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_JOGPARAMS, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -950,43 +1019,47 @@ public:
 class JogParams : public LongMessage
 {
 public:
-    JogParams() : LongMessage(28){}
+    JogParams()
+        : LongMessage(28)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    JogParams(uint8_t *mess) : LongMessage(mess, 28){}
+    JogParams(uint8_t *mess)
+        : LongMessage(mess, 28)
+    {}
 
     /**
      * @return 1 for continuous jogging, 2 for single step
      */
-    uint16_t GetJogMode(){ return le16toh(*((uint16_t*) &bytes[8])); }
+    uint16_t GetJogMode() { return le16toh(*((uint16_t *) &bytes[8])); }
 
     /**
      * @return size of step in Thorlabs specified units
      */
-    int32_t GetStepSize(){ return le32toh(*((int32_t*) &bytes[10])); }
+    int32_t GetStepSize() { return le32toh(*((int32_t *) &bytes[10])); }
 
     /**
      * @return minimal velocity in Thorlabs specified units
      */
-    int32_t GetMinVel(){ return le32toh(*((int32_t*) &bytes[14])); }
+    int32_t GetMinVel() { return le32toh(*((int32_t *) &bytes[14])); }
 
     /**
      * @return acceleration in Thorlabs specified units
      */
-    int32_t GetAcceleration(){ return le32toh(*((int32_t*) &bytes[18])); }
+    int32_t GetAcceleration() { return le32toh(*((int32_t *) &bytes[18])); }
 
     /**
      * @return maximal velocity in Thorlabs specified units
      */
-    int32_t GetMaxVel(){ return le32toh(*((int32_t*) &bytes[22])); }
+    int32_t GetMaxVel() { return le32toh(*((int32_t *) &bytes[22])); }
 
     /**
      * @return 1 means immediate stop, 2 means profiled stop
      */
-    uint16_t GetStopMode(){ return le16toh(*((uint16_t*) &bytes[26])); }
+    uint16_t GetStopMode() { return le16toh(*((uint16_t *) &bytes[26])); }
 };
 
 /**
@@ -1010,7 +1083,8 @@ public:
      */
     int SetRestFactor(uint16_t rest_fac)
     {
-        if (rest_fac > 100 || rest_fac == 0) return INVALID_PARAM;
+        if (rest_fac > 100 || rest_fac == 0)
+            return INVALID_PARAM;
         *((uint16_t *) &bytes[8]) = htole16(rest_fac);
         return 0;
     }
@@ -1021,7 +1095,8 @@ public:
      */
     int SetMoveFactor(uint16_t move_fac)
     {
-        if (move_fac > 100 || move_fac == 0) return INVALID_PARAM;
+        if (move_fac > 100 || move_fac == 0)
+            return INVALID_PARAM;
         *((uint16_t *) &bytes[10]) = htole16(move_fac);
         return 0;
     }
@@ -1036,7 +1111,9 @@ public:
 class ReqPowerParams : public HeaderMessage
 {
 public:
-    ReqPowerParams(uint8_t dest, uint8_t source,  uint8_t chanId) : HeaderMessage(REQ_POWERPARAMS, chanId, 0, dest, source){}
+    ReqPowerParams(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_POWERPARAMS, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -1045,22 +1122,26 @@ public:
 class PowerParams : public LongMessage
 {
 public:
-    PowerParams() : LongMessage(12){}
+    PowerParams()
+        : LongMessage(12)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    PowerParams(uint8_t *mess) : LongMessage(mess, 12){}
+    PowerParams(uint8_t *mess)
+        : LongMessage(mess, 12)
+    {}
 
     /**
      * @return phase power used while motor is resting in %
      */
-    uint16_t GetRestFactor(){ return le16toh(*((uint16_t*) &bytes[8]));  }
+    uint16_t GetRestFactor() { return le16toh(*((uint16_t *) &bytes[8])); }
     /**
      * @return phase power used while motor is moving in %
      */
-    uint16_t GetMoveFactor(){ return le16toh(*((uint16_t*) &bytes[10]));  }
+    uint16_t GetMoveFactor() { return le16toh(*((uint16_t *) &bytes[10])); }
 };
 
 /**
@@ -1082,7 +1163,7 @@ public:
      * Sets backlash distance
      * @param dist - distance in Thorlabs specified units
      */
-    void SetBacklashDist(int32_t dist){ *((int32_t *) &bytes[8]) = htole16(dist); }
+    void SetBacklashDist(int32_t dist) { *((int32_t *) &bytes[8]) = htole16(dist); }
 };
 
 /**
@@ -1094,7 +1175,9 @@ public:
 class ReqGeneralMoveParams : public HeaderMessage
 {
 public:
-    ReqGeneralMoveParams(uint8_t dest, uint8_t source,  uint8_t chanId) : HeaderMessage(REQ_GENMOVEPARAMS, chanId, 0, dest, source){}
+    ReqGeneralMoveParams(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_GENMOVEPARAMS, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -1103,18 +1186,21 @@ public:
 class GeneralMoveParams : public LongMessage
 {
 public:
-    GeneralMoveParams() : LongMessage(12){}
+    GeneralMoveParams()
+        : LongMessage(12)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GeneralMoveParams(uint8_t *mess) : LongMessage(mess, 12){};
+    GeneralMoveParams(uint8_t *mess)
+        : LongMessage(mess, 12){};
 
     /**
      * @return backlash distance in Thorlabs specified units
      */
-    int32_t GetBacklashDist(){return le32toh(*((int32_t*) &bytes[8])); }
+    int32_t GetBacklashDist() { return le32toh(*((int32_t *) &bytes[8])); }
 };
 
 /**
@@ -1132,7 +1218,7 @@ public:
         *((uint16_t *) &bytes[6]) = htole16(chanId);
     }
 
-    void SetRelativeDist(int32_t dist){ *((int32_t *) &bytes[8]) = htole32(dist); }
+    void SetRelativeDist(int32_t dist) { *((int32_t *) &bytes[8]) = htole32(dist); }
 };
 
 /**
@@ -1144,7 +1230,9 @@ public:
 class ReqRelativeMoveParams : public HeaderMessage
 {
 public:
-    ReqRelativeMoveParams(uint8_t dest, uint8_t source, uint8_t chanId) : HeaderMessage(REQ_MOVERELPARAMS, chanId, 0, dest, source){}
+    ReqRelativeMoveParams(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_MOVERELPARAMS, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -1153,18 +1241,22 @@ public:
 class RelativeMoveParams : public LongMessage
 {
 public:
-    RelativeMoveParams() : LongMessage(12){}
+    RelativeMoveParams()
+        : LongMessage(12)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    RelativeMoveParams(uint8_t *mess) : LongMessage(mess, 12){}
+    RelativeMoveParams(uint8_t *mess)
+        : LongMessage(mess, 12)
+    {}
 
     /**
      * @return distance in Thorlabs specified units
      */
-    int32_t GetRelativeDist(){ return le32toh(*((int32_t*) &bytes[8])); }
+    int32_t GetRelativeDist() { return le32toh(*((int32_t *) &bytes[8])); }
 };
 
 /**
@@ -1189,7 +1281,8 @@ public:
      */
     int SetAbsolutePos(int32_t pos)
     {
-        if (pos < 0 || pos > opened_device->motor[GetMotorID()].max_pos) return INVALID_PARAM;
+        if (pos < 0 || pos > opened_device->motor[GetMotorID()].max_pos)
+            return INVALID_PARAM;
         *((int32_t *) &bytes[8]) = htole32(pos);
         return 0;
     }
@@ -1204,7 +1297,9 @@ public:
 class ReqAbsoluteMoveParams : public HeaderMessage
 {
 public:
-    ReqAbsoluteMoveParams(uint8_t dest, uint8_t source, uint8_t chanId) : HeaderMessage(REQ_MOVEABSPARAMS, chanId, 0, dest, source){}
+    ReqAbsoluteMoveParams(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_MOVEABSPARAMS, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -1213,19 +1308,23 @@ public:
 class AbsoluteMoveParams : public LongMessage
 {
 public:
-    AbsoluteMoveParams() : LongMessage(12){}
+    AbsoluteMoveParams()
+        : LongMessage(12)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    AbsoluteMoveParams(uint8_t *mess) : LongMessage(mess, 12){}
+    AbsoluteMoveParams(uint8_t *mess)
+        : LongMessage(mess, 12)
+    {}
 
     /**
      * Returns absolute position set in device, which is used when calling absolute move.
      * @return position in Thorlabs specified units
      */
-    int32_t GetAbsolutePos(){ return le32toh(*((int32_t*) &bytes[8])); }
+    int32_t GetAbsolutePos() { return le32toh(*((int32_t *) &bytes[8])); }
 };
 
 /**
@@ -1237,7 +1336,8 @@ public:
 class SetHomeParams : public LongMessage
 {
 public:
-    SetHomeParams(uint8_t dest, uint8_t source, uint16_t chanId) : LongMessage(SET_HOMEPARAMS, 14, dest, source)
+    SetHomeParams(uint8_t dest, uint8_t source, uint16_t chanId)
+        : LongMessage(SET_HOMEPARAMS, 14, dest, source)
     {
         *((uint16_t *) &bytes[6]) = htole16(chanId);
     }
@@ -1249,7 +1349,8 @@ public:
      */
     int SetHomingVelocity(int32_t vel)
     {
-        if (vel < 0 || vel > opened_device->motor[GetMotorID()].max_vel) return INVALID_PARAM;
+        if (vel < 0 || vel > opened_device->motor[GetMotorID()].max_vel)
+            return INVALID_PARAM;
         *((int32_t *) &bytes[12]) = htole32(vel);
         return 0;
     }
@@ -1264,7 +1365,9 @@ public:
 class ReqHomeParams : public HeaderMessage
 {
 public:
-    ReqHomeParams(uint8_t dest, uint8_t source, uint8_t chanId) : HeaderMessage(REQ_HOMEPARAMS, chanId, 0, dest, source){}
+    ReqHomeParams(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_HOMEPARAMS, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -1273,19 +1376,23 @@ public:
 class HomeParams : public LongMessage
 {
 public:
-    HomeParams() : LongMessage(20){}
+    HomeParams()
+        : LongMessage(20)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    HomeParams(uint8_t *mess) : LongMessage(mess, 20){}
+    HomeParams(uint8_t *mess)
+        : LongMessage(mess, 20)
+    {}
 
     /**
      * Returns homing velocity.
      * @return velocity in Thorlabs specified units.
      */
-    int32_t GetHomingVelocity(){ return le32toh(*((int32_t*) &bytes[12])); }
+    int32_t GetHomingVelocity() { return le32toh(*((int32_t *) &bytes[12])); }
 };
 
 /**
@@ -1317,7 +1424,8 @@ public:
      */
     int SetClockwiseHardLimit(uint16_t limit)
     {
-        if (limit != 0x80 && limit > 0x06) return INVALID_PARAM;
+        if (limit != 0x80 && limit > 0x06)
+            return INVALID_PARAM;
         *((uint16_t *) &bytes[8]) = htole16(limit);
         return 0;
     }
@@ -1336,7 +1444,8 @@ public:
      */
     int SetCounterlockwiseHardLimit(uint16_t limit)
     {
-        if (limit != 0x80 && limit > 0x06) return INVALID_PARAM;
+        if (limit != 0x80 && limit > 0x06)
+            return INVALID_PARAM;
         *((uint16_t *) &bytes[10]) = htole16(limit);
         return 0;
     }
@@ -1348,7 +1457,8 @@ public:
      */
     int SetClockwiseSoftLimit(int32_t limit)
     {
-        if (opened_device->device_type == TDC001) return IGNORED_PARAM;
+        if (opened_device->device_type == TDC001)
+            return IGNORED_PARAM;
         *((int32_t *) &bytes[12]) = htole32(limit);
         return 0;
     }
@@ -1360,7 +1470,8 @@ public:
      */
     int SetCounterlockwiseSoftLimit(int32_t limit)
     {
-        if (opened_device->device_type == TDC001) return IGNORED_PARAM;
+        if (opened_device->device_type == TDC001)
+            return IGNORED_PARAM;
         *((int32_t *) &bytes[16]) = htole32(limit);
         return 0;
     }
@@ -1376,8 +1487,10 @@ public:
      */
     int SetLimitMode(uint16_t mode)
     {
-        if (opened_device->device_type == TDC001) return IGNORED_PARAM;
-        if (mode != 0x80 && mode > 0x03) return INVALID_PARAM;
+        if (opened_device->device_type == TDC001)
+            return IGNORED_PARAM;
+        if (mode != 0x80 && mode > 0x03)
+            return INVALID_PARAM;
         *((uint16_t *) &bytes[20]) = htole16(mode);
         return 0;
     }
@@ -1392,7 +1505,9 @@ public:
 class ReqLimitSwitchParams : public HeaderMessage
 {
 public:
-    ReqLimitSwitchParams(uint8_t dest, uint8_t source,  uint8_t chanId) : HeaderMessage(REQ_LIMSWITCHPARAMS, chanId, 0, dest, source){}
+    ReqLimitSwitchParams(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_LIMSWITCHPARAMS, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -1401,13 +1516,17 @@ public:
 class LimitSwitchParams : public LongMessage
 {
 public:
-    LimitSwitchParams() : LongMessage(22){}
+    LimitSwitchParams()
+        : LongMessage(22)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    LimitSwitchParams(uint8_t *mess) : LongMessage(mess, 22){}
+    LimitSwitchParams(uint8_t *mess)
+        : LongMessage(mess, 22)
+    {}
 
     /**
      * Return clockwise hardware limit switch operation.
@@ -1420,7 +1539,7 @@ public:
      * 6 - For PMD based brushless servo controllers only, uses index mark for homing\n
      * 128(0x80) - bitwise OR \n
      */
-    uint16_t GetClockwiseHardLimit(){ return le16toh(*((uint16_t*) &bytes[8])); }
+    uint16_t GetClockwiseHardLimit() { return le16toh(*((uint16_t *) &bytes[8])); }
 
     /**
      * Return counterclockwise hardware limit switch operation.
@@ -1433,19 +1552,19 @@ public:
      * 6 - For PMD based brushless servo controllers only, uses index mark for homing\n
      * 128(0x80) - bitwise OR \n
      */
-    uint16_t GetCounterlockwiseHardLimit(){ return le16toh(*((uint16_t*) &bytes[10])); }
+    uint16_t GetCounterlockwiseHardLimit() { return le16toh(*((uint16_t *) &bytes[10])); }
 
     /**
      * Returns clockwise software limit.
      * @return limit in position steps.
      */
-    int32_t SetClockwiseSoftLimit(){ return le32toh(*((int32_t*) &bytes[12])); }
+    int32_t SetClockwiseSoftLimit() { return le32toh(*((int32_t *) &bytes[12])); }
 
     /**
      * Returns counterclockwise software limit.
      * @return limit in position steps.
      */
-    int32_t SetCounterlockwiseSoftLimit(){ return le32toh(*((int32_t*) &bytes[16])); }
+    int32_t SetCounterlockwiseSoftLimit() { return le32toh(*((int32_t *) &bytes[16])); }
 
     /**
      * Returns mode of software limit switch.
@@ -1455,7 +1574,7 @@ public:
      * 3 - profiled stop at limit\n
      * 128(0x80) - bitwise OR
      */
-    uint16_t GetLimitMode(){ return le16toh(*((uint16_t*) &bytes[20])); }
+    uint16_t GetLimitMode() { return le16toh(*((uint16_t *) &bytes[20])); }
 };
 
 /**
@@ -1467,7 +1586,9 @@ public:
 class MoveHome : public HeaderMessage
 {
 public:
-    MoveHome(uint8_t dest, uint8_t source, uint8_t chanId) : HeaderMessage(MOVE_HOME, chanId, 0, dest, source){}
+    MoveHome(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(MOVE_HOME, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -1476,13 +1597,17 @@ public:
 class MovedHome : public HeaderMessage
 {
 public:
-    MovedHome() : HeaderMessage(){}
+    MovedHome()
+        : HeaderMessage()
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    MovedHome(uint8_t *mess) : HeaderMessage(mess){}
+    MovedHome(uint8_t *mess)
+        : HeaderMessage(mess)
+    {}
 };
 
 /**
@@ -1494,7 +1619,9 @@ public:
 class MoveRelative1 : public HeaderMessage
 {
 public:
-    MoveRelative1(uint8_t dest, uint8_t source, uint8_t chanId) : HeaderMessage(MOVE_RELATIVE, chanId, 0, dest, source){}
+    MoveRelative1(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(MOVE_RELATIVE, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -1506,7 +1633,8 @@ public:
 class MoveRelative2 : public LongMessage
 {
 public:
-    MoveRelative2(uint8_t dest, uint8_t source, uint16_t chanId) : LongMessage(MOVE_RELATIVE, 6, dest, source)
+    MoveRelative2(uint8_t dest, uint8_t source, uint16_t chanId)
+        : LongMessage(MOVE_RELATIVE, 6, dest, source)
     {
         *((uint16_t *) &bytes[6]) = htole16(chanId);
     }
@@ -1515,7 +1643,7 @@ public:
      * Sets relative distance.
      * @param dist - distance in Thorlabs specified units
      */
-    void SetRelativeDistance(int32_t dist){ *((int32_t *) &bytes[8]) = htole32(dist); }
+    void SetRelativeDistance(int32_t dist) { *((int32_t *) &bytes[8]) = htole32(dist); }
 };
 
 /**
@@ -1524,9 +1652,12 @@ public:
 class MoveCompleted : public LongMessage
 {
 public:
-    MoveCompleted(uint8_t *mess) : LongMessage(mess, 20){};
+    MoveCompleted(uint8_t *mess)
+        : LongMessage(mess, 20){};
 
-    MoveCompleted() : LongMessage(20){}
+    MoveCompleted()
+        : LongMessage(20)
+    {}
 };
 
 /**
@@ -1538,7 +1669,9 @@ public:
 class MoveAbsolute1 : public HeaderMessage
 {
 public:
-    MoveAbsolute1(uint8_t dest, uint8_t source, uint8_t chanId) : HeaderMessage(MOVE_ABSOLUTE, chanId, 0, dest, source){}
+    MoveAbsolute1(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(MOVE_ABSOLUTE, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -1550,7 +1683,8 @@ public:
 class MoveAbsolute2 : public LongMessage
 {
 public:
-    MoveAbsolute2(uint8_t dest, uint8_t source, uint16_t chanId) : LongMessage(MOVE_ABSOLUTE, 6, dest, source)
+    MoveAbsolute2(uint8_t dest, uint8_t source, uint16_t chanId)
+        : LongMessage(MOVE_ABSOLUTE, 6, dest, source)
     {
         *((uint16_t *) &bytes[6]) = htole16(chanId);
     };
@@ -1562,7 +1696,8 @@ public:
      */
     int SetAbsoluteDistance(int32_t pos)
     {
-        if (pos < 0 || pos > opened_device->motor[GetMotorID()].max_pos) return INVALID_PARAM;
+        if (pos < 0 || pos > opened_device->motor[GetMotorID()].max_pos)
+            return INVALID_PARAM;
         *((int32_t *) &bytes[8]) = htole32(pos);
         return 0;
     }
@@ -1577,7 +1712,9 @@ public:
 class JogMove : public HeaderMessage
 {
 public:
-    JogMove(uint8_t dest, uint8_t source, uint8_t chanId) : HeaderMessage(MOVE_JOG, chanId, 1, dest, source){}
+    JogMove(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(MOVE_JOG, chanId, 1, dest, source)
+    {}
 
     /**
      * Sets direction
@@ -1586,7 +1723,8 @@ public:
      */
     int SetDirection(uint8_t direction)
     {
-        if (direction != 0x01 && direction != 0x02) return INVALID_PARAM;
+        if (direction != 0x01 && direction != 0x02)
+            return INVALID_PARAM;
         SetSecondParam(direction);
         return 0;
     }
@@ -1601,7 +1739,9 @@ public:
 class MovewVelocity : public HeaderMessage
 {
 public:
-    MovewVelocity(uint8_t dest, uint8_t source,  uint8_t chanId) : HeaderMessage(MOVE_VELOCITY, chanId, 1, dest, source){}
+    MovewVelocity(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(MOVE_VELOCITY, chanId, 1, dest, source)
+    {}
 
     /**
      * Sets direction of move
@@ -1610,7 +1750,8 @@ public:
      */
     int SetDirection(uint8_t direction)
     {
-        if (direction != 0x01 && direction != 0x02) return INVALID_PARAM;
+        if (direction != 0x01 && direction != 0x02)
+            return INVALID_PARAM;
         SetSecondParam(direction);
         return 0;
     }
@@ -1625,7 +1766,9 @@ public:
 class StopMove : public HeaderMessage
 {
 public:
-    StopMove(uint8_t dest, uint8_t source, uint8_t chanId) : HeaderMessage(MOVE_STOP, chanId, 2, dest, source){}
+    StopMove(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(MOVE_STOP, chanId, 2, dest, source)
+    {}
 
     /**
      * Sets stop mode.
@@ -1634,7 +1777,8 @@ public:
      */
     int SetStopMode(uint8_t mode)
     {
-        if (mode != 0x01 && mode != 0x02) return INVALID_PARAM;
+        if (mode != 0x01 && mode != 0x02)
+            return INVALID_PARAM;
         SetSecondParam(mode);
         return 0;
     }
@@ -1646,9 +1790,13 @@ public:
 class MoveStopped : public LongMessage
 {
 public:
-    MoveStopped() : LongMessage(20){}
+    MoveStopped()
+        : LongMessage(20)
+    {}
 
-    MoveStopped(uint8_t *mess) : LongMessage(mess, 20){}
+    MoveStopped(uint8_t *mess)
+        : LongMessage(mess, 20)
+    {}
 };
 
 /**
@@ -1660,7 +1808,8 @@ public:
 class SetBowIndex : public LongMessage
 {
 public:
-    SetBowIndex(uint8_t dest, uint8_t source, uint16_t chanId) : LongMessage(SET_BOWINDEX, 4, dest, source)
+    SetBowIndex(uint8_t dest, uint8_t source, uint16_t chanId)
+        : LongMessage(SET_BOWINDEX, 4, dest, source)
     {
         *((uint16_t *) &bytes[6]) = htole16(chanId);
     }
@@ -1672,7 +1821,8 @@ public:
      */
     int SetBowindex(uint16_t index)
     {
-        if (index > 18) return INVALID_PARAM;
+        if (index > 18)
+            return INVALID_PARAM;
         *((uint16_t *) &bytes[8]) = htole16(index);
         return 0;
     }
@@ -1687,7 +1837,9 @@ public:
 class ReqBowIndex : public HeaderMessage
 {
 public:
-    ReqBowIndex(uint8_t dest, uint8_t source, uint8_t chanId) : HeaderMessage(REQ_BOWINDEX, chanId, 0, dest, source){}
+    ReqBowIndex(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_BOWINDEX, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -1696,19 +1848,22 @@ public:
 class BowIndex : public LongMessage
 {
 public:
-    BowIndex() : LongMessage(10){}
+    BowIndex()
+        : LongMessage(10)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    BowIndex(uint8_t *mess) : LongMessage(mess, 10){};
+    BowIndex(uint8_t *mess)
+        : LongMessage(mess, 10){};
 
     /**
      * Return profile.
      * @return 0 means trapezoidal, 1-18 means s-curve profile
      */
-    uint16_t GetBowIndex(){ return le16toh(*((uint16_t*) &bytes[8])); }
+    uint16_t GetBowIndex() { return le16toh(*((uint16_t *) &bytes[8])); }
 };
 
 /**
@@ -1720,7 +1875,8 @@ public:
 class SetLedMode : public LongMessage
 {
 public:
-    SetLedMode(uint8_t dest, uint8_t source, uint16_t chanId) : LongMessage(SET_AVMODES, 4, dest, source)
+    SetLedMode(uint8_t dest, uint8_t source, uint16_t chanId)
+        : LongMessage(SET_AVMODES, 4, dest, source)
     {
         *((uint16_t *) &bytes[6]) = htole16(chanId);
     }
@@ -1735,7 +1891,8 @@ public:
      */
     int SetMode(uint16_t mode)
     {
-        if (mode != 1 && mode != 2 && mode != 3 && (mode < 8  || mode > 11)) return INVALID_PARAM;
+        if (mode != 1 && mode != 2 && mode != 3 && (mode < 8 || mode > 11))
+            return INVALID_PARAM;
         *((uint16_t *) &bytes[8]) = htole16(mode);
         return 0;
     }
@@ -1750,7 +1907,9 @@ public:
 class ReqLedMode : public HeaderMessage
 {
 public:
-    ReqLedMode(uint8_t dest, uint8_t source, uint8_t chanId) : HeaderMessage(REQ_AVMODES, chanId, 0, dest, source){}
+    ReqLedMode(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_AVMODES, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -1759,13 +1918,17 @@ public:
 class LedMode : public LongMessage
 {
 public:
-    LedMode() : LongMessage(10){}
+    LedMode()
+        : LongMessage(10)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    LedMode(uint8_t *mess) : LongMessage(mess, 10){}
+    LedMode(uint8_t *mess)
+        : LongMessage(mess, 10)
+    {}
 
     /**
      * Returns mode of LED. May contain combination of modes.
@@ -1774,7 +1937,7 @@ public:
      * 2 - flash when motor reach limit switch\n
      * 8 - lit while motor is moving\n
      */
-    uint16_t GetMode(){ return le16toh(*((uint16_t*) &bytes[8])); }
+    uint16_t GetMode() { return le16toh(*((uint16_t *) &bytes[8])); }
 };
 
 /**
@@ -1800,7 +1963,8 @@ public:
      */
     int SetMode(uint16_t mode)
     {
-        if (mode != 1 && mode != 2) return INVALID_PARAM;
+        if (mode != 1 && mode != 2)
+            return INVALID_PARAM;
         *((uint16_t *) &bytes[8]) = htole16(mode);
         return 0;
     }
@@ -1812,7 +1976,8 @@ public:
      */
     int SetPosition1(int32_t pos)
     {
-        if (pos < 0 || pos > opened_device->motor[GetMotorID()].max_pos) return INVALID_PARAM;
+        if (pos < 0 || pos > opened_device->motor[GetMotorID()].max_pos)
+            return INVALID_PARAM;
         *((int32_t *) &bytes[10]) = htole32(pos);
         return 0;
     }
@@ -1824,14 +1989,16 @@ public:
      */
     int SetPosition2(int32_t pos)
     {
-        if (pos < 0 || pos > opened_device->motor[GetMotorID()].max_pos) return INVALID_PARAM;
+        if (pos < 0 || pos > opened_device->motor[GetMotorID()].max_pos)
+            return INVALID_PARAM;
         *((int32_t *) &bytes[14]) = htole32(pos);
         return 0;
     }
 
     int SetTimeout(uint16_t ms)
     {
-        if (opened_device->device_type == TDC001) return IGNORED_PARAM;
+        if (opened_device->device_type == TDC001)
+            return IGNORED_PARAM;
         *((uint16_t *) &bytes[18]) = htole16(ms);
         return 0;
     }
@@ -1846,7 +2013,9 @@ public:
 class ReqButtonParams : public HeaderMessage
 {
 public:
-    ReqButtonParams(uint8_t dest, uint8_t source, uint8_t chanId) : HeaderMessage(REQ_BUTTONPARAMS, chanId, 0, dest, source){}
+    ReqButtonParams(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_BUTTONPARAMS, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -1858,34 +2027,38 @@ public:
 class ButtonParams : public LongMessage
 {
 public:
-    ButtonParams() : LongMessage(22){}
+    ButtonParams()
+        : LongMessage(22)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    ButtonParams(uint8_t *mess) : LongMessage(mess, 22){}
+    ButtonParams(uint8_t *mess)
+        : LongMessage(mess, 22)
+    {}
 
     /**
      * Return mode of controller device buttons. Upon pressing button motor can either perform jog move or
      * move to preset absolute position.
      * @return 1 for jog mode, 2 for absolute move mode
      */
-    uint16_t GetMode(){ return le16toh(*((uint16_t*) &bytes[8])); }
+    uint16_t GetMode() { return le16toh(*((uint16_t *) &bytes[8])); }
 
     /**
      * Returns position to move to after pressing button 1.
      * @return position in Thorlabs specified units
      */
-    int32_t GetPosition1(){ return le32toh(*((int32_t*) &bytes[12])); }
+    int32_t GetPosition1() { return le32toh(*((int32_t *) &bytes[12])); }
 
     /**
      * Returns position to move to after pressing button 2.
      * @return position in Thorlabs specified units
      */
-    int32_t GetPosition2(){ return le32toh(*((int32_t*) &bytes[14])); }
+    int32_t GetPosition2() { return le32toh(*((int32_t *) &bytes[14])); }
 
-    uint16_t GetTimeout(){ return le16toh(*((uint16_t*) &bytes[18])); }
+    uint16_t GetTimeout() { return le16toh(*((uint16_t *) &bytes[18])); }
 };
 
 /**
@@ -1897,7 +2070,9 @@ public:
 class ReqStatusUpdate : public HeaderMessage
 {
 public:
-    ReqStatusUpdate(uint8_t dest, uint8_t source, uint8_t chanId) : HeaderMessage(REQ_STATUSUPDATE, chanId, 0, dest, source){}
+    ReqStatusUpdate(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_STATUSUPDATE, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -1909,29 +2084,33 @@ public:
 class GetStatusUpdate : public LongMessage
 {
 public:
-    GetStatusUpdate() : LongMessage(20){}
+    GetStatusUpdate()
+        : LongMessage(20)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetStatusUpdate(uint8_t *mess) : LongMessage(mess, 20){}
+    GetStatusUpdate(uint8_t *mess)
+        : LongMessage(mess, 20)
+    {}
 
     /**
      * Returns position.
      * @return position in Thorlabs specified units
      */
-    int32_t GetPosition(){ return le32toh(*((int32_t*) &bytes[8])); }
+    int32_t GetPosition() { return le32toh(*((int32_t *) &bytes[8])); }
     /**
      * Returns encoder counter value.
      * @return encoder count
      */
-    int32_t GetEncCount(){ return le32toh(*((int32_t*) &bytes[12])); }
+    int32_t GetEncCount() { return le32toh(*((int32_t *) &bytes[12])); }
     /**
      * Returns word containing status bits.
      * @return status word
      */
-    uint32_t GetStatusBits(){ return le32toh(*((uint32_t*) &bytes[16])); }
+    uint32_t GetStatusBits() { return le32toh(*((uint32_t *) &bytes[16])); }
 };
 
 /**
@@ -1943,7 +2122,9 @@ public:
 class ReqMotChanStatusUpdate : public HeaderMessage
 {
 public:
-    ReqMotChanStatusUpdate(uint8_t dest, uint8_t source, uint8_t chanId) : HeaderMessage(REQ_DCSTATUSUPDATE, chanId, 0, dest, source){}
+    ReqMotChanStatusUpdate(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_DCSTATUSUPDATE, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -1955,29 +2136,33 @@ public:
 class GetMotChanStatusUpdate : public LongMessage
 {
 public:
-    GetMotChanStatusUpdate() : LongMessage(20){}
+    GetMotChanStatusUpdate()
+        : LongMessage(20)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    GetMotChanStatusUpdate(uint8_t *mess) : LongMessage(mess, 20){}
+    GetMotChanStatusUpdate(uint8_t *mess)
+        : LongMessage(mess, 20)
+    {}
 
     /**
      * Returns actual position.
      * @return position in Thorlabs specified units
      */
-    int32_t GetPosition(){ return le32toh(*((int32_t*) &bytes[8])); }
+    int32_t GetPosition() { return le32toh(*((int32_t *) &bytes[8])); }
     /**
      * Returns actual velocity.
      * @return velocity in Thorlabs specified units
      */
-    uint16_t GetVelocity(){ return le16toh(*((uint16_t*) &bytes[12])); }
+    uint16_t GetVelocity() { return le16toh(*((uint16_t *) &bytes[12])); }
     /**
      * Returns word containing status bits.
      * @return status word
      */
-    uint32_t GetStatusBits(){ return le32toh(*((uint32_t*) &bytes[16])); }
+    uint32_t GetStatusBits() { return le32toh(*((uint32_t *) &bytes[16])); }
 };
 
 /**
@@ -1988,7 +2173,9 @@ public:
 class ServerAlive : public HeaderMessage
 {
 public:
-    ServerAlive(uint8_t dest, uint8_t source) : HeaderMessage(ACK_DCSTATUSUPDATE, 0, 0, dest, source){}
+    ServerAlive(uint8_t dest, uint8_t source)
+        : HeaderMessage(ACK_DCSTATUSUPDATE, 0, 0, dest, source)
+    {}
 };
 
 /**
@@ -2000,7 +2187,9 @@ public:
 class ReqStatusBits : public HeaderMessage
 {
 public:
-    ReqStatusBits(uint8_t dest, uint8_t source,  uint8_t chanId) : HeaderMessage(REQ_STATUSBITS, chanId, 0, dest, source){}
+    ReqStatusBits(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_STATUSBITS, chanId, 0, dest, source)
+    {}
 };
 
 /**
@@ -2009,19 +2198,23 @@ public:
 class StatusBits : public LongMessage
 {
 public:
-    StatusBits() : LongMessage(12){}
+    StatusBits()
+        : LongMessage(12)
+    {}
 
     /**
      * Construct message and copies buffer to message.
      * @param mess - pointer to buffer to copy
      */
-    StatusBits(uint8_t *mess) : LongMessage(mess, 12){}
+    StatusBits(uint8_t *mess)
+        : LongMessage(mess, 12)
+    {}
 
     /**
      * Returns word containing status bits.
      * @return 32 bit long status word
      */
-    uint32_t GetStatBits(){ return le32toh(*((uint32_t*) &bytes[8])); }
+    uint32_t GetStatBits() { return le32toh(*((uint32_t *) &bytes[8])); }
 };
 
 /**
@@ -2032,7 +2225,9 @@ public:
 class DisableEndMoveMessages : public HeaderMessage
 {
 public:
-    DisableEndMoveMessages(uint8_t dest, uint8_t source) : HeaderMessage(SUSPEND_ENDOFMOVEMSGS, 0, 0, dest, source){}
+    DisableEndMoveMessages(uint8_t dest, uint8_t source)
+        : HeaderMessage(SUSPEND_ENDOFMOVEMSGS, 0, 0, dest, source)
+    {}
 };
 
 /**
@@ -2043,19 +2238,24 @@ public:
 class EnableEndMoveMessages : public HeaderMessage
 {
 public:
-    EnableEndMoveMessages(uint8_t dest, uint8_t source) : HeaderMessage(RESUME_ENDOFMOVEMSGS, 0, 0, dest, source){}
+    EnableEndMoveMessages(uint8_t dest, uint8_t source)
+        : HeaderMessage(RESUME_ENDOFMOVEMSGS, 0, 0, dest, source)
+    {}
 };
 
 class SetTrigger : public HeaderMessage
 {
 public:
-    SetTrigger(uint8_t dest, uint8_t source, uint8_t chanId) : HeaderMessage(SET_TRIGGER, chanId, 0, dest, source){}
+    SetTrigger(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(SET_TRIGGER, chanId, 0, dest, source)
+    {}
 
     int SetMode(uint8_t mode)
     {
-        if (opened_device->device_type != BSC201 && opened_device->device_type != BSC202 && opened_device->device_type != BSC203 &&
-            opened_device->device_type != TBD001 && opened_device->device_type != BBD201 && opened_device->device_type != BBD202 &&
-            opened_device->device_type != BBD203)
+        if (opened_device->device_type != BSC201 && opened_device->device_type != BSC202
+            && opened_device->device_type != BSC203 && opened_device->device_type != TBD001
+            && opened_device->device_type != BBD201 && opened_device->device_type != BBD202
+            && opened_device->device_type != BBD203)
             return IGNORED_PARAM;
         SetSecondParam(mode);
         return 0;
@@ -2065,20 +2265,26 @@ public:
 class ReqTrigger : public HeaderMessage
 {
 public:
-    ReqTrigger(uint8_t dest, uint8_t source, uint8_t chanId) : HeaderMessage(REQ_TRIGGER, chanId, 0, dest, source){}
+    ReqTrigger(uint8_t dest, uint8_t source, uint8_t chanId)
+        : HeaderMessage(REQ_TRIGGER, chanId, 0, dest, source)
+    {}
 };
 
 class GetTrigger : public HeaderMessage
 {
 public:
-    GetTrigger() : HeaderMessage(){}
+    GetTrigger()
+        : HeaderMessage()
+    {}
 
-    GetTrigger(uint8_t *mess) : HeaderMessage(mess){}
+    GetTrigger(uint8_t *mess)
+        : HeaderMessage(mess)
+    {}
 
-    uint8_t GetMode(){return GetSecondParam();}
+    uint8_t GetMode() { return GetSecondParam(); }
 };
 } // namespace Thorlabs
 } // namespace hw
 } // namespace QtLab
 
- #endif
+#endif

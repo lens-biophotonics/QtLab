@@ -110,7 +110,7 @@ enum {
     REQ_BUTTONPARAMS = 0x04b7,
     GET_BUTTONPARAMS = 0x04b8,
 
-    GET_STATUSUPDATE =  0x0481,
+    GET_STATUSUPDATE = 0x0481,
     REQ_STATUSUPDATE = 0x0480,
 
     GET_DCSTATUSUPDATE = 0x0491,
@@ -128,4 +128,4 @@ enum {
     GET_TRIGGER = 0x0502,
 };
 
- #endif
+#endif
