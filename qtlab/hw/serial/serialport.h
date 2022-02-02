@@ -3,13 +3,14 @@
 
 #include <QMutex>
 #include <QSerialPort>
-#include <QState>
+#include <QStateMachine>
 
 class SerialPort : public QSerialPort
 {
     Q_OBJECT
 public:
     SerialPort(QObject *parent = nullptr);
+    virtual ~SerialPort();
     bool open(OpenMode mode = QIODevice::ReadWrite);
     void close();
 
@@ -63,6 +64,7 @@ private:
 
     QState *connectedState;
     QState *disconnectedState;
+    QStateMachine *sm;
 
     void setupStateMachine();
 };

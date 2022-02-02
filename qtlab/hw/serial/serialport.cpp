@@ -4,7 +4,6 @@
 #include <qtlab/hw/serial/serialport.h>
 
 #include <QSerialPortInfo>
-#include <QStateMachine>
 #include <QTime>
 
 #define RUNTIME_ERROR(what) \
@@ -26,6 +25,13 @@ SerialPort::SerialPort(QObject *parent)
     setDataBits(Data8);
     setStopBits(OneStop);
     setTimeout(500);
+}
+
+SerialPort::~SerialPort()
+{
+    delete connectedState;
+    delete disconnectedState;
+    delete sm;
 }
 
 bool SerialPort::open(OpenMode mode)
@@ -76,7 +82,7 @@ void SerialPort::setupStateMachine()
 
     disconnectedState->addTransition(this, &SerialPort::opened, connectedState);
 
-    QStateMachine *sm = new QStateMachine();
+    sm = new QStateMachine();
 
     sm->addState(connectedState);
     sm->addState(disconnectedState);
