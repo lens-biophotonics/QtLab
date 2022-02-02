@@ -3,7 +3,6 @@ find_package(Qt5 5.8 REQUIRED COMPONENTS
 )
 
 find_package(Qwt)
-find_package(Qt5 5.8 COMPONENTS SerialPort)
 
 set(TARGETNAME qtlab-widgets)
 set(EXPORT_NAME Widgets)
