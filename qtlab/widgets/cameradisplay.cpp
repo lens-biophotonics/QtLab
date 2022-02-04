@@ -4,6 +4,7 @@
 #include <qtlab/widgets/colormaps.h>
 #include <qtlab/widgets/customspinbox.h>
 
+#include <qwt_plot_grid.h>
 #include <qwt_slider.h>
 
 #include <QCheckBox>
@@ -106,6 +107,11 @@ void CameraDisplay::setupUi()
     cursorMarker->setValue(256, 256);
     cursorMarker->attach(plot);
     cursorMarker->setVisible(false);
+
+    QwtPlotGrid *plotGrid = new QwtPlotGrid();
+    plotGrid->setPen(Qt::green);
+    plotGrid->attach(plot);
+    plotGrid->setVisible(false);
 
     QAction *autoscaleAction = new QAction("Autoscale");
     autoscaleAction->setCheckable(true);
@@ -230,6 +236,16 @@ void CameraDisplay::setupUi()
         plot->replot();
     });
     menu->addAction(action);
+
+    action = new QAction("Show grid", this);
+    action->setCheckable(true);
+    action->setChecked(false);
+    connect(action, &QAction::triggered, this, [=](bool checked) {
+        plotGrid->setVisible(checked);
+        plot->replot();
+    });
+    menu->addAction(action);
+    menu->addSeparator();
 
     LUTMenu = new QMenu("LUT");
 
