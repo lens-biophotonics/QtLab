@@ -145,7 +145,6 @@ QByteArray SerialPort::receiveBytes(QByteArray until)
 
         if (transceiveTimeout >= 0) {
             if (time.elapsed() > transceiveTimeout) {
-                logger->warning("Transceive timeout");
                 break;
             }
         } else if (bytesAvailable() <= 0) {
