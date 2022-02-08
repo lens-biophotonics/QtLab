@@ -237,14 +237,29 @@ void CameraDisplay::setupUi()
     });
     menu->addAction(action);
 
-    action = new QAction("Show grid", this);
-    action->setCheckable(true);
-    action->setChecked(false);
-    connect(action, &QAction::triggered, this, [=](bool checked) {
+    QAction *showGridAction = new QAction("Show grid", this);
+    QAction *showMinorGridAction = new QAction("Show minor grid", this);
+    showGridAction->setCheckable(true);
+    showGridAction->setChecked(false);
+    connect(showGridAction, &QAction::triggered, this, [=](bool checked) {
+        plotGrid->enableXMin(false);
+        plotGrid->enableYMin(false);
         plotGrid->setVisible(checked);
+        showMinorGridAction->setChecked(false);
         plot->replot();
     });
-    menu->addAction(action);
+    menu->addAction(showGridAction);
+
+    showMinorGridAction->setCheckable(true);
+    showMinorGridAction->setChecked(false);
+    connect(showMinorGridAction, &QAction::triggered, this, [=](bool checked) {
+        plotGrid->enableXMin(true);
+        plotGrid->enableYMin(true);
+        plotGrid->setVisible(checked);
+        showGridAction->setChecked(false);
+        plot->replot();
+    });
+    menu->addAction(showMinorGridAction);
     menu->addSeparator();
 
     LUTMenu = new QMenu("LUT");
