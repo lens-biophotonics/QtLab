@@ -1,5 +1,5 @@
-#ifndef AOTFWIDGET_H
-#define AOTFWIDGET_H
+#ifndef AA_AOTFWIDGET_H
+#define AA_AOTFWIDGET_H
 
 #include <qtlab/hw/serial/AA_MPDSnCxx.h>
 
@@ -17,4 +17,4 @@ private:
     AA_MPDSnCxx *aotf = nullptr;
 };
 
-#endif // AOTFWIDGET_H
+#endif // AA_AOTFWIDGET_H
