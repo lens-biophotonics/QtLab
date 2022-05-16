@@ -3,13 +3,15 @@
 
 #include <qtlab/hw/serial/serialport.h>
 
+#include "qtlab-hw-serial_export.h"
+
 #include <QObject>
 
 /**
  * @brief The SerialDevice class represents a device with a serial port.
  */
 
-class SerialDevice : public QObject
+class QTLAB_HW_SERIAL_EXPORT SerialDevice : public QObject
 {
     Q_OBJECT
 public:

@@ -1,5 +1,7 @@
 #include "aa_aotf_widget.h"
 
+#include <stdexcept>
+
 #include <qtlab/widgets/customspinbox.h>
 
 #include <QBoxLayout>
