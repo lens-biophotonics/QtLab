@@ -3,9 +3,9 @@
 
 #include <qtlab/hw/serial/serialport.h>
 
-#include "qtlab-hw-serial_export.h"
-
 #include <QObject>
+
+#include "qtlab-hw-serial_export.h"
 
 /**
  * @brief The SerialDevice class represents a device with a serial port.
@@ -27,6 +27,7 @@ public slots:
 signals:
     void connected();
     void disconnected();
+    void error(QString errMsg);
 
 protected:
     virtual void postConnect_impl();

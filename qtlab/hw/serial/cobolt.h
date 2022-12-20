@@ -105,8 +105,8 @@ private:
     QState *laserOffState;
     QState *classInitializedState;
 
-    QString transceiveChkOK(QString cmd);
-    QString transceiveChkSyntaxError(QString cmd);
+    bool transceiveChkOK(QString cmd);
+    QString transceive(QString cmd);
 
     void init();
     void _setCoboltClass();

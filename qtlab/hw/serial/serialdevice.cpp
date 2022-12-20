@@ -23,7 +23,7 @@ void SerialDevice::connect()
     if (!ret) {
         QString msg("Cannot connect to Device on serial port %1");
         msg = msg.arg(serial->portName());
-        throw std::runtime_error(msg.toLatin1());
+        emit error(msg);
     } else {
         serial->readAll(); // empty input buffer
         postConnect_impl();

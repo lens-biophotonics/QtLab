@@ -48,7 +48,7 @@ void Cobolt::init()
     sn = getSerialNumber();
 
     if (fv.contains('.')) {
-        modelNumber = transceiveChkSyntaxError("glm?");
+        modelNumber = transceive("glm?");
     } else if (sn.contains('0')) {
         modelNumber = QString("0%1-04-XX-XXXX-XXX").arg(sn.section('0', 0, 0));
     }
@@ -91,17 +91,17 @@ QState *Cobolt::getLaserOnState() const
 
 QString Cobolt::getSerialNumber()
 {
-    return transceiveChkSyntaxError("sn?");
+    return transceive("sn?");
 }
 
 QString Cobolt::getFirmwareVersion()
 {
-    return transceiveChkSyntaxError("gfv?");
+    return transceive("gfv?");
 }
 
 QString Cobolt::getFullName()
 {
-    return transceiveChkSyntaxError("gcn?");
+    return transceive("gcn?");
 }
 
 int Cobolt::getWavelength()
@@ -280,14 +280,16 @@ void Cobolt::restart()
 
 void Cobolt::setLaserOn()
 {
-    transceiveChkOK("l1");
-    emit laserOn();
+    if (transceiveChkOK("l1")) {
+        emit laserOn();
+    }
 }
 
 void Cobolt::setLaserOff()
 {
-    transceiveChkOK("l0");
-    emit laserOff();
+    if (transceiveChkOK("l0")) {
+        emit laserOff();
+    }
 }
 
 void Cobolt::enterConstantPowerMode()
@@ -325,20 +327,21 @@ void Cobolt::setVerboseName(const QString &value)
     verboseName = value;
 }
 
-QString Cobolt::transceiveChkOK(QString cmd)
+bool Cobolt::transceiveChkOK(QString cmd)
 {
     QString response = serial->transceive(cmd, "\r\n");
-    if (response != "OK") {
-        throw std::runtime_error(response.toLatin1());
+    if (response != "OK" || response.startsWith("Syntax error")) {
+        emit error(response);
+        return false;
     }
-    return response;
+    return true;
 }
 
-QString Cobolt::transceiveChkSyntaxError(QString cmd)
+QString Cobolt::transceive(QString cmd)
 {
     QString response = serial->transceive(cmd, "\r\n");
     if (response.startsWith("Syntax error")) {
-        throw std::runtime_error(response.toLatin1());
+        emit error(response);
     }
     return response;
 }
