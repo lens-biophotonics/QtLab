@@ -1,5 +1,6 @@
 find_package(TIFF)
-find_package(Qt5 COMPONENTS Core)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 
 set(TARGETNAME qtlab-io)
 set(EXPORT_NAME IO)
@@ -20,7 +21,7 @@ set(HEADERS
 add_library(${TARGETNAME} SHARED ${SOURCEFILES})
 
 target_link_libraries(${TARGETNAME} PRIVATE
-    Qt5::Core
+    Qt${QT_VERSION_MAJOR}::Core
     qtlab-core
     TIFF::TIFF
 )

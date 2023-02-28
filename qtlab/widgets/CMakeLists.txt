@@ -1,6 +1,5 @@
-find_package(Qt5 5.8 REQUIRED COMPONENTS
-    Widgets
-)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
 find_package(Qwt)
 
@@ -32,7 +31,7 @@ if (Qwt_FOUND)
         ${Qwt_LIBRARY}
         )
 else()
-    message("Could not find Qwt. Camera widgets will not be built")
+    message("Could not find Qwt. Some widgets will not be built")
 endif()
 
 target_sources(${TARGETNAME} PRIVATE ${SOURCE_FILES})
@@ -52,7 +51,7 @@ set(HEADERS
 
 target_link_libraries(${TARGETNAME}
     PUBLIC
-        Qt5::Widgets
+        Qt${QT_VERSION_MAJOR}::Widgets
         qtlab-core
 )
 

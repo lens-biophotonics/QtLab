@@ -14,7 +14,7 @@ set(HEADERS
 add_library(${TARGETNAME} SHARED ${SOURCE_FILES})
 
 target_link_libraries(${TARGETNAME} PUBLIC
-    Qt5::Core
+    Qt${QT_VERSION_MAJOR}::Core
 )
 
 set(${TARGETNAME}_GEN_EXPORT_HEADER TRUE)

@@ -2,7 +2,8 @@
 
 @PACKAGE_INIT@
 include(CMakeFindDependencyMacro)
-find_dependency(Qt5 5.8 REQUIRED COMPONENTS Core)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 
 set(QtLab_INCLUDE_DIR @CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_INCLUDEDIR@)
 
@@ -31,7 +32,7 @@ if(";${QtLab_FIND_COMPONENTS};" MATCHES Widgets)
 endif()
 
 if(";${QtLab_FIND_COMPONENTS};" MATCHES Serial)
-find_dependency(Qt5 REQUIRED SerialPort)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS SerialPort)
 endif()
 
 set(QtLab_FOUND True)

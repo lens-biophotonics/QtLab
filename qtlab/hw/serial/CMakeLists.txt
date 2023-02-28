@@ -3,7 +3,8 @@ if(NOT BUILD_SERIAL)
     return()
 endif()
 
-find_package(Qt5 COMPONENTS SerialPort REQUIRED)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS SerialPort)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS SerialPort)
 
 set(CMAKE_AUTOMOC ON)
 
@@ -33,7 +34,7 @@ add_library(${TARGETNAME} SHARED ${SOURCE_FILES})
 
 target_link_libraries(${TARGETNAME}
     PUBLIC
-        Qt5::SerialPort
+        Qt${QT_VERSION_MAJOR}::SerialPort
         qtlab-core
 )
 set(${TARGETNAME}_GEN_EXPORT_HEADER TRUE)

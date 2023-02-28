@@ -2,9 +2,8 @@ cmake_minimum_required(VERSION 3.1.0)
 
 project(QtLab)
 
-find_package(Qt5 5.8 REQUIRED COMPONENTS
-    Core
-)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 
 message(STATUS "Custom include directories: ${INCLUDE_DIRS}")
 

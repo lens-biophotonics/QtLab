@@ -1,5 +1,6 @@
 find_package(PIGCS)
-find_package(Qt5 COMPONENTS SerialPort REQUIRED)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS SerialPort)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS SerialPort)
 
 set(TARGETNAME qtlab-hw-pi)
 set(EXPORT_NAME PI)
@@ -25,7 +26,7 @@ set(HEADERS
 add_library(${TARGETNAME} SHARED ${SOURCEFILES})
 
 target_link_libraries(${TARGETNAME} PUBLIC
-    Qt5::SerialPort
+    Qt${QT_VERSION_MAJOR}::SerialPort
     qtlab-core
 )
 target_include_directories(${TARGETNAME} PUBLIC
