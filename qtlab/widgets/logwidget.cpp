@@ -2,6 +2,7 @@
 
 #include <qtlab/core/logmanager.h>
 
+#include <QRegularExpression>
 #include <QTime>
 #include <QVBoxLayout>
 
@@ -25,16 +26,31 @@ void LogWidget::logMessages()
         if (msg.isEmpty())
             return;
         QString timeString = QString("[%1]").arg(QTime::currentTime().toString());
-        if (msg.contains(QRegExp("<")))
-            msg.replace(QRegExp("<"), "&lt;");
-        if (msg.contains(QRegExp(">")))
-            msg.replace(QRegExp(">"), "&gt;");
-        if (msg.contains(QRegExp("\n*$")))
-            msg.replace(QRegExp("\n*$"), "");
-        if (msg.contains(QRegExp("\n")))
-            msg.replace(QRegExp("\n"), QString("<br>").append(timeString));
-        if (msg.contains(QRegExp("\r")))
-            msg.replace(QRegExp("\r"), "");
+
+        QRegularExpression re("<");
+        if (msg.contains(re)) {
+            msg.replace(re, "&lt;");
+        }
+
+        re.setPattern(">");
+        if (msg.contains(re)) {
+            msg.replace(re, "&gt;");
+        }
+
+        re.setPattern("\n*$");
+        if (msg.contains(re)) {
+            msg.replace(re, "");
+        }
+
+        re.setPattern("\n");
+        if (msg.contains(re)) {
+            msg.replace(re, QString("<br>").append(timeString));
+        }
+
+        re.setPattern("\r");
+        if (msg.contains(re)) {
+            msg.replace(re, "");
+        }
 
         msg.prepend(timeString);
         switch (message.type) {
