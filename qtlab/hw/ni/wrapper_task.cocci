@@ -194,4 +194,12 @@ identifier fn;
 @@
 -t1
 +t1 __NITask__
+fn(...);
+
+@@
+type t1;
+identifier fn;
+@@
+-t1
++t1 __NITask__
 fn(...) {...}

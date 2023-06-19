@@ -137,4 +137,12 @@ identifier fn;
 @@
 -t1
 +t1 __NI__
+fn(...);
+
+@@
+type t1;
+identifier fn;
+@@
+-t1
++t1 __NI__
 fn(...) {...}
